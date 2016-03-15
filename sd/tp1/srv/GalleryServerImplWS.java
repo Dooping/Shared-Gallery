@@ -62,7 +62,6 @@ public class GalleryServerImplWS {
 			toSend.setPort(packet.getPort());
 			socket.send(toSend);
 
-
 		}
 
 	}
