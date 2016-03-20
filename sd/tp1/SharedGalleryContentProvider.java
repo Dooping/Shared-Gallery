@@ -1,14 +1,12 @@
 package sd.tp1;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import sd.tp1.clt.ws.GalleryServerImplWS;
+import sd.tp1.clt.ws.GalleryServerImplWSService;
+import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
 
@@ -19,10 +17,17 @@ import sd.tp1.gui.Gui;
  */
 public class SharedGalleryContentProvider implements GalleryContentProvider{
 
-	Gui gui;	
+	Gui gui;
+	private GalleryServerImplWS server;
 
 	SharedGalleryContentProvider() {
-		// TODO: code to do when shared gallery starts
+		MulticastDiscovery discovery = new MulticastDiscovery();
+		URL serviceURL = discovery.findService("GalleryServer");
+		System.out.println(serviceURL);
+
+		GalleryServerImplWSService service = new GalleryServerImplWSService(serviceURL);
+
+		this.server = service.getGalleryServerImplWSPort();
 	}
 
 	
@@ -42,10 +47,16 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Album> getListOfAlbums() {
-		// TODO: obtain remote information 
+		List<String> albums;
+		try {
+			albums = server.listAlbums();
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+			albums = new ArrayList<String>();
+		} 
 		List<Album> lst = new ArrayList<Album>();
-		lst.add( new SharedAlbum("SD"));
-		lst.add( new SharedAlbum("RC"));
+		for(String a: albums)
+			lst.add( new SharedAlbum(a));
 		return lst;
 	}
 
@@ -55,11 +66,16 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Picture> getListOfPictures(Album album) {
-		// TODO: obtain remote information 
+		List<String> pictures;
+		try {
+			pictures = server.listPictures(album.getName());
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+			pictures = new ArrayList<String>();
+		} 
 		List<Picture> lst = new ArrayList<Picture>();
-		lst.add( new SharedPicture("aula 1"));
-		lst.add( new SharedPicture("aula 2"));
-		lst.add( new SharedPicture("aula 3"));
+		for(String p: pictures)
+			lst.add( new SharedPicture(p));
 		return lst;
 	}
 

@@ -15,6 +15,11 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 
+import sd.tp1.common.MulticastDiscovery;
+import sd.tp1.exeptions.AlbumNotFoundException;
+import sd.tp1.exeptions.GalleryNotFoundException;
+import sd.tp1.gui.GalleryContentProvider;
+
 
 @WebService
 public class GalleryServerImplWS {
@@ -36,10 +41,31 @@ public class GalleryServerImplWS {
 		return 0;
 	}
 	
+	@WebMethod
+	public ArrayList<String> ListAlbums() throws GalleryNotFoundException{
+		File f = new File(basePath, "");
+		ArrayList<String> names;
+		if (f.exists())
+			return names = new ArrayList<String>(Arrays.asList(f.list()));
+		else 
+			throw new GalleryNotFoundException("Gallery not found");
+	}
+	
+	@WebMethod
+	public ArrayList<String> ListPictures(String album) throws AlbumNotFoundException{
+		File f = new File(basePath, album);
+		ArrayList<String> names;
+		if (f.exists())
+			return names = new ArrayList<String>(Arrays.asList(f.list()));
+		else
+			throw new AlbumNotFoundException("Album not found");
+	}
+	
 
 	public static void main(String[] args) throws Exception {
-		String path = args.length > 0 ? args[0] : ".";
-		Endpoint.publish("http://0.0.0.0:8080/GalleryServer", new GalleryServerImplWS());
+		String path = args.length > 0 ? args[0] : "./gallery";
+		final int servicePort = 8080;
+		Endpoint.publish("http://0.0.0.0:"+servicePort+"/GalleryServer", new GalleryServerImplWS(path));
 		System.err.println("GalleryServer started");
 
 		final String add = "230.0.1.0";
@@ -48,16 +74,18 @@ public class GalleryServerImplWS {
 		@SuppressWarnings("resource")
 		MulticastSocket socket = new MulticastSocket(port);
 		socket.joinGroup(adress);
+		MulticastDiscovery discovery = new MulticastDiscovery();
 
 
 		while(true){
 			byte [] buffer = new byte [65536];
 			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 			socket.receive(packet);
+			//TODO comparar o serviço pedido
 			byte [] send = new byte[128];
-			String s = "webService of david and goncalo";
+			String s = ""+servicePort;
 			send = s.getBytes();
-			DatagramPacket toSend = new DatagramPacket(send, send.length);
+			DatagramPacket toSend = new DatagramPacket(send, s.length());
 			toSend.setAddress(packet.getAddress());
 			toSend.setPort(packet.getPort());
 			socket.send(toSend);

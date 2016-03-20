@@ -1,11 +1,14 @@
 
 package sd.tp1.clt.ws;
 
+import java.util.List;
 import javax.jws.WebMethod;
+import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.ws.Action;
+import javax.xml.ws.FaultAction;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
@@ -34,5 +37,42 @@ public interface GalleryServerImplWS {
     @ResponseWrapper(localName = "printCenasResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.PrintCenasResponse")
     @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/printCenasRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/printCenasResponse")
     public int printCenas();
+
+    /**
+     * 
+     * @return
+     *     returns java.util.List<java.lang.String>
+     * @throws GalleryNotFoundException_Exception
+     */
+    @WebMethod(operationName = "ListAlbums")
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "ListAlbums", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.ListAlbums")
+    @ResponseWrapper(localName = "ListAlbumsResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.ListAlbumsResponse")
+    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/ListAlbumsRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/ListAlbumsResponse", fault = {
+        @FaultAction(className = GalleryNotFoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/ListAlbums/Fault/GalleryNotFoundException")
+    })
+    public List<String> listAlbums()
+        throws GalleryNotFoundException_Exception
+    ;
+
+    /**
+     * 
+     * @param arg0
+     * @return
+     *     returns java.util.List<java.lang.String>
+     * @throws AlbumNotFoundException_Exception
+     */
+    @WebMethod(operationName = "ListPictures")
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "ListPictures", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.ListPictures")
+    @ResponseWrapper(localName = "ListPicturesResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.ListPicturesResponse")
+    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/ListPicturesRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/ListPicturesResponse", fault = {
+        @FaultAction(className = AlbumNotFoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/ListPictures/Fault/AlbumNotFoundException")
+    })
+    public List<String> listPictures(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0)
+        throws AlbumNotFoundException_Exception
+    ;
 
 }

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sd.tp1.srv;
+package sd.tp1.common;
 
 import java.net.URL;
 
@@ -13,7 +13,7 @@ public interface Discovery {
 	
 	URL findService( String name);
 	
-	void registerService (URL url);
+	void registerService (URL url, int servicePort);
 	
 
 }
