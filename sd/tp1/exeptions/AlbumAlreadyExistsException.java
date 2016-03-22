@@ -1,12 +1,13 @@
 package sd.tp1.exeptions;
 
-public class AlbumNotFoundException extends Exception {
+public class AlbumAlreadyExistsException extends Exception {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public AlbumNotFoundException(String message) {
+	public AlbumAlreadyExistsException(String message) {
 		super(message);
 	}
+
 }

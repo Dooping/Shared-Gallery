@@ -39,7 +39,6 @@ public interface GalleryContentProvider {
 	/*
 	 * Creates an album with the given name. 
 	 * If null is returned the GUI ignores the result.
-	 * TODO: ver para duplicados
 	 */
 	public Album createAlbum( String name ) ;
 	

@@ -38,7 +38,6 @@ public class MulticastDiscovery implements Discovery {
 	@Override
 	public void registerService(URL url, int servicePort) {
 		//TODO perguntar ao prof
-
 	}
 
 }

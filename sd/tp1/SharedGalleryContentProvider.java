@@ -6,6 +6,7 @@ import java.util.List;
 
 import sd.tp1.clt.ws.GalleryServerImplWS;
 import sd.tp1.clt.ws.GalleryServerImplWSService;
+import sd.tp1.clt.ws.PictureClass;
 import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
@@ -24,9 +25,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		MulticastDiscovery discovery = new MulticastDiscovery();
 		URL serviceURL = discovery.findService("GalleryServer");
 		System.out.println(serviceURL);
-
 		GalleryServerImplWSService service = new GalleryServerImplWSService(serviceURL);
-
 		this.server = service.getGalleryServerImplWSPort();
 	}
 
@@ -47,6 +46,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Album> getListOfAlbums() {
+		//TODO: cache?
 		List<String> albums;
 		try {
 			albums = server.listAlbums();
@@ -66,6 +66,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Picture> getListOfPictures(Album album) {
+		//TODO: cache?
 		List<String> pictures;
 		try {
 			pictures = server.listPictures(album.getName());
@@ -85,8 +86,16 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public byte[] getPictureData(Album album, Picture picture) {
-		// TODO: obtain remote information 
-		return null;
+		//TODO: put picture on cache
+		byte [] pic = null;
+		try {
+			PictureClass p = server.getPicture(album.getName(), picture.getName());
+			pic = p.getContents();
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+		} 
+		
+		return pic;
 	}
 
 	/**
@@ -95,7 +104,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		// TODO: contact servers to create album 
+		// TODO: put this album on cache
+		try{
+			server.creatAlbum(name);
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+			return null;
+		}
+		
 		return new SharedAlbum(name);
 	}
 
@@ -104,7 +120,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public void deleteAlbum(Album album) {
-		// TODO: contact servers to delete album 
+		//TODO: retirar o album da cache?!
+		try{
+			server.deleteAlbum(album.getName());
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+		}
 	}
 	
 	/**
@@ -113,7 +134,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
-		// TODO: contact servers to add picture name with contents data 
+		//TODO: put picture on cache
+		try{
+			PictureClass pic = new PictureClass();
+			pic.setContents(data);
+			pic.setName(name);
+			server.uploadPicture(album.getName(),data, name);
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+			return null;
+		}
+		
 		return new SharedPicture(name);
 	}
 
@@ -123,7 +154,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
-		// TODO: contact servers to delete picture from album 
+
+		try{
+		server.deletePicture(album.getName(), picture.getName());
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+		}
 		return true;
 	}
 

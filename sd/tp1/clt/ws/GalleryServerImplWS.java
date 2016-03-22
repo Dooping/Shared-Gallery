@@ -28,15 +28,64 @@ public interface GalleryServerImplWS {
 
     /**
      * 
+     * @param arg1
+     * @param arg0
      * @return
-     *     returns int
+     *     returns sd.tp1.clt.ws.PictureClass
+     * @throws AlbumNotFoundException_Exception
+     * @throws PictureNotfoundException_Exception
+     * @throws IOException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "printCenas", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.PrintCenas")
-    @ResponseWrapper(localName = "printCenasResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.PrintCenasResponse")
-    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/printCenasRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/printCenasResponse")
-    public int printCenas();
+    @RequestWrapper(localName = "getPicture", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.GetPicture")
+    @ResponseWrapper(localName = "getPictureResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.GetPictureResponse")
+    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/getPictureRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/getPictureResponse", fault = {
+        @FaultAction(className = AlbumNotFoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/getPicture/Fault/AlbumNotFoundException"),
+        @FaultAction(className = IOException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/getPicture/Fault/IOException"),
+        @FaultAction(className = PictureNotfoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/getPicture/Fault/PictureNotfoundException")
+    })
+    public PictureClass getPicture(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        String arg1)
+        throws AlbumNotFoundException_Exception, IOException_Exception, PictureNotfoundException_Exception
+    ;
+
+    /**
+     * 
+     * @param arg0
+     * @throws AlbumAlreadyExistsException_Exception
+     */
+    @WebMethod
+    @RequestWrapper(localName = "creatAlbum", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.CreatAlbum")
+    @ResponseWrapper(localName = "creatAlbumResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.CreatAlbumResponse")
+    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/creatAlbumRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/creatAlbumResponse", fault = {
+        @FaultAction(className = AlbumAlreadyExistsException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/creatAlbum/Fault/AlbumAlreadyExistsException")
+    })
+    public void creatAlbum(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0)
+        throws AlbumAlreadyExistsException_Exception
+    ;
+
+    /**
+     * 
+     * @param arg0
+     * @throws AlbumNotFoundException_Exception
+     */
+    @WebMethod
+    @RequestWrapper(localName = "deleteAlbum", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.DeleteAlbum")
+    @ResponseWrapper(localName = "deleteAlbumResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.DeleteAlbumResponse")
+    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/deleteAlbumRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/deleteAlbumResponse", fault = {
+        @FaultAction(className = AlbumNotFoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/deleteAlbum/Fault/AlbumNotFoundException")
+    })
+    public void deleteAlbum(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0)
+        throws AlbumNotFoundException_Exception
+    ;
 
     /**
      * 
@@ -73,6 +122,55 @@ public interface GalleryServerImplWS {
         @WebParam(name = "arg0", targetNamespace = "")
         String arg0)
         throws AlbumNotFoundException_Exception
+    ;
+
+    /**
+     * 
+     * @param arg2
+     * @param arg1
+     * @param arg0
+     * @throws AlbumNotFoundException_Exception
+     * @throws PictureAlreadyExistsException_Exception
+     * @throws IOException_Exception
+     */
+    @WebMethod
+    @RequestWrapper(localName = "uploadPicture", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.UploadPicture")
+    @ResponseWrapper(localName = "uploadPictureResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.UploadPictureResponse")
+    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/uploadPictureRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/uploadPictureResponse", fault = {
+        @FaultAction(className = AlbumNotFoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/uploadPicture/Fault/AlbumNotFoundException"),
+        @FaultAction(className = IOException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/uploadPicture/Fault/IOException"),
+        @FaultAction(className = PictureAlreadyExistsException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/uploadPicture/Fault/PictureAlreadyExistsException")
+    })
+    public void uploadPicture(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        byte[] arg1,
+        @WebParam(name = "arg2", targetNamespace = "")
+        String arg2)
+        throws AlbumNotFoundException_Exception, IOException_Exception, PictureAlreadyExistsException_Exception
+    ;
+
+    /**
+     * 
+     * @param arg1
+     * @param arg0
+     * @throws AlbumNotFoundException_Exception
+     * @throws PictureNotfoundException_Exception
+     */
+    @WebMethod
+    @RequestWrapper(localName = "deletePicture", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.DeletePicture")
+    @ResponseWrapper(localName = "deletePictureResponse", targetNamespace = "http://srv.tp1.sd/", className = "sd.tp1.clt.ws.DeletePictureResponse")
+    @Action(input = "http://srv.tp1.sd/GalleryServerImplWS/deletePictureRequest", output = "http://srv.tp1.sd/GalleryServerImplWS/deletePictureResponse", fault = {
+        @FaultAction(className = AlbumNotFoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/deletePicture/Fault/AlbumNotFoundException"),
+        @FaultAction(className = PictureNotfoundException_Exception.class, value = "http://srv.tp1.sd/GalleryServerImplWS/deletePicture/Fault/PictureNotfoundException")
+    })
+    public void deletePicture(
+        @WebParam(name = "arg0", targetNamespace = "")
+        String arg0,
+        @WebParam(name = "arg1", targetNamespace = "")
+        String arg1)
+        throws AlbumNotFoundException_Exception, PictureNotfoundException_Exception
     ;
 
 }
