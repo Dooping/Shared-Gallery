@@ -9,6 +9,8 @@ import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
 import sd.tp1.clt.ws.GalleryNotFoundException_Exception;
 import sd.tp1.clt.ws.GalleryServerImplWS;
+import sd.tp1.clt.ws.GalleryServerImplWSClass;
+import sd.tp1.clt.ws.GalleryServerImplWSClassService;
 import sd.tp1.clt.ws.GalleryServerImplWSService;
 import sd.tp1.clt.ws.IOException_Exception;
 import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
@@ -39,14 +41,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 * e não conseguir fazer a conexão
 	 */
 	Gui gui;
-	private GalleryServerImplWS server;
+	//TODO: tive de mudar para class,
+	//mas temos de ver isto melhor,
+	//devia dar com a interface...
+	private GalleryServerImplWSClass server;
 
 	SharedGalleryContentProvider() {
 		MulticastDiscovery discovery = new MulticastDiscovery();
 		URL serviceURL = discovery.findService("GalleryServer");
 		System.out.println(serviceURL);
-		GalleryServerImplWSService service = new GalleryServerImplWSService(serviceURL);
-		this.server = service.getGalleryServerImplWSPort();
+		GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
+		this.server = service.getGalleryServerImplWSClassPort();
 	}
 
 	
