@@ -11,6 +11,8 @@ public class MulticastDiscovery implements Discovery {
 
 	@Override
 	public URL findService(String name) {
+		//TODO: para quando houver dois svç, temos de tentar e se falhar
+		// tentar no outro!
 		try{
 			final InetAddress adress = InetAddress.getByName(MULTICAST_IP);
 			int port = 9000;
