@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.net.*;
 
 import javax.jws.WebMethod;
@@ -18,7 +19,7 @@ import sd.tp1.exeptions.*;
 
 
 @WebService
-public class GalleryServerImplWSClass implements GalleryServerImplWS{
+public class GalleryServerImplWSClass{
 	
 	/*TODO:
 	 * Ao criar uma interface, o webMethod na class mantem-se?
@@ -152,6 +153,7 @@ public class GalleryServerImplWSClass implements GalleryServerImplWS{
 		String path = args.length > 0 ? args[0] : "./gallery";
 		final int servicePort = 8080;
 		Endpoint.publish("http://0.0.0.0:"+servicePort+"/GalleryServer", new GalleryServerImplWSClass(path));
+		//Endpoint.publish("http://"+localhostAddress().getCanonicalHostName()+":"+servicePort+"/GalleryServer", new GalleryServerImplWSClass(path));
 		System.err.println("GalleryServer started");
 
 		final String add = "230.0.1.0";
@@ -170,7 +172,7 @@ public class GalleryServerImplWSClass implements GalleryServerImplWS{
 			socket.receive(packet);
 			//TODO comparar o serviço pedido
 			byte [] send = new byte[128];
-			String s = ""+servicePort;
+			String s = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
 			send = s.getBytes();
 			DatagramPacket toSend = new DatagramPacket(send, s.length());
 			toSend.setAddress(packet.getAddress());
@@ -178,6 +180,33 @@ public class GalleryServerImplWSClass implements GalleryServerImplWS{
 			socket.send(toSend);
 		}
 
+	}
+	
+	/**
+	 * Return the IPv4 address of the local machine that is not a loopback address if available.
+	 * Otherwise, returns loopback address.
+	 * If no address is available returns null.
+	 */
+	public static InetAddress localhostAddress() {
+		try {
+			try {
+				Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+				while (e.hasMoreElements()) {
+					NetworkInterface n = e.nextElement();
+					Enumeration<InetAddress> ee = n.getInetAddresses();
+					while (ee.hasMoreElements()) {
+						InetAddress i = ee.nextElement();
+						if (i instanceof Inet4Address && !i.isLoopbackAddress())
+							return i;
+					}
+				}
+			} catch (SocketException e) {
+				// do nothing
+			}
+			return InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			return null;
+		}
 	}
 	
 }

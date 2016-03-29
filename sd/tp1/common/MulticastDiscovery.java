@@ -28,8 +28,8 @@ public class MulticastDiscovery implements Discovery {
 			byte [] buffer = new byte [65536];
 			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 			socket.receive(packet);
-			String servicePort = new String(packet.getData(),0,packet.getLength());
-			return new URL("http", packet.getAddress().getHostAddress(), Integer.valueOf(servicePort), "/"+name);
+			String serviceURL = new String(packet.getData(),0,packet.getLength());
+			return new URL("http://"+serviceURL+ "/"+name);
 		}
 		catch (Exception e){
 			e.printStackTrace();
