@@ -152,7 +152,7 @@ public class GalleryServerImplWSClass{
 	public static void main(String[] args) throws Exception {
 		String path = args.length > 0 ? args[0] : "./gallery";
 		final int servicePort = 8080;
-		Endpoint.publish("http://0.0.0.0:"+servicePort+"/GalleryServer", new GalleryServerImplWSClass(path));
+		Endpoint.publish("http://0.0.0.0:"+servicePort+"/GalleryServerSOAP", new GalleryServerImplWSClass(path));
 		//Endpoint.publish("http://"+localhostAddress().getCanonicalHostName()+":"+servicePort+"/GalleryServer", new GalleryServerImplWSClass(path));
 		System.err.println("GalleryServer started");
 

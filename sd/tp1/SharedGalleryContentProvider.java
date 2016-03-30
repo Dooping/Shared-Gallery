@@ -48,7 +48,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 	SharedGalleryContentProvider() {
 		MulticastDiscovery discovery = new MulticastDiscovery();
-		URL serviceURL = discovery.findService("GalleryServer");
+		URL serviceURL = discovery.findService("GalleryServerSOAP");
 		System.out.println(serviceURL);
 		GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
 		this.server = service.getGalleryServerImplWSClassPort();

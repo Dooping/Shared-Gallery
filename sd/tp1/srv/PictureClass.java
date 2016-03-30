@@ -16,5 +16,9 @@ public class PictureClass {
 		this.name = name;
 		this.contents = c;
 	}
+	
+	public String toString() {
+		return String.format("name: %s, contents: %s", name, contents);
+	}
 
 }
