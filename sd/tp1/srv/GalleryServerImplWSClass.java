@@ -156,20 +156,22 @@ public class GalleryServerImplWSClass{
 		//Endpoint.publish("http://"+localhostAddress().getCanonicalHostName()+":"+servicePort+"/GalleryServer", new GalleryServerImplWSClass(path));
 		System.err.println("GalleryServer started");
 
-		final String add = "230.0.1.0";
-		final int port = 9000;
+		final String add = "224.0.0.0";
+		final int port = 9005;
 		final InetAddress adress = InetAddress.getByName(add);
 		@SuppressWarnings("resource")
 		MulticastSocket socket = new MulticastSocket(port);
 		socket.joinGroup(adress);
 		@SuppressWarnings("unused")
 		MulticastDiscovery discovery = new MulticastDiscovery();
+		System.out.println(adress);
 
 
 		while(true){
 			byte [] buffer = new byte [65536];
 			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 			socket.receive(packet);
+			System.out.println("akjhsgf");
 			//TODO comparar o serviço pedido
 			byte [] send = new byte[128];
 			String s = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;

@@ -15,7 +15,7 @@ public class MulticastDiscovery implements Discovery {
 		// tentar no outro!
 		try{
 			final InetAddress adress = InetAddress.getByName(MULTICAST_IP);
-			int port = 9000;
+			int port = 9005;
 			@SuppressWarnings("resource")
 			MulticastSocket socket = new MulticastSocket();
 
