@@ -37,12 +37,12 @@ public class AlbumResource {
 	}
 
 	@GET
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAlbums() {
 		System.err.printf("getAlbums()\n");
 		if (basePath.exists()){
 			ArrayList<String> names = new ArrayList<String>(Arrays.asList(basePath.list()));
-			return Response.ok(names.toString().getBytes()).build();
+			return Response.ok(names.toString()).build();
 		}
 		else
 			return Response.status(Status.NOT_FOUND).build();
@@ -57,7 +57,7 @@ public class AlbumResource {
 		ArrayList<String> names;
 		if (f.exists()){
 			names = new ArrayList<String>(Arrays.asList(f.list()));
-			return Response.ok(names.toString().getBytes()).build();
+			return Response.ok(names.toString()).build();
 		}
 		else
 			return Response.status(Status.NOT_FOUND).build();
@@ -66,14 +66,14 @@ public class AlbumResource {
 	
 	@GET
 	@Path("/{album}/{picture}")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getPicture(@PathParam("album") String album, @PathParam("picture") String picture) throws IOException {
 		System.err.printf("getPicture()\n");
 		File f = new File(basePath, album);
 		if (f.exists()){
 			f = new File(basePath, album + "/"+ picture);
 			if (f.exists())
-				return Response.ok(new PictureClass(picture, Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture)))).build();
+				return Response.ok(Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture))).build();
 			else
 				return Response.status(Status.NOT_FOUND).build();
 		}
@@ -131,17 +131,17 @@ public class AlbumResource {
 	}
 	
 	@POST
-	@Path("/{album}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response uploadPicture(@PathParam("album") String album, PictureClass picture) throws IOException {
+	@Path("/{album}/{pictureName}")
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String pictureName, byte[] picture) throws IOException {
 		System.err.printf("uploadPicture()\n");
 		File dir = new File(basePath + "/" + album);
 		if (dir.exists()) {
-			dir = new File(basePath, album + "/"+ picture.name);
+			dir = new File(basePath, album + "/"+ pictureName);
 			
 			if (!dir.exists()){
 				FileOutputStream out = new FileOutputStream(dir);
-				out.write(picture.contents);
+				out.write(picture);
 				out.close();
 				return Response.ok().build();
 			}
