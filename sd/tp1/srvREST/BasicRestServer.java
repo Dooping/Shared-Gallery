@@ -20,7 +20,6 @@ public class BasicRestServer {
 		config.register(AlbumResource.class);
 		
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
-		System.out.println(baseUri);
 
 		System.err.println("REST Server ready... ");
 	}

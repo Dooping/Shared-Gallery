@@ -1,20 +1,17 @@
 package sd.tp1.srvREST;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -22,14 +19,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import sd.tp1.exeptions.AlbumNotFoundException;
-import sd.tp1.exeptions.PictureAlreadyExistsException;
-import sd.tp1.srv.PictureClass;
-
 @Path("/albums")
 public class AlbumResource {
 	File basePath;
-	static List<Message> board = null;
 	
 	public AlbumResource(){
 		super();
