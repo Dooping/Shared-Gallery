@@ -3,6 +3,7 @@
  */
 package sd.tp1.common;
 
+import java.net.MulticastSocket;
 import java.net.URL;
 
 /**
@@ -11,9 +12,11 @@ import java.net.URL;
  */
 public interface Discovery {
 	
-	URL findService( String name);
+	void findService(MulticastSocket socket);
 	
-	void registerService (URL url, int servicePort);
+	URL getService(MulticastSocket socket);
+	
+	void registerService (URL url);
 	
 
 }

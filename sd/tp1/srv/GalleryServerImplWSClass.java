@@ -14,6 +14,7 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 
+import sd.tp1.common.Discovery;
 import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.exeptions.*;
 
@@ -153,34 +154,42 @@ public class GalleryServerImplWSClass{
 		String path = args.length > 0 ? args[0] : "./gallery";
 		final int servicePort = 8080;
 		Endpoint.publish("http://0.0.0.0:"+servicePort+"/GalleryServerSOAP", new GalleryServerImplWSClass(path));
-		//Endpoint.publish("http://"+localhostAddress().getCanonicalHostName()+":"+servicePort+"/GalleryServer", new GalleryServerImplWSClass(path));
 		System.err.println("GalleryServer started");
 
-		final String add = "224.0.0.0";
-		final int port = 9005;
-		final InetAddress adress = InetAddress.getByName(add);
-		@SuppressWarnings("resource")
-		MulticastSocket socket = new MulticastSocket(port);
-		socket.joinGroup(adress);
-		@SuppressWarnings("unused")
-		MulticastDiscovery discovery = new MulticastDiscovery();
-		System.out.println(adress);
+		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
+		//return new URL("http://"+serviceURL+ /GalleryServerSOAP);
+		String url = "http://"+serviceURL+ "/GalleryServerSOAP";
+		System.out.println(url);
+		Discovery discovery = new MulticastDiscovery();
+		
+		discovery.registerService(new URL(url));
+		
+		
+//		final String add = "224.0.0.0";
+//		final int port = 9005;
+		
+//		final InetAddress adress = InetAddress.getByName(add);
+//		@SuppressWarnings("resource")
+//		MulticastSocket socket = new MulticastSocket(port);
+//		socket.joinGroup(adress);
+//		@SuppressWarnings("unused")
+//		MulticastDiscovery discovery = new MulticastDiscovery();
+//		//System.out.println(adress);
 
 
-		while(true){
-			byte [] buffer = new byte [65536];
-			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-			socket.receive(packet);
-			System.out.println("akjhsgf");
-			//TODO comparar o serviço pedido
-			byte [] send = new byte[128];
-			String s = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
-			send = s.getBytes();
-			DatagramPacket toSend = new DatagramPacket(send, s.length());
-			toSend.setAddress(packet.getAddress());
-			toSend.setPort(packet.getPort());
-			socket.send(toSend);
-		}
+//		while(true){
+//			byte [] buffer = new byte [65536];
+//			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+//			socket.receive(packet);
+//			//TODO comparar o serviço pedido
+//			byte [] send = new byte[128];
+//			String s = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
+//			send = s.getBytes();
+//			DatagramPacket toSend = new DatagramPacket(send, s.length());
+//			toSend.setAddress(packet.getAddress());
+//			toSend.setPort(packet.getPort());
+//			socket.send(toSend);
+//		}
 
 	}
 	
@@ -189,7 +198,7 @@ public class GalleryServerImplWSClass{
 	 * Otherwise, returns loopback address.
 	 * If no address is available returns null.
 	 */
-	public static InetAddress localhostAddress() {
+	private static InetAddress localhostAddress() {
 		try {
 			try {
 				Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
