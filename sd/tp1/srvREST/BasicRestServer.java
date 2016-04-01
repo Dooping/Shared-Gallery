@@ -1,11 +1,15 @@
 package sd.tp1.srvREST;
 
 import java.net.URI;
+import java.net.URL;
 
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+
+import sd.tp1.common.Discovery;
+import sd.tp1.common.MulticastDiscovery;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -22,5 +26,8 @@ public class BasicRestServer {
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
 
 		System.err.println("REST Server ready... ");
+		
+		Discovery discovery = new MulticastDiscovery();
+		discovery.registerService(baseUri.toURL());
 	}
 }
