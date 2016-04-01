@@ -78,10 +78,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Album> getListOfAlbums() {
-		//TODO: return on null?
 		List<String> albuns = new ArrayList<String>();
 		List<Album> toReturn = new ArrayList<Album>();
-		//System.out.println(servers.size());
 		if (servers != null){
 			for (serverObjectClass server: servers){
 				if (server != null){
@@ -111,20 +109,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Picture> getListOfPictures(Album album) {
-		List<String> pictNames = new ArrayList<String>();
-		for (serverObjectClass server: servers){
-			try{
-				RequestInterface s = server.serverOfAlbun(album.getName());
-				if(s != null){
-					pictNames = s.getPictures(album.getName());
-					List<Picture> lst = new ArrayList<Picture>();
-					for(String p: pictNames)
-						lst.add( new SharedPicture(p));
-					return lst;
-				}
-			}catch (Exception e){
-				//e.printStackTrace();
-			}
+		serverObjectClass s = this.findServer(album.getName());
+		if(s!= null){
+			RequestInterface i = s.getServer();
+			List<String> pictNames = i.getPictures(album.getName());
+			List<Picture> lst = new ArrayList<Picture>();
+			for(String p: pictNames)
+				lst.add( new SharedPicture(p));
+			return lst;
 		}
 		return null;
 	}
@@ -134,16 +126,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 * On error this method should return null.
 	 */
 	@Override
-	public byte[] getPictureData(Album album, Picture picture) {
-		for (serverObjectClass server: servers){
-			try{
-				RequestInterface s = server.serverOfAlbun(album.getName());
-				if(s != null){
-					return s.getPicture(album.getName(), picture.getName());
-				}
-			}catch (Exception e){
-				e.printStackTrace();
-			}
+	public byte[] getPictureData(Album album, Picture picture) {	
+		serverObjectClass s = this.findServer(album.getName());
+		if(s!= null){
+			RequestInterface i = s.getServer();
+			return i.getPicture(album.getName(), picture.getName());
 		}
 		return null;
 	}
@@ -154,23 +141,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		try{
-			for (serverObjectClass server: servers){
-				if (server.containsAlbuns(name))
-					return null;
-			}
-
+		serverObjectClass s = this.findServer(name);
+		if(s== null){
 			Random r = new Random();
 			int i = r.nextInt(servers.size());
-			System.out.println(i);
 			serverObjectClass server = servers.get(i);
 			server.getServer().createAlbum(name);
 			server.addAlbum(name);
 			return new SharedAlbum(name);
-		}catch (Exception e){
-			e.printStackTrace();
 		}
-		return null;
+		else
+			return null;
 	}
 
 	/**
@@ -178,41 +159,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public void deleteAlbum(Album album) {
-		
-		try{
-			for (serverObjectClass server: servers){
-				if (server.containsAlbuns(album.getName())){
-					server.getServer().deleteAlbum(album.getName());
-				}
-			}
-		}catch (Exception e){
-			e.printStackTrace();
+		serverObjectClass s = this.findServer(album.getName());
+		if(s!= null){
+			s.getServer().deleteAlbum(album.getName());
+			s.deleteAlbum(album.getName());
 		}
-		
-		
-		
-//		//TODO: retirar o album da cache?!
-//		boolean executed = false;
-//		for (int i =0; !executed && i<3; i++){
-//			try{
-//				server.deleteAlbum(album.getName());
-//				executed = true;
-//			} catch (AlbumNotFoundException_Exception e1){
-//				System.err.println("Erro: " + e1.getMessage());
-//			} catch (Exception e) {
-//				if(i < 2){
-//					try {
-//						Thread.sleep(500); //wait some time
-//					} catch (InterruptedException e1) {
-//						//do nothing
-//					}
-//				}
-//				else {
-//					System.err.println("Erro: " + e.getMessage());
-//				}
-//			}
-//		}
-		
 		
 	}
 	
@@ -222,6 +173,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
+		
+		
+		
+		
+		
 		//TODO: put picture on cache
 		boolean executed = false;
 		for (int i =0; !executed && i<3; i++){
@@ -292,6 +248,23 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		return true;
 	}
 
+	
+	/**
+	 * @param album
+	 * @return the server of the album, or null
+	 */
+	private serverObjectClass findServer(String album){
+		try{
+			for (serverObjectClass server: servers){
+				if (server.containsAlbuns(album)){
+					return server;
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	/**
 	 * Represents a shared album.

@@ -67,15 +67,10 @@ public class serverObjectClass {
 		}
 	}
 	
-
 	/**
-	 * @param the album name
-	 * @return the RequestServer in case the album belongs to this server, null if not
+	 * @param name
+	 * @return true if this server contais the album
 	 */
-	public RequestInterface serverOfAlbun(String album) {
-		return (listAlbuns.containsKey(album)) ? server : null;
-	}
-	
 	public boolean containsAlbuns(String name){
 		return listAlbuns.containsKey(name);
 	}
