@@ -74,10 +74,11 @@ public class GalleryWindow implements Gui {
 
 	@Override
 	public void updateAlbums() {
-		Platform.runLater(() -> {
-			createAlbums(primaryStage);
-			showAlbums();
-		});
+		if (currentAlbum == null)
+			Platform.runLater(() -> {
+				createAlbums(primaryStage);
+				showAlbums();
+			});
 	}
 
 	@Override
@@ -108,10 +109,12 @@ public class GalleryWindow implements Gui {
 		albums = new Scene(root);
 		albums.getStylesheets().add(getClass().getResource("gallery.css").toExternalForm());
 
-		contentProvider.getListOfAlbums().forEach(album -> {
-			final AlbumView av = new AlbumView(album);
-			tile.getChildren().add(av);
-		});
+		List<Album> list = contentProvider.getListOfAlbums();
+		if (list != null)
+			list.forEach(album -> {
+				final AlbumView av = new AlbumView(album);
+				tile.getChildren().add(av);
+			});
 
 		tile.getChildren().add(new AddAlbumIcon(tile));
 		tile.getChildren().add(new TrashIcon());
@@ -237,7 +240,6 @@ public class GalleryWindow implements Gui {
 			});
 
 			this.setOnDragDone((ev) -> {
-				System.err.println(ev.getTransferMode() + "/" + ev.getAcceptingObject());
 				if (ev.getAcceptedTransferMode() == TransferMode.LINK) {
 					contentProvider.deleteAlbum(album);
 					createAlbums(primaryStage);
@@ -268,10 +270,12 @@ public class GalleryWindow implements Gui {
 			stage.setTitle(album.getName());
 
 			tile.getChildren().add(new TrashIcon());
-			contentProvider.getListOfPictures(album).forEach(picture -> {
-				final PictureView pv = new PictureView(album, picture);
-				tile.getChildren().add(pv);
-			});
+			List<Picture> list = contentProvider.getListOfPictures(album);
+			if (list != null)
+				contentProvider.getListOfPictures(album).forEach(picture -> {
+					final PictureView pv = new PictureView(album, picture);
+					tile.getChildren().add(pv);
+				});
 
 			tile.setOnDragOver((e) -> {
 				e.acceptTransferModes(TransferMode.MOVE);
@@ -397,5 +401,4 @@ public class GalleryWindow implements Gui {
 	static Image loadingIcon = new Image(GalleryWindow.class.getResourceAsStream("loading.gif"));
 	static Image albumIcon = new Image(GalleryWindow.class.getResourceAsStream("album.png"));
 	static Image trashIcon = new Image(GalleryWindow.class.getResourceAsStream("trash.png"));
-
 }

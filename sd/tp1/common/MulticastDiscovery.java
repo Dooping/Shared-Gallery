@@ -6,7 +6,7 @@ import java.net.MulticastSocket;
 import java.net.URL;
 
 public class MulticastDiscovery implements Discovery {
-	private static final String MULTICAST_IP = "230.0.1.0";
+	private static final String MULTICAST_IP = "224.0.0.0";
 	
 
 	@Override
