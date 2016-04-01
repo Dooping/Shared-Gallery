@@ -6,6 +6,8 @@ import java.net.MulticastSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
@@ -22,6 +24,7 @@ import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
 
+import com.sun.net.httpserver.HttpServer;
 /*
  * This class provides the album/picture content to the gui/main application.
  * 
@@ -48,10 +51,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	//devia dar com a interface...
 	private GalleryServerImplWSClass server;
 	private MulticastDiscovery discovery;
-	MulticastSocket socket;
+	public MulticastSocket socket;
+	
+	
+	private Map<String, GalleryServerImplWSClass> serversSOAP;
+	private Map<String, HttpServer> serversREST;
 
 	SharedGalleryContentProvider() {
-		server = null;
+		
+		serversSOAP = new ConcurrentHashMap<String, GalleryServerImplWSClass>();
+		serversREST = new ConcurrentHashMap<String, HttpServer>();
+		
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
@@ -388,11 +398,22 @@ private void sendRequests(){
 
 private void registServer (){
 	String SERVER_SOAP = "GalleryServerSOAP";
+	String SERVER_REST = "GalleryServerREST";
 	new Thread(() -> {
 		try {
 			while (true){
 				URL serviceURL = discovery.getService(socket);
 				System.out.println(serviceURL);
+				
+				String [] compare = serviceURL.toString().split("/");
+				if (compare[3].equals(SERVER_SOAP)){
+					System.out.println("SOAP SERVER!");
+				}
+				else if (compare[3].equals(SERVER_REST)){
+					System.out.println("REST SERVER!");
+				}
+
+				
 				GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
 				this.server = service.getGalleryServerImplWSClassPort();
 
