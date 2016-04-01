@@ -15,44 +15,53 @@ public class MulticastDiscovery implements Discovery {
 	private static final String MULTICAST_IP = "224.0.0.0";
 	private static int port = 9005;
 	
+	
+	
 
 	@Override
-	public URL findService(String name) {
-		//TODO: para quando houver dois svç, temos de tentar e se falhar
-		// tentar no outro!
+	public void findService(MulticastSocket socket) {
 		try{
-			final InetAddress adress = InetAddress.getByName(MULTICAST_IP);
-			//int port = 9005;
-			@SuppressWarnings("resource")
-			MulticastSocket socket = new MulticastSocket();
-
+			final InetAddress address = InetAddress.getByName(MULTICAST_IP);
+			if( ! address.isMulticastAddress()) { 
+				 System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255"); 
+			} 
 			byte [] send = new byte [128];
-			send = name.getBytes();
 			DatagramPacket request = new DatagramPacket(send, send.length);
-			request.setAddress(adress);
+			request.setAddress(address);
 			request.setPort(port);
 			socket.send(request);
-			byte [] buffer = new byte [65536];
-			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-			socket.receive(packet);
-			String serviceURL = new String(packet.getData(),0,packet.getLength());
-			return new URL(serviceURL);
+
 		}
 		catch (Exception e){
 			e.printStackTrace();
 		}
-		return null;
+		
 	}
 	
+	public URL getService(MulticastSocket socket){
+		byte [] buffer = new byte [65536];
+		DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+		try {
+			socket.receive(packet);
+			String serviceURL = new String(packet.getData(),0,packet.getLength());
+			return new URL(serviceURL);
+		} catch (IOException e) {
+			return null;
+			//e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void registerService(URL url) {
-		InetAddress adress;
+		InetAddress address;
 		MulticastSocket socket;
 		try {
-			adress = InetAddress.getByName(MULTICAST_IP);
+			address = InetAddress.getByName(MULTICAST_IP);
+			if( ! address.isMulticastAddress()) { 
+				 System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255"); 
+			} 
 			socket = new MulticastSocket(port);
-			socket.joinGroup(adress);
+			socket.joinGroup(address);
 
 			while(true){
 				byte [] buffer = new byte [65536];

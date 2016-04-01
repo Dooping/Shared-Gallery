@@ -1,6 +1,8 @@
 package sd.tp1;
 
 
+import java.io.IOException;
+import java.net.MulticastSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,13 +47,24 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	//mas temos de ver isto melhor,
 	//devia dar com a interface...
 	private GalleryServerImplWSClass server;
+	private MulticastDiscovery discovery;
+	MulticastSocket socket;
 
 	SharedGalleryContentProvider() {
-		MulticastDiscovery discovery = new MulticastDiscovery();
-		URL serviceURL = discovery.findService("GalleryServerSOAP");
-		System.out.println(serviceURL);
-		GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
-		this.server = service.getGalleryServerImplWSClassPort();
+		server = null;
+		discovery = new MulticastDiscovery();
+		try {
+			socket = new MulticastSocket();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.sendRequests();
+		this.registServer();
+		//URL serviceURL = discovery.findService();
+		//System.out.println(serviceURL);
+		//GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
+		//this.server = service.getGalleryServerImplWSClassPort();
 	}
 
 	
@@ -350,4 +363,47 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			return name;
 		}
 	}
+
+
+
+/**
+ * to send the requests to the network
+ */
+private void sendRequests(){
+	
+	new Thread(() -> {
+		try {
+			while (true){
+				discovery.findService(socket);
+				Thread.sleep(5000);
+			}
+			
+		}catch(Exception e){
+		};
+	}).start();
+	
+	
+}
+
+
+private void registServer (){
+	String SERVER_SOAP = "GalleryServerSOAP";
+	new Thread(() -> {
+		try {
+			while (true){
+				URL serviceURL = discovery.getService(socket);
+				System.out.println(serviceURL);
+				GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
+				this.server = service.getGalleryServerImplWSClassPort();
+
+			}
+
+		}catch(Exception e){
+		};
+	}).start();
+}
+
+
+
+
 }
