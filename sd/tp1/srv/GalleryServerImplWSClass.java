@@ -146,13 +146,12 @@ public class GalleryServerImplWSClass{
 		}
 		else
 			throw new AlbumNotFoundException("Album not found");
-		
 	}
 
 	public static void main(String[] args) throws Exception {
 		String path = args.length > 0 ? args[0] : "./gallery";
 		final int servicePort = 8080;
-		Endpoint.publish("http://0.0.0.0:"+servicePort+"/GalleryServerSOAP", new GalleryServerImplWSClass(path));
+		Endpoint.publish("http://0.0.0.0:" +servicePort+"/GalleryServerSOAP", new GalleryServerImplWSClass(path));
 		System.err.println("GalleryServer started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
 		String url = "http://"+serviceURL+ "/GalleryServerSOAP";

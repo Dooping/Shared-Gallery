@@ -32,7 +32,6 @@ public class MulticastDiscovery implements Discovery {
 			request.setAddress(address);
 			request.setPort(port);
 			socket.send(request);
-
 		}
 		catch (Exception e){
 			e.printStackTrace();
@@ -69,6 +68,7 @@ public class MulticastDiscovery implements Discovery {
 				byte [] buffer = new byte [65536];
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				socket.receive(packet);
+				System.out.println(packet.getAddress());
 				//TODO comparar o serviço pedido
 				byte [] send = new byte[128];
 				String s = url.toString();

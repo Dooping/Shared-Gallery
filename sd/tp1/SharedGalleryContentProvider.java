@@ -2,10 +2,14 @@ package sd.tp1;
 
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,16 +57,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private GalleryServerImplWSClass server;
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
-	
-	
-	private Map<String, RequestInterface> serversSOAP;
-	private Map<String, RequestInterface> serversREST;
+	private List<serverObjectClass> servers;
 
 	SharedGalleryContentProvider() {
 		
-		serversSOAP = new ConcurrentHashMap<String, RequestInterface>();
-		serversREST = new ConcurrentHashMap<String, RequestInterface>();
-		
+		servers = new LinkedList<serverObjectClass>();
+
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
@@ -72,10 +72,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}
 		this.sendRequests();
 		this.registServer();
-		//URL serviceURL = discovery.findService();
-		//System.out.println(serviceURL);
-		//GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
-		//this.server = service.getGalleryServerImplWSClassPort();
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	
@@ -96,38 +98,48 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public List<Album> getListOfAlbums() {
 		
+		List<String> albuns = new ArrayList<String>();
+		List<Album> toReturn = new ArrayList<Album>();
 		
-		
-		
-		//TODO: cache?
-		boolean executed = false;
-		List<String> albums = null;
-		for (int i =0; !executed && i<3; i++){
-			try {
-				albums = server.listAlbums();
-				executed = true;
-			} catch (GalleryNotFoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
-				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
-					//albums = new ArrayList<String>();
-					return null;
-				}
-			}
+		for (serverObjectClass obj: servers){
+			albuns = obj.getServer().getAlbums();
 		}
-		List<Album> lst = new ArrayList<Album>();
-		for(String a: albums)
-			lst.add( new SharedAlbum(a));
-		return lst;
+		
+		for(String a: albuns)
+			toReturn.add( new SharedAlbum(a));
+		return toReturn;
+		
+		
+//		
+//		//TODO: cache?
+//		boolean executed = false;
+//		List<String> albums = null;
+//		for (int i =0; !executed && i<3; i++){
+//			try {
+//				albums = server.listAlbums();
+//				executed = true;
+//			} catch (GalleryNotFoundException_Exception e1){
+//				System.err.println("Erro: " + e1.getMessage());
+//				return null;
+//			} catch (Exception e) {
+//				if(i < 2){
+//					try {
+//						Thread.sleep(500); //wait some time
+//					} catch (InterruptedException e1) {
+//						//do nothing
+//					}
+//				}
+//				else {
+//					System.err.println("Erro: " + e.getMessage());
+//					//albums = new ArrayList<String>();
+//					return null;
+//				}
+//			}
+//		}
+//		List<Album> lst = new ArrayList<Album>();
+//		for(String a: albums)
+//			lst.add( new SharedAlbum(a));
+//		return lst;
 	}
 
 	/**
@@ -405,31 +417,23 @@ private void registServer (){
 	String SERVER_REST = "GalleryServerREST";
 	new Thread(() -> {
 		try {
-//			while (true){
+			while (true){
 				URI serviceURI = discovery.getService(socket);
-//				String [] compare = serviceURI.toString().split("/");
-//				if (compare[3].equals(SERVER_SOAP)){
-//					if(!serversSOAP.containsKey(serviceURI.toString())){
-//						System.err.println("NEW SOAP SERVER!");
-//						System.out.println(serviceURI);
-//						RequestInterface sv = new SOAPClientClass(serviceURI);
-//						serversSOAP.put(serviceURI.toString(), sv);
-//					}
-//
-//				}
-//				else if (compare[3].equals(SERVER_REST)){
-//					if(!serversREST.containsKey(serviceURI.toString())){
-//						System.err.println("NEW REST SERVER!");
-//						System.out.println(serviceURI);
-//						RequestInterface sv = new RESTClientClass(serviceURI);
-//						serversREST.put(serviceURI.toString(), sv);
-//					}
-//				}
-//
-//
-//			}
-			GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURI.toURL());
-			this.server = service.getGalleryServerImplWSClassPort();
+				System.out.println(serviceURI.toString());
+				String [] compare = serviceURI.toString().split("/");
+				RequestInterface sv = null;
+				if(servers.equals(serviceURI.toString())){
+					if(compare[2].equalsIgnoreCase(SERVER_SOAP)){
+						sv = new SOAPClientClass(serviceURI);
+					}
+					else if(compare[2].equalsIgnoreCase(SERVER_REST)){
+						sv = new RESTClientClass(serviceURI);
+					}
+					serverObjectClass obj = new serverObjectClass(sv, serviceURI.toString());
+					servers.add(obj);
+					gui.updateAlbums();
+				}
+			}
 		}catch(Exception e){
 		};
 	}).start();
