@@ -6,11 +6,15 @@ import java.net.MulticastSocket;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 
 
 import java.util.Random;
+
+
 
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
@@ -41,7 +45,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private List<serverObjectClass> servers;
 
 	SharedGalleryContentProvider() {
-		servers = Collections.synchronizedList(new ArrayList<serverObjectClass>());
+		servers = Collections.synchronizedList(new LinkedList<serverObjectClass>());
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
@@ -52,8 +56,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		this.registServer();
 		
 		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -78,6 +81,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		//TODO: return on null?
 		List<String> albuns = new ArrayList<String>();
 		List<Album> toReturn = new ArrayList<Album>();
+		System.out.println(servers.size());
 		for (serverObjectClass server: servers){
 			try{
 				List <String> al = server.getServer().getAlbums();
@@ -86,7 +90,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 				//adicionar ao serverObjectClass
 				server.addListAlbuns(al);
 			}catch (Exception e){
-				e.printStackTrace();
+				return null;
 			}
 		}
 		for(String a: albuns)
@@ -310,8 +314,17 @@ private void sendRequests(){
 	new Thread(() -> {
 		try {
 			while (true){
+				Iterator<serverObjectClass> i = servers.iterator();
+				while(i.hasNext()){
+					serverObjectClass s = i.next();
+					s.incrementCounter();
+					if(s.getCounter() == 5){
+						servers.remove(s);
+						gui.updateAlbums();
+					}
+				}
 				discovery.findService(socket);
-				Thread.sleep(5000);
+				Thread.sleep(1000);
 			}
 		}catch(Exception e){
 		};
@@ -331,24 +344,31 @@ private void registServer (){
 		try {
 			while (true){
 				URI serviceURI = discovery.getService(socket);
-				//System.out.println(serviceURI.toString());
-				String [] compare = serviceURI.toString().split("/");
-				RequestInterface sv = null;
-				if(!servers.equals(serviceURI.toString())){
-					System.out.println(serviceURI.toString());
-					if(compare[3].equalsIgnoreCase(SERVER_SOAP)){
-						sv = new SOAPClientClass(serviceURI);
-						
+				if(serviceURI!=null){
+					String [] compare = serviceURI.toString().split("/");
+					RequestInterface sv = null;
+					if(!servers.contains(serviceURI.toString())){
+						System.out.println(serviceURI.toString());
+						if(compare[3].equalsIgnoreCase(SERVER_SOAP)){
+							sv = new SOAPClientClass(serviceURI);
+
+						}
+						else if(compare[3].equalsIgnoreCase(SERVER_REST)){
+							sv = new RESTClientClass(serviceURI);
+						}
+						serverObjectClass obj = new serverObjectClass(sv, serviceURI.toString());
+						servers.add(obj);
+						gui.updateAlbums();
 					}
-					else if(compare[3].equalsIgnoreCase(SERVER_REST)){
-						sv = new RESTClientClass(serviceURI);
+					else{
+						System.out.println("ajhgsd");
+						int index = servers.indexOf(serviceURI);
+						servers.get(index).resetCounter();;
 					}
-					serverObjectClass obj = new serverObjectClass(sv, serviceURI.toString());
-					servers.add(obj);
-					gui.updateAlbums();
 				}
 			}
 		}catch(Exception e){
+			e.printStackTrace();
 		};
 	}).start();
 }

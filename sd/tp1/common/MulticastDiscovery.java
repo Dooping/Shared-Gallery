@@ -43,6 +43,7 @@ public class MulticastDiscovery implements Discovery {
 		byte [] buffer = new byte [65536];
 		DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 		try {
+			socket.setSoTimeout(500);
 			socket.receive(packet);
 			String serviceURL = new String(packet.getData(),0,packet.getLength());
 			return new URI(serviceURL);

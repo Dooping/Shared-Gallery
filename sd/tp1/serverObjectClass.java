@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import sd.tp1.gui.GalleryContentProvider.Album;
 
 /**
  * @author Moncada
@@ -36,6 +35,7 @@ public class serverObjectClass {
 	
 	@Override
 	public boolean equals(Object obj) {
+		System.out.println(serverName.equals(obj));
 		if (obj instanceof String)
 			return serverName.equals(obj);
 		return false;
