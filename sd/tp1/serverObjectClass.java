@@ -55,22 +55,24 @@ public class serverObjectClass {
 	 * @param album
 	 * add an album
 	 */
-	public void addAlbum(Album album){
-		if(listAlbuns.containsKey(album.getName())){
-			listAlbuns.put(album.getName(), album.getName());
+	public void addAlbum(String album){
+		if(listAlbuns.containsKey(album)){
+			listAlbuns.put(album, album);
 		}
 	}
 	
 
 	/**
 	 * @param the album name
-	 * @return the server in case the album belongs to this server, null if not
+	 * @return the RequestServer in case the album belongs to this server, null if not
 	 */
 	public RequestInterface serverOfAlbun(String album) {
 		return (listAlbuns.containsKey(album)) ? server : null;
 	}
 	
-
+	public boolean containsAlbuns(String name){
+		return listAlbuns.containsKey(name);
+	}
 	
 	/**
 	 * reset the counter to zero

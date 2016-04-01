@@ -10,6 +10,8 @@ import java.util.List;
 
 
 
+import java.util.Random;
+
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
 import sd.tp1.clt.ws.GalleryServerImplWSClass;
@@ -142,31 +144,23 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		// TODO: put this album on cache
-		boolean executed = false;
-		for (int i =0; !executed && i<3; i++){
-			try{
-				server.creatAlbum(name);
-				executed = true;
-			} catch (AlbumAlreadyExistsException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
-				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
+		try{
+			for (serverObjectClass server: servers){
+				if (server.containsAlbuns(name))
 					return null;
-				}
-				
 			}
+
+			Random r = new Random();
+			int i = r.nextInt(servers.size());
+			System.out.println(i);
+			serverObjectClass server = servers.get(i);
+			server.getServer().createAlbum(name);
+			server.addAlbum(name);
+			return new SharedAlbum(name);
+		}catch (Exception e){
+			e.printStackTrace();
 		}
-		return new SharedAlbum(name);
+		return null;
 	}
 
 	/**
