@@ -35,7 +35,7 @@ public class serverObjectClass {
 	
 	@Override
 	public boolean equals(Object obj) {
-		System.out.println(serverName.equals(obj));
+		//System.out.println(serverName.equals(obj));
 		if (obj instanceof String)
 			return serverName.equals(obj);
 		return false;

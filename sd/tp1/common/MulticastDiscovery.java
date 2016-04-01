@@ -81,9 +81,7 @@ public class MulticastDiscovery implements Discovery {
 			}
 
 		} catch (UnknownHostException e) {
-			//e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
