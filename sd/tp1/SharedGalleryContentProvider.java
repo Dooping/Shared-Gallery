@@ -84,15 +84,18 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		//System.out.println(servers.size());
 		if (servers != null){
 			for (serverObjectClass server: servers){
-				try{
-					List <String> al = server.getServer().getAlbums();
-					//adicionar ao albuns para devolver
-					albuns.addAll(al);
-					//adicionar ao serverObjectClass
-					server.addListAlbuns(al);
-				}catch (Exception e ){
-					return null;
+				if (server != null){
+					try{
+						List <String> al = server.getServer().getAlbums();
+						//adicionar ao albuns para devolver
+						albuns.addAll(al);
+						//adicionar ao serverObjectClass
+						server.addListAlbuns(al);
+					}catch (Exception e ){
+						return null;
+					}
 				}
+
 			}
 			for(String a: albuns)
 				toReturn.add( new SharedAlbum(a));
@@ -320,15 +323,18 @@ private void sendRequests(){
 				Iterator<serverObjectClass> i = servers.iterator();
 				while(i.hasNext()){
 					serverObjectClass s = i.next();
-					s.incrementCounter();
+					
 					if(s.getCounter() == 5){
 						System.out.println("Removing server: " + s.getServerName());
-						servers.remove(s);
+						i.remove();
+						//servers.remove(s);
 						gui.updateAlbums();
 					}
+					else
+						s.incrementCounter();
 				}
 				discovery.findService(socket);
-				Thread.sleep(1000);
+				Thread.sleep(1500);
 			}
 		}catch(Exception e){
 		};
@@ -356,6 +362,7 @@ private void registServer (){
 					for (serverObjectClass s: servers){
 						if (s.equals(serviceURI.toString())){
 							exits = true;
+							s.resetCounter();
 							break;
 						}
 					}
@@ -367,30 +374,20 @@ private void registServer (){
 						else if(compare[3].equalsIgnoreCase(SERVER_REST)){
 							sv = new RESTClientClass(serviceURI);
 						}
+						System.out.println("Adding server: " + serviceURI.toString() );
 						serverObjectClass obj = new serverObjectClass(sv, serviceURI.toString());
 						servers.add(obj);
 						gui.updateAlbums();
 					}
-					
-//					if(!servers.contains(serviceURI.toString())){
-//						System.out.println(serviceURI.toString());
-//						if(compare[3].equalsIgnoreCase(SERVER_SOAP)){
-//							sv = new SOAPClientClass(serviceURI);
+					//the server already exits
+//					else{
+//						for (serverObjectClass s: servers){
+//							if (s.equals(serviceURI.toString())){
+//								s.resetCounter();
+//							}
+//						}
 //
-//						}
-//						else if(compare[3].equalsIgnoreCase(SERVER_REST)){
-//							sv = new RESTClientClass(serviceURI);
-//						}
-//						serverObjectClass obj = new serverObjectClass(sv, serviceURI.toString());
-//						servers.add(obj);
-//						gui.updateAlbums();
 //					}
-					else{
-						//System.out.println("reset counter of: " + serviceURI.toString());
-						int index = servers.indexOf(serviceURI.toString());
-						if (index >= 0)
-							servers.get(index).resetCounter();;
-					}
 				}
 			}
 		}catch(Exception e){
