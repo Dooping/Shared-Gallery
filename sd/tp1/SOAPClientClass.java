@@ -48,14 +48,10 @@ public class SOAPClientClass implements RequestInterface{
 				}
 				else {
 					System.err.println("Erro: " + e.getMessage());
-					//albums = new ArrayList<String>();
 					return null;
 				}
 			}
 		}
-		/*List<Album> lst = new ArrayList<Album>();
-		for(String a: albums)
-			lst.add( new SharedAlbum(a));*/
 		return albums;
 	}
 

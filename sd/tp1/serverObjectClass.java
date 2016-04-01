@@ -3,6 +3,7 @@
  */
 package sd.tp1;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,6 @@ import sd.tp1.gui.GalleryContentProvider.Album;
 public class serverObjectClass {
 	
 	private RequestInterface server;
-
 	private Map <String, String> listAlbuns;
 	private int counter;
 	private String serverName;
@@ -24,7 +24,7 @@ public class serverObjectClass {
 		this.server = sv;
 		this.counter = 0;
 		this.serverName = serverName;
-	
+		listAlbuns = new HashMap<String, String>();
 	}
 	
 	/**
@@ -41,9 +41,23 @@ public class serverObjectClass {
 		return false;
 	}
 
-	public void addListAlbuns(List <Album> listAlbuns){
-		for(Album a: listAlbuns){
-			this.listAlbuns.put(a.getName(), a.getName());
+	/**
+	 * @param listAlbuns
+	 * to add list of albuns
+	 */
+	public void addListAlbuns(List <String> listAlbuns){
+		for(String a: listAlbuns){
+			this.listAlbuns.put(a, a);
+		}
+	}
+	
+	/**
+	 * @param album
+	 * add an album
+	 */
+	public void addAlbum(Album album){
+		if(listAlbuns.containsKey(album.getName())){
+			listAlbuns.put(album.getName(), album.getName());
 		}
 	}
 	
@@ -56,16 +70,7 @@ public class serverObjectClass {
 		return (listAlbuns.containsKey(album)) ? server : null;
 	}
 	
-	/**
-	 * @param album
-	 * add an album
-	 */
-	public void addAlbum(Album album){
-		if(listAlbuns.containsKey(album.getName())){
-			listAlbuns.put(album.getName(), album.getName());
-		}
-		
-	}
+
 	
 	/**
 	 * reset the counter to zero
