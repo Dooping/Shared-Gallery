@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
@@ -38,14 +40,14 @@ public class MulticastDiscovery implements Discovery {
 		
 	}
 	
-	public URL getService(MulticastSocket socket){
+	public URI getService(MulticastSocket socket){
 		byte [] buffer = new byte [65536];
 		DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 		try {
 			socket.receive(packet);
 			String serviceURL = new String(packet.getData(),0,packet.getLength());
-			return new URL(serviceURL);
-		} catch (IOException e) {
+			return new URI(serviceURL);
+		} catch (IOException | URISyntaxException e) {
 			return null;
 			//e.printStackTrace();
 		}

@@ -3,6 +3,7 @@ package sd.tp1;
 
 import java.io.IOException;
 import java.net.MulticastSocket;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,13 +55,13 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public MulticastSocket socket;
 	
 	
-	private Map<String, GalleryServerImplWSClass> serversSOAP;
-	private Map<String, HttpServer> serversREST;
+	private Map<String, RequestInterface> serversSOAP;
+	private Map<String, RequestInterface> serversREST;
 
 	SharedGalleryContentProvider() {
 		
-		serversSOAP = new ConcurrentHashMap<String, GalleryServerImplWSClass>();
-		serversREST = new ConcurrentHashMap<String, HttpServer>();
+		serversSOAP = new ConcurrentHashMap<String, RequestInterface>();
+		serversREST = new ConcurrentHashMap<String, RequestInterface>();
 		
 		discovery = new MulticastDiscovery();
 		try {
@@ -94,6 +95,10 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Album> getListOfAlbums() {
+		
+		
+		
+		
 		//TODO: cache?
 		boolean executed = false;
 		List<String> albums = null;
@@ -387,7 +392,6 @@ private void sendRequests(){
 				discovery.findService(socket);
 				Thread.sleep(5000);
 			}
-			
 		}catch(Exception e){
 		};
 	}).start();
@@ -401,24 +405,31 @@ private void registServer (){
 	String SERVER_REST = "GalleryServerREST";
 	new Thread(() -> {
 		try {
-			while (true){
-				URL serviceURL = discovery.getService(socket);
-				System.out.println(serviceURL);
-				
-				String [] compare = serviceURL.toString().split("/");
-				if (compare[3].equals(SERVER_SOAP)){
-					System.out.println("SOAP SERVER!");
-				}
-				else if (compare[3].equals(SERVER_REST)){
-					System.out.println("REST SERVER!");
-				}
-
-				
-				GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURL);
-				this.server = service.getGalleryServerImplWSClassPort();
-
-			}
-
+//			while (true){
+				URI serviceURI = discovery.getService(socket);
+//				String [] compare = serviceURI.toString().split("/");
+//				if (compare[3].equals(SERVER_SOAP)){
+//					if(!serversSOAP.containsKey(serviceURI.toString())){
+//						System.err.println("NEW SOAP SERVER!");
+//						System.out.println(serviceURI);
+//						RequestInterface sv = new SOAPClientClass(serviceURI);
+//						serversSOAP.put(serviceURI.toString(), sv);
+//					}
+//
+//				}
+//				else if (compare[3].equals(SERVER_REST)){
+//					if(!serversREST.containsKey(serviceURI.toString())){
+//						System.err.println("NEW REST SERVER!");
+//						System.out.println(serviceURI);
+//						RequestInterface sv = new RESTClientClass(serviceURI);
+//						serversREST.put(serviceURI.toString(), sv);
+//					}
+//				}
+//
+//
+//			}
+			GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serviceURI.toURL());
+			this.server = service.getGalleryServerImplWSClassPort();
 		}catch(Exception e){
 		};
 	}).start();
