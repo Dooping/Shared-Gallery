@@ -173,45 +173,13 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
-		
-		
-		
-		
-		
-		//TODO: put picture on cache
-		boolean executed = false;
-		for (int i =0; !executed && i<3; i++){
-			try{
-				PictureClass pic = new PictureClass();
-				pic.setContents(data);
-				pic.setName(name);
-				server.uploadPicture(album.getName(),data, name);
-				executed = true;
-			} catch (AlbumNotFoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (IOException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (PictureAlreadyExistsException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
-				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
-					return null;
-				}
-
-			}
+		serverObjectClass s = this.findServer(album.getName());
+		if(s!= null){
+			s.getServer().uploadPicture(album.getName(), name, data);
+			return new SharedPicture(name);
 		}
-		return new SharedPicture(name);
+		else
+			return null;
 	}
 
 	/**
@@ -220,34 +188,15 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
-		boolean executed = false;
-		for (int i =0; !executed && i<3; i++){
-			try{
-				server.deletePicture(album.getName(), picture.getName());
-				executed = true;
-			} catch (AlbumNotFoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return false;
-			} catch (PictureNotfoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return false;
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
-				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
-					return false;
-				}
-			}
+		
+		serverObjectClass s = this.findServer(album.getName());
+		if(s!= null){
+			s.getServer().deletePicture(album.getName(), picture.getName());
+			return true;
 		}
-		return true;
+		else
+			return false;
 	}
-
 	
 	/**
 	 * @param album
