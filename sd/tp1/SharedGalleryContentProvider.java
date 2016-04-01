@@ -10,6 +10,8 @@ import java.util.List;
 
 
 
+import java.util.Random;
+
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
 import sd.tp1.clt.ws.GalleryServerImplWSClass;
@@ -28,19 +30,6 @@ import sd.tp1.gui.Gui;
  */
 public class SharedGalleryContentProvider implements GalleryContentProvider{
 
-	/*TODO:
-	 * Em relação a cache, podemos tambem gravar diretamente no pc do utilizador 
-	 * (usando o serializable do java) e depois era so uma questão de saber se houve
-	 * alterações
-	 * 
-	 * Para o error handling neste momento fazemos 3 tentativas para ir buscar o recurso que 
-	 * queremos, no futuro, com dois servidores, podemos fazer duas tentativas para um
-	 * e depois mudar para o outro e assim sucessivamente. 
-	 * Embora isto dependa bastante de como vamos fazer as coisas, se por replicação, ou divisão
-	 * (o ideal era os dois!!!)
-	 * nota: exstem diferenças nos erros, entre, por exemplo, não encontrar uma galeria
-	 * e não conseguir fazer a conexão
-	 */
 	Gui gui;
 	//TODO: tive de mudar para class,
 	//mas temos de ver isto melhor,
@@ -52,8 +41,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private List<serverObjectClass> servers;
 
 	SharedGalleryContentProvider() {
-		
-		//servers = new LinkedList<serverObjectClass>();
 		servers = Collections.synchronizedList(new ArrayList<serverObjectClass>());
 		discovery = new MulticastDiscovery();
 		try {
@@ -65,7 +52,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		this.registServer();
 		
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(3000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -88,49 +75,24 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Album> getListOfAlbums() {
-		
+		//TODO: return on null?
 		List<String> albuns = new ArrayList<String>();
 		List<Album> toReturn = new ArrayList<Album>();
-		
-		for (serverObjectClass obj: servers){
-			albuns.addAll(obj.getServer().getAlbums()) ;
+		for (serverObjectClass server: servers){
+			try{
+				List <String> al = server.getServer().getAlbums();
+				//adicionar ao albuns para devolver
+				albuns.addAll(al);
+				//adicionar ao serverObjectClass
+				server.addListAlbuns(al);
+			}catch (Exception e){
+				e.printStackTrace();
+			}
 		}
-		
 		for(String a: albuns)
 			toReturn.add( new SharedAlbum(a));
+		
 		return toReturn;
-		
-		
-//		
-//		//TODO: cache?
-//		boolean executed = false;
-//		List<String> albums = null;
-//		for (int i =0; !executed && i<3; i++){
-//			try {
-//				albums = server.listAlbums();
-//				executed = true;
-//			} catch (GalleryNotFoundException_Exception e1){
-//				System.err.println("Erro: " + e1.getMessage());
-//				return null;
-//			} catch (Exception e) {
-//				if(i < 2){
-//					try {
-//						Thread.sleep(500); //wait some time
-//					} catch (InterruptedException e1) {
-//						//do nothing
-//					}
-//				}
-//				else {
-//					System.err.println("Erro: " + e.getMessage());
-//					//albums = new ArrayList<String>();
-//					return null;
-//				}
-//			}
-//		}
-//		List<Album> lst = new ArrayList<Album>();
-//		for(String a: albums)
-//			lst.add( new SharedAlbum(a));
-//		return lst;
 	}
 
 	/**
@@ -139,36 +101,22 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Picture> getListOfPictures(Album album) {
-		//TODO: cache?
-		List<String> pictures = null;
-		boolean executed = false;
-		for (int i =0; !executed && i<3; i++){
-			try {
-				pictures = server.listPictures(album.getName());
-				executed = true;
-			} catch (AlbumNotFoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
+		List<String> pictNames = new ArrayList<String>();
+		for (serverObjectClass server: servers){
+			try{
+				RequestInterface s = server.serverOfAlbun(album.getName());
+				if(s != null){
+					pictNames = s.getPictures(album.getName());
+					List<Picture> lst = new ArrayList<Picture>();
+					for(String p: pictNames)
+						lst.add( new SharedPicture(p));
+					return lst;
 				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
-					//pictures = new ArrayList<String>();
-					return null;
-				}
-
-			} 
+			}catch (Exception e){
+				e.printStackTrace();
+			}
 		}
-		List<Picture> lst = new ArrayList<Picture>();
-		for(String p: pictures)
-			lst.add( new SharedPicture(p));
-		return lst;
+		return null;
 	}
 
 	/**
@@ -177,39 +125,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public byte[] getPictureData(Album album, Picture picture) {
-		//TODO: put picture on cache
-		byte [] pic = null;
-		boolean executed = false;
-		for (int i =0; !executed && i<3; i++){
-			try {
-				PictureClass p = server.getPicture(album.getName(), picture.getName());
-				pic = p.getContents();
-				executed = true;
-				//tratamento dos vários erros possiveis
-			} catch (AlbumNotFoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (IOException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (PictureNotfoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
+		for (serverObjectClass server: servers){
+			try{
+				RequestInterface s = server.serverOfAlbun(album.getName());
+				if(s != null){
+					return s.getPicture(album.getName(), picture.getName());
 				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
-					return null;
-				}
-			} 
+			}catch (Exception e){
+				e.printStackTrace();
+			}
 		}
-		return pic;
+		return null;
 	}
 
 	/**
@@ -218,31 +144,23 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		// TODO: put this album on cache
-		boolean executed = false;
-		for (int i =0; !executed && i<3; i++){
-			try{
-				server.creatAlbum(name);
-				executed = true;
-			} catch (AlbumAlreadyExistsException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-				return null;
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
-				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
+		try{
+			for (serverObjectClass server: servers){
+				if (server.containsAlbuns(name))
 					return null;
-				}
-				
 			}
+
+			Random r = new Random();
+			int i = r.nextInt(servers.size());
+			System.out.println(i);
+			serverObjectClass server = servers.get(i);
+			server.getServer().createAlbum(name);
+			server.addAlbum(name);
+			return new SharedAlbum(name);
+		}catch (Exception e){
+			e.printStackTrace();
 		}
-		return new SharedAlbum(name);
+		return null;
 	}
 
 	/**
@@ -403,6 +321,9 @@ private void sendRequests(){
 }
 
 
+/**
+ * to catch the servers 
+ */
 private void registServer (){
 	String SERVER_SOAP = "GalleryServerSOAP";
 	String SERVER_REST = "GalleryServerREST";
@@ -410,15 +331,16 @@ private void registServer (){
 		try {
 			while (true){
 				URI serviceURI = discovery.getService(socket);
-				System.out.println(serviceURI.toString());
+				//System.out.println(serviceURI.toString());
 				String [] compare = serviceURI.toString().split("/");
 				RequestInterface sv = null;
-				if(servers.equals(serviceURI.toString())){
-					if(compare[2].equalsIgnoreCase(SERVER_SOAP)){
+				if(!servers.equals(serviceURI.toString())){
+					System.out.println(serviceURI.toString());
+					if(compare[3].equalsIgnoreCase(SERVER_SOAP)){
 						sv = new SOAPClientClass(serviceURI);
 						
 					}
-					else if(compare[2].equalsIgnoreCase(SERVER_REST)){
+					else if(compare[3].equalsIgnoreCase(SERVER_REST)){
 						sv = new RESTClientClass(serviceURI);
 					}
 					serverObjectClass obj = new serverObjectClass(sv, serviceURI.toString());
