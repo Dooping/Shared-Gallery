@@ -2,25 +2,17 @@ package sd.tp1;
 
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+
 
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
-import sd.tp1.clt.ws.GalleryNotFoundException_Exception;
-import sd.tp1.clt.ws.GalleryServerImplWS;
 import sd.tp1.clt.ws.GalleryServerImplWSClass;
-import sd.tp1.clt.ws.GalleryServerImplWSClassService;
-import sd.tp1.clt.ws.GalleryServerImplWSService;
 import sd.tp1.clt.ws.IOException_Exception;
 import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.PictureClass;
@@ -29,7 +21,6 @@ import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
 
-import com.sun.net.httpserver.HttpServer;
 /*
  * This class provides the album/picture content to the gui/main application.
  * 
@@ -57,25 +48,25 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private GalleryServerImplWSClass server;
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
+
 	private List<serverObjectClass> servers;
 
 	SharedGalleryContentProvider() {
 		
-		servers = new LinkedList<serverObjectClass>();
-
+		//servers = new LinkedList<serverObjectClass>();
+		servers = Collections.synchronizedList(new ArrayList<serverObjectClass>());
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.sendRequests();
 		this.registServer();
+		
 		try {
-			Thread.sleep(100);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -102,7 +93,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		List<Album> toReturn = new ArrayList<Album>();
 		
 		for (serverObjectClass obj: servers){
-			albuns = obj.getServer().getAlbums();
+			albuns.addAll(obj.getServer().getAlbums()) ;
 		}
 		
 		for(String a: albuns)
@@ -425,6 +416,7 @@ private void registServer (){
 				if(servers.equals(serviceURI.toString())){
 					if(compare[2].equalsIgnoreCase(SERVER_SOAP)){
 						sv = new SOAPClientClass(serviceURI);
+						
 					}
 					else if(compare[2].equalsIgnoreCase(SERVER_REST)){
 						sv = new RESTClientClass(serviceURI);
