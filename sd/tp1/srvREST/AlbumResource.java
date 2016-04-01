@@ -34,7 +34,7 @@ public class AlbumResource {
 		System.err.printf("getAlbums()\n");
 		if (basePath.exists()){
 			ArrayList<String> names = new ArrayList<String>(Arrays.asList(basePath.list()));
-			return Response.ok(names.toString()).build();
+			return Response.ok(names).build();
 		}
 		else
 			return Response.status(Status.NOT_FOUND).build();
@@ -49,7 +49,7 @@ public class AlbumResource {
 		ArrayList<String> names;
 		if (f.exists()){
 			names = new ArrayList<String>(Arrays.asList(f.list()));
-			return Response.ok(names.toString()).build();
+			return Response.ok(names).build();
 		}
 		else
 			return Response.status(Status.NOT_FOUND).build();
