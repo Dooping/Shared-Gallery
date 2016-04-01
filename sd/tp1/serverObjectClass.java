@@ -61,6 +61,12 @@ public class serverObjectClass {
 		}
 	}
 	
+	public void deleteAlbum(String album){
+		if(listAlbuns.containsKey(album)){
+			listAlbuns.remove(album);
+		}
+	}
+	
 
 	/**
 	 * @param the album name

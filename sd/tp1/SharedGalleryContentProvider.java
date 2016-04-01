@@ -95,7 +95,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 						return null;
 					}
 				}
-
 			}
 			for(String a: albuns)
 				toReturn.add( new SharedAlbum(a));
@@ -179,27 +178,42 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public void deleteAlbum(Album album) {
-		//TODO: retirar o album da cache?!
-		boolean executed = false;
-		for (int i =0; !executed && i<3; i++){
-			try{
-				server.deleteAlbum(album.getName());
-				executed = true;
-			} catch (AlbumNotFoundException_Exception e1){
-				System.err.println("Erro: " + e1.getMessage());
-			} catch (Exception e) {
-				if(i < 2){
-					try {
-						Thread.sleep(500); //wait some time
-					} catch (InterruptedException e1) {
-						//do nothing
-					}
-				}
-				else {
-					System.err.println("Erro: " + e.getMessage());
+		
+		try{
+			for (serverObjectClass server: servers){
+				if (server.containsAlbuns(album.getName())){
+					server.getServer().deleteAlbum(album.getName());
 				}
 			}
+		}catch (Exception e){
+			e.printStackTrace();
 		}
+		
+		
+		
+//		//TODO: retirar o album da cache?!
+//		boolean executed = false;
+//		for (int i =0; !executed && i<3; i++){
+//			try{
+//				server.deleteAlbum(album.getName());
+//				executed = true;
+//			} catch (AlbumNotFoundException_Exception e1){
+//				System.err.println("Erro: " + e1.getMessage());
+//			} catch (Exception e) {
+//				if(i < 2){
+//					try {
+//						Thread.sleep(500); //wait some time
+//					} catch (InterruptedException e1) {
+//						//do nothing
+//					}
+//				}
+//				else {
+//					System.err.println("Erro: " + e.getMessage());
+//				}
+//			}
+//		}
+		
+		
 	}
 	
 	/**
@@ -334,7 +348,7 @@ private void sendRequests(){
 						s.incrementCounter();
 				}
 				discovery.findService(socket);
-				Thread.sleep(1500);
+				Thread.sleep(1000);
 			}
 		}catch(Exception e){
 		};
