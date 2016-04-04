@@ -43,9 +43,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public MulticastSocket socket;
 
 	private List<serverObjectClass> servers;
+	private PictureCacheClass cache;
 
 	SharedGalleryContentProvider() {
 		servers = Collections.synchronizedList(new LinkedList<serverObjectClass>());
+		cache = new PictureCacheClass(100);
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
@@ -128,11 +130,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public byte[] getPictureData(Album album, Picture picture) {	
 		serverObjectClass s = this.findServer(album.getName());
-		if(s!= null){
+		byte[] pic = cache.get(album.getName()+"/"+picture.getName());
+		if(s!= null && pic == null){
 			RequestInterface i = s.getServer();
-			return i.getPicture(album.getName(), picture.getName());
+			pic = i.getPicture(album.getName(), picture.getName());
+			cache.put(album.getName()+"/"+picture.getName(), pic);
+			System.out.println("get");
 		}
-		return null;
+		return pic;
 	}
 
 	/**
