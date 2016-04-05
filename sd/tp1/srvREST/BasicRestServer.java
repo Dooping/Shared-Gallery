@@ -1,7 +1,13 @@
 package sd.tp1.srvREST;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -24,10 +30,38 @@ public class BasicRestServer {
 		config.register(AlbumResource.class);
 		
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
-
-		System.err.println("REST Server ready... ");
 		
+		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
+		String url = "http://"+serviceURL+ "/GalleryServerREST";
+		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
-		discovery.registerService(baseUri.toURL());
+		discovery.registerService(new URL(url));
+	}
+	
+	/**
+	 * Return the IPv4 address of the local machine that is not a loopback address if available.
+	 * Otherwise, returns loopback address.
+	 * If no address is available returns null.
+	 */
+	private static InetAddress localhostAddress() {
+		try {
+			try {
+				Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+				while (e.hasMoreElements()) {
+					NetworkInterface n = e.nextElement();
+					Enumeration<InetAddress> ee = n.getInetAddresses();
+					while (ee.hasMoreElements()) {
+						InetAddress i = ee.nextElement();
+						if (i instanceof Inet4Address && !i.isLoopbackAddress())
+							return i;
+					}
+				}
+			} catch (SocketException e) {
+				// do nothing
+			}
+			return InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			return null;
+		}
 	}
 }
