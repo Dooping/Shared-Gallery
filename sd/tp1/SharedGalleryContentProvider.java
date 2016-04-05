@@ -34,6 +34,9 @@ import sd.tp1.gui.Gui;
  */
 public class SharedGalleryContentProvider implements GalleryContentProvider{
 
+	public static final int DISCOVERY_INTERVAL = 1000;
+	public static final int TIMEOUT_CYCLES = 5;
+	
 	Gui gui;
 	//TODO: tive de mudar para class,
 	//mas temos de ver isto melhor,
@@ -41,9 +44,9 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private GalleryServerImplWSClass server;
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
-
 	private List<serverObjectClass> servers;
 	private PictureCacheClass cache;
+	
 
 	SharedGalleryContentProvider() {
 		servers = Collections.synchronizedList(new LinkedList<serverObjectClass>());
@@ -52,14 +55,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		try {
 			socket = new MulticastSocket();
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		this.sendRequests();
 		this.registServer();
 		
 		try {
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -135,7 +138,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			RequestInterface i = s.getServer();
 			pic = i.getPicture(album.getName(), picture.getName());
 			cache.put(album.getName()+"/"+picture.getName(), pic);
-			System.out.println("get");
 		}
 		return pic;
 	}
@@ -215,7 +217,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 				}
 			}
 		}catch (Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return null;
 	}
@@ -245,13 +247,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		SharedPicture(String name) {
 			this.name = name;
 		}
-
 		@Override
 		public String getName() {
 			return name;
 		}
 	}
-
 
 
 /**
@@ -265,23 +265,20 @@ private void sendRequests(){
 				while(i.hasNext()){
 					serverObjectClass s = i.next();
 					
-					if(s.getCounter() == 5){
+					if(s.getCounter() == TIMEOUT_CYCLES){
 						System.out.println("Removing server: " + s.getServerName());
 						i.remove();
-						//servers.remove(s);
 						gui.updateAlbums();
 					}
 					else
 						s.incrementCounter();
 				}
 				discovery.findService(socket);
-				Thread.sleep(1000);
+				Thread.sleep(DISCOVERY_INTERVAL);
 			}
 		}catch(Exception e){
 		};
 	}).start();
-	
-	
 }
 
 
@@ -320,19 +317,10 @@ private void registServer (){
 						servers.add(obj);
 						gui.updateAlbums();
 					}
-					//the server already exits
-//					else{
-//						for (serverObjectClass s: servers){
-//							if (s.equals(serviceURI.toString())){
-//								s.resetCounter();
-//							}
-//						}
-//
-//					}
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		};
 	}).start();
 }
