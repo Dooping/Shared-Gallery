@@ -31,7 +31,7 @@ public class AlbumResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAlbums() {
-		System.err.printf("getAlbums()\n");
+		//System.err.printf("getAlbums()\n");
 		if (basePath.exists()){
 			ArrayList<String> names = new ArrayList<String>(Arrays.asList(basePath.list()));
 			return Response.ok(names).build();
@@ -44,7 +44,7 @@ public class AlbumResource {
 	@Path("/{album}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPictures(@PathParam("album") String a) {
-		System.err.printf("getPictures()\n");
+		//System.err.printf("getPictures()\n");
 		File f = new File(basePath, a);
 		ArrayList<String> names;
 		if (f.exists()){
@@ -60,7 +60,7 @@ public class AlbumResource {
 	@Path("/{album}/{picture}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getPicture(@PathParam("album") String album, @PathParam("picture") String picture) throws IOException {
-		System.err.printf("getPicture()\n");
+		//System.err.printf("getPicture()\n");
 		File f = new File(basePath, album);
 		if (f.exists()){
 			f = new File(basePath, album + "/"+ picture);
@@ -77,7 +77,7 @@ public class AlbumResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createAlbum(String album) {
-		System.err.printf("createAlbum()\n");
+		//System.err.printf("createAlbum()\n");
 		File f = new File(basePath, album);
 		if (f.exists())
 			return Response.status(422).build();
@@ -91,7 +91,7 @@ public class AlbumResource {
 	@DELETE
 	@Path("/{album}")
 	public Response deleteAlbum(@PathParam("album") String album) {
-		System.err.printf("deleteAlbum()\n");
+		//System.err.printf("deleteAlbum()\n");
 		File f = new File(basePath, album);
 		if (f.exists()){
 			deleteDir(f);
@@ -113,7 +113,7 @@ public class AlbumResource {
 	@DELETE
 	@Path("/{album}/{picture}")
 	public Response deletePicture(@PathParam("album") String album, @PathParam("picture") String picture) {
-		System.err.printf("deletePicture()\n");
+		//System.err.printf("deletePicture()\n");
 		File f = new File(basePath, album+"/"+picture);
 		if (f.exists()){
 			f.delete();
@@ -126,7 +126,7 @@ public class AlbumResource {
 	@Path("/{album}/{pictureName}")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String pictureName, byte[] picture) throws IOException {
-		System.err.printf("uploadPicture()\n");
+		//System.err.printf("uploadPicture()\n");
 		File dir = new File(basePath + "/" + album);
 		if (dir.exists()) {
 			dir = new File(basePath, album + "/"+ pictureName);

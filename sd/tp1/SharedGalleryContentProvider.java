@@ -95,6 +95,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 						//adicionar ao serverObjectClass
 						server.addListAlbuns(al);
 					}catch (Exception e ){
+						System.out.println(e.getMessage());
 						return null;
 					}
 				}
@@ -137,7 +138,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		if(s!= null && pic == null){
 			RequestInterface i = s.getServer();
 			pic = i.getPicture(album.getName(), picture.getName());
-			cache.put(album.getName()+"/"+picture.getName(), pic);
+			if(pic != null)
+				cache.put(album.getName()+"/"+picture.getName(), pic);
 		}
 		return pic;
 	}
@@ -149,13 +151,18 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public Album createAlbum(String name) {
 		serverObjectClass s = this.findServer(name);
-		if(s== null){
+		if(s == null){
 			Random r = new Random();
 			int i = r.nextInt(servers.size());
 			serverObjectClass server = servers.get(i);
-			server.getServer().createAlbum(name);
-			server.addAlbum(name);
-			return new SharedAlbum(name);
+			boolean c = server.getServer().createAlbum(name);
+			if(c){
+				//System.out.println("New album");
+				server.addAlbum(name);
+				gui.updateAlbums();
+				return new SharedAlbum(name);
+			}
+			else return null;
 		}
 		else
 			return null;
@@ -168,8 +175,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public void deleteAlbum(Album album) {
 		serverObjectClass s = this.findServer(album.getName());
 		if(s!= null){
-			s.getServer().deleteAlbum(album.getName());
-			s.deleteAlbum(album.getName());
+			if(s.getServer().deleteAlbum(album.getName())){
+				//System.out.println("Deleting");
+				s.deleteAlbum(album.getName());
+				gui.updateAlbums();
+			}
+			
 		}
 		
 	}
