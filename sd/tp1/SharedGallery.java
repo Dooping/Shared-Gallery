@@ -7,6 +7,7 @@ import sd.tp1.gui.impl.GalleryWindow;
 /*
  * Launches the local shared gallery application.
  */
+@SuppressWarnings("restriction")
 public class SharedGallery extends Application {
 
 	GalleryWindow window;

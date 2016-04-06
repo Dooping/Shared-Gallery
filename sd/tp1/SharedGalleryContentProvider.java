@@ -1,6 +1,5 @@
 package sd.tp1;
 
-
 import java.io.IOException;
 import java.net.MulticastSocket;
 import java.net.URI;
@@ -9,20 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-
-
 import java.util.Random;
-
-
-
-import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
-import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
-import sd.tp1.clt.ws.GalleryServerImplWSClass;
-import sd.tp1.clt.ws.IOException_Exception;
-import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
-import sd.tp1.clt.ws.PictureClass;
-import sd.tp1.clt.ws.PictureNotfoundException_Exception;
 import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
@@ -38,10 +24,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public static final int TIMEOUT_CYCLES = 5;
 	
 	Gui gui;
-	//TODO: tive de mudar para class,
-	//mas temos de ver isto melhor,
-	//devia dar com a interface...
-	private GalleryServerImplWSClass server;
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
 	private List<serverObjectClass> servers;

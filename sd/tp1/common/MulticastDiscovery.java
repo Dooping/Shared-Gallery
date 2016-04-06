@@ -2,16 +2,13 @@ package sd.tp1.common;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+
 
 public class MulticastDiscovery implements Discovery {
 	private static final String MULTICAST_IP = "224.0.0.0";

@@ -2,11 +2,8 @@ package sd.tp1;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
-import sd.tp1.SharedGalleryContentProvider.SharedAlbum;
-import sd.tp1.SharedGalleryContentProvider.SharedPicture;
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
 import sd.tp1.clt.ws.GalleryNotFoundException_Exception;
@@ -16,8 +13,7 @@ import sd.tp1.clt.ws.IOException_Exception;
 import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.PictureClass;
 import sd.tp1.clt.ws.PictureNotfoundException_Exception;
-import sd.tp1.gui.GalleryContentProvider.Album;
-import sd.tp1.gui.GalleryContentProvider.Picture;
+
 
 public class SOAPClientClass implements RequestInterface{
 	private GalleryServerImplWSClass server;

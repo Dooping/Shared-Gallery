@@ -19,8 +19,10 @@ import sd.tp1.common.MulticastDiscovery;
 
 import com.sun.net.httpserver.HttpServer;
 
+@SuppressWarnings("restriction")
 public class BasicRestServer {
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 
 		URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(8080).path("GalleryServerREST").build();
