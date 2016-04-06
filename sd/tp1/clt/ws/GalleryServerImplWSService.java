@@ -17,7 +17,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient(name = "GalleryServerImplWSService", targetNamespace = "http://srv.tp1.sd/", wsdlLocation = "http://localhost:8080/GalleryServer?wsdl")
+@WebServiceClient(name = "GalleryServerImplWSService", targetNamespace = "http://srv.tp1.sd/", wsdlLocation = "http://localhost:8080/GalleryServerSOAP?wsdl")
 public class GalleryServerImplWSService
     extends Service
 {
@@ -30,7 +30,7 @@ public class GalleryServerImplWSService
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("http://localhost:8080/GalleryServer?wsdl");
+            url = new URL("http://localhost:8080/GalleryServerSOAP?wsdl");
         } catch (MalformedURLException ex) {
             e = new WebServiceException(ex);
         }

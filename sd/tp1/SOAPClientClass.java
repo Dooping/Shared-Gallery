@@ -7,8 +7,8 @@ import java.util.List;
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
 import sd.tp1.clt.ws.GalleryNotFoundException_Exception;
-import sd.tp1.clt.ws.GalleryServerImplWSClass;
-import sd.tp1.clt.ws.GalleryServerImplWSClassService;
+import sd.tp1.clt.ws.GalleryServerImplWS;
+import sd.tp1.clt.ws.GalleryServerImplWSService;
 import sd.tp1.clt.ws.IOException_Exception;
 import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.PictureClass;
@@ -16,11 +16,11 @@ import sd.tp1.clt.ws.PictureNotfoundException_Exception;
 
 
 public class SOAPClientClass implements RequestInterface{
-	private GalleryServerImplWSClass server;
+	private GalleryServerImplWS server;
 	
 	public SOAPClientClass(URI serverURI) throws MalformedURLException{
-		GalleryServerImplWSClassService service = new GalleryServerImplWSClassService(serverURI.toURL());
-		this.server = service.getGalleryServerImplWSClassPort();
+		GalleryServerImplWSService service = new GalleryServerImplWSService(serverURI.toURL());
+		this.server = service.getGalleryServerImplWSPort();
 	}
 
 	@Override
