@@ -33,6 +33,7 @@ public class BasicRestServer {
 		
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
 		
+		System.err.println("GalleryServer started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
 		String url = "http://"+serviceURL+ "/GalleryServerREST";
 		System.out.println(url);

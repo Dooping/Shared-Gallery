@@ -27,7 +27,7 @@ public class PictureCacheClass {
 	 * @param picture
 	 */
 	public void put(String path, byte[] picture){
-		if(2*size < cache.size() )
+		if(size <= cache.size() )
 			this.clear();
 		if(cache.containsKey(path))
 			cache.remove(path);
