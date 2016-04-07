@@ -5,12 +5,14 @@ import java.util.HashMap;
 public class PictureCacheClass {
 	public static final int DEFAULT_SIZE = 100;
 	private HashMap<String, byte[]> cache;
+	private int size;
 	
 	/**
 	 * @param size
 	 */
 	public PictureCacheClass(int size){
 		cache = new HashMap<String, byte[]>(size);
+		this.size = size;
 	}
 	
 	/**
@@ -25,6 +27,8 @@ public class PictureCacheClass {
 	 * @param picture
 	 */
 	public void put(String path, byte[] picture){
+		if(2*size < cache.size() )
+			this.clear();
 		if(cache.containsKey(path))
 			cache.remove(path);
 		cache.put(path, picture);
