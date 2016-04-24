@@ -32,6 +32,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 	SharedGalleryContentProvider() {
 		servers = Collections.synchronizedList(new LinkedList<serverObjectClass>());
+		
+		ImgurClient i = new ImgurClient();
+		//TODO: fazer um construtor sem URI?
+		//TODO: este servidor não pode desligado!
+		serverObjectClass obj = new serverObjectClass(i, "ImgurClient");
+		servers.add(obj);
+		
+		
 		cache = new PictureCacheClass(100);
 		discovery = new MulticastDiscovery();
 		try {
@@ -46,6 +54,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
+		
+		
 	}
 
 	
