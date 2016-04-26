@@ -1,9 +1,15 @@
 package sd.tp1;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+
+import javax.imageio.ImageIO;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,6 +29,7 @@ public class ImgurClient implements RequestInterface{
 	private OAuth20Service service;
 	
 	public ImgurClient() {
+		//TODO: verificar albumsRes.getCode() (200 ou outro, return null)
 		try {
 			// Substituir pela API key atribuida
 			final String apiKey = "87d56e838ce5413"; 
@@ -53,6 +60,7 @@ public class ImgurClient implements RequestInterface{
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public List<String> getAlbums() {
 		List<String> al = new LinkedList<String>();
@@ -61,33 +69,71 @@ public class ImgurClient implements RequestInterface{
 					"https://api.imgur.com/3/account/GonaloMoncada/albums/ids", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
-			System.out.println(albumsRes.getCode());
-
+			//System.out.println(albumsRes.getCode());
 			JSONParser parser = new JSONParser();
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
-
 			JSONArray albums = (JSONArray) res.get("data");
 			Iterator albumsIt = albums.iterator();
 			while (albumsIt.hasNext()) {
-				//System.out.println( "id : " + albumsIt.next()); 
 				al.add(albumsIt.next().toString());
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		
-		return null;
+		return al;
 	}
 
 	@Override
 	public List<String> getPictures(String album) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> al = new LinkedList<String>();
+		try{
+			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
+					"https://api.imgur.com/3/account/GonaloMoncada/album/"+album+"/images", service);
+			service.signRequest(accessToken, albumsReq);
+			final Response albumsRes = albumsReq.send();
+			//System.out.println(albumsRes.getCode());
+			JSONParser parser = new JSONParser();
+			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
+			JSONArray albums = (JSONArray) res.get("data");
+			@SuppressWarnings("rawtypes")
+			Iterator albumsIt = albums.iterator();
+			while (albumsIt.hasNext()) {
+				JSONObject p = (JSONObject) albumsIt.next();
+				String piI = (String) p.get("id");
+				//System.out.println(piI); 
+				al.add(piI);
+			}
+		} catch (ParseException e) {
+			//e.printStackTrace();
+		}
+		return al;
 	}
-
+	
 	@Override
 	public byte[] getPicture(String album, String picture) {
-		// TODO Auto-generated method stub
+		try{
+			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
+					"https://api.imgur.com/3/account/GonaloMoncada/image/" + picture, service);
+			service.signRequest(accessToken, albumsReq);
+			final Response albumsRes = albumsReq.send();
+			//System.out.println(albumsRes.getCode());
+			JSONParser parser = new JSONParser();
+			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
+			JSONObject p = (JSONObject) res.get("data");
+			String link = (String) p.get("link");
+			URL imageURL = new URL(link);
+			BufferedImage originalImage=ImageIO.read(imageURL);
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			ImageIO.write(originalImage, "jpg", baos );
+			byte[] imageInByte=baos.toByteArray();
+			return imageInByte;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 

@@ -55,9 +55,12 @@ public class SOAPClientClass implements RequestInterface{
 	public List<String> getPictures(String album) {
 		List<String> pictures = null;
 		boolean executed = false;
+		//System.out.println("getting: " + album);
 		for (int i =0; !executed && i<3; i++){
 			try {
 				pictures = server.listPictures(album);
+				//for(String s: pictures)
+					//System.out.println(s);
 				executed = true;
 			} catch (AlbumNotFoundException_Exception e1){
 				System.err.println("Erro: " + e1.getMessage());
@@ -78,9 +81,6 @@ public class SOAPClientClass implements RequestInterface{
 
 			} 
 		}
-		/*List<Picture> lst = new ArrayList<Picture>();
-		for(String p: pictures)
-			lst.add( new SharedPicture(p));*/
 		return pictures;
 	}
 
@@ -88,6 +88,7 @@ public class SOAPClientClass implements RequestInterface{
 	public byte[] getPicture(String album, String picture) {
 		byte [] pic = null;
 		boolean executed = false;
+		//System.out.println("Getting picture: " + picture + " of album: " + album);
 		for (int i =0; !executed && i<3; i++){
 			try {
 				PictureClass p = server.getPicture(album, picture);

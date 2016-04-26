@@ -36,7 +36,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		ImgurClient i = new ImgurClient();
 		//TODO: fazer um construtor sem URI?
 		//TODO: este servidor não pode desligado!
-		serverObjectClass obj = new serverObjectClass(i, "ImgurClient");
+		serverObjectClass obj = new serverObjectClass(i, "ImgurClient", false);
 		servers.add(obj);
 		
 		
@@ -268,7 +268,7 @@ private void sendRequests(){
 				while(i.hasNext()){
 					serverObjectClass s = i.next();
 					
-					if(s.getCounter() == TIMEOUT_CYCLES){
+					if(s.getCounter() == TIMEOUT_CYCLES && s.canBeDeleted()){
 						System.out.println("Removing server: " + s.getServerName());
 						i.remove();
 						gui.updateAlbums();
