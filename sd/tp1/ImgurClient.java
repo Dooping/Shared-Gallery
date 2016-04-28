@@ -30,6 +30,7 @@ public class ImgurClient implements RequestInterface{
 	
 	public ImgurClient() {
 		//TODO: verificar albumsRes.getCode() (200 ou outro, return null)
+		//TODO: quando passarmos para o lado servidor, trocar entre id's e nomes!
 		try {
 			// Substituir pela API key atribuida
 			final String apiKey = "87d56e838ce5413"; 
@@ -70,6 +71,8 @@ public class ImgurClient implements RequestInterface{
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			//System.out.println(albumsRes.getCode());
+			if(albumsRes.getCode() != 200)
+				return null;
 			JSONParser parser = new JSONParser();
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
 			JSONArray albums = (JSONArray) res.get("data");
@@ -92,7 +95,8 @@ public class ImgurClient implements RequestInterface{
 					"https://api.imgur.com/3/account/GonaloMoncada/album/"+album+"/images", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
-			//System.out.println(albumsRes.getCode());
+			if(albumsRes.getCode() != 200)
+				return null;
 			JSONParser parser = new JSONParser();
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
 			JSONArray albums = (JSONArray) res.get("data");
@@ -117,14 +121,15 @@ public class ImgurClient implements RequestInterface{
 					"https://api.imgur.com/3/account/GonaloMoncada/image/" + picture, service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
-			//System.out.println(albumsRes.getCode());
+			if(albumsRes.getCode() != 200)
+				return null;
 			JSONParser parser = new JSONParser();
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
 			JSONObject p = (JSONObject) res.get("data");
 			String link = (String) p.get("link");
 			URL imageURL = new URL(link);
-			BufferedImage originalImage=ImageIO.read(imageURL);
-			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			BufferedImage originalImage = ImageIO.read(imageURL);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ImageIO.write(originalImage, "jpg", baos );
 			byte[] imageInByte=baos.toByteArray();
 			return imageInByte;
@@ -139,14 +144,28 @@ public class ImgurClient implements RequestInterface{
 
 	@Override
 	public boolean createAlbum(String album) {
-		// TODO Auto-generated method stub
+			OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
+					"https://api.imgur.com/3/album", service);
+			albumsReq.addBodyParameter("title", album);
+			service.signRequest(accessToken, albumsReq);
+			final Response albumsRes = albumsReq.send();
+			if(albumsRes.getCode()==200)
+				return true;
 		return false;
 	}
 
 	@Override
 	public boolean deleteAlbum(String album) {
-		// TODO Auto-generated method stub
+		//https://api.imgur.com/3/account/{username}/album/{id}
+		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
+				"https://api.imgur.com/3/account/GonaloMoncada/album/"+album, service);
+		albumsReq.addBodyParameter("title", album);
+		service.signRequest(accessToken, albumsReq);
+		final Response albumsRes = albumsReq.send();
+		if(albumsRes.getCode()==200)
+			return true;
 		return false;
+
 	}
 
 	@Override
