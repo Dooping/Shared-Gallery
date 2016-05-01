@@ -34,7 +34,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		servers = Collections.synchronizedList(new LinkedList<serverObjectClass>());
 		
 		ImgurClient i = new ImgurClient();
-		//TODO: fazer um construtor sem URI?
 		//TODO: este servidor não pode desligado!
 		serverObjectClass obj = new serverObjectClass(i, "ImgurClient", false);
 		servers.add(obj);
