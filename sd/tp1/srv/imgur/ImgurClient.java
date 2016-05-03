@@ -164,6 +164,7 @@ public class ImgurClient implements RequestInterface{
 		return al;
 	}
 	
+	
 	@Override
 	public byte[] getPicture(String album, String picture) {
 		try{
