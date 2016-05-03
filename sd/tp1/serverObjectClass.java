@@ -18,28 +18,16 @@ public class serverObjectClass {
 	private Map <String, String> listAlbuns;
 	private int counter;
 	private String serverName;
-	private boolean canBeDeleted;
+
 	
 	public serverObjectClass (RequestInterface sv, String serverName){
 		this.server = sv;
 		this.counter = 0;
 		this.serverName = serverName;
 		listAlbuns = new HashMap<String, String>();
-		canBeDeleted = true;
+
 	}
-	
-	public serverObjectClass (RequestInterface sv, String serverName, boolean del){
-		this.server = sv;
-		this.counter = 0;
-		this.serverName = serverName;
-		this.canBeDeleted = del;
-		listAlbuns = new HashMap<String, String>();
-		
-	}
-	
-	public boolean canBeDeleted (){
-		return canBeDeleted;
-	}
+
 	
 	/**
 	 * @return

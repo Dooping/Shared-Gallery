@@ -9,9 +9,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
 import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
+import sd.tp1.srv.imgur.ImgurClient;
 
 /*
  * This class provides the album/picture content to the gui/main application.
@@ -33,10 +35,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	SharedGalleryContentProvider() {
 		servers = Collections.synchronizedList(new LinkedList<serverObjectClass>());
 		
-		ImgurClient i = new ImgurClient();
-		//TODO: este servidor não pode desligado!
-		serverObjectClass obj = new serverObjectClass(i, "ImgurClient", false);
-		servers.add(obj);
 		
 		
 		cache = new PictureCacheClass(100);
@@ -267,7 +265,7 @@ private void sendRequests(){
 				while(i.hasNext()){
 					serverObjectClass s = i.next();
 					
-					if(s.getCounter() == TIMEOUT_CYCLES && s.canBeDeleted()){
+					if(s.getCounter() == TIMEOUT_CYCLES ){
 						System.out.println("Removing server: " + s.getServerName());
 						i.remove();
 						gui.updateAlbums();

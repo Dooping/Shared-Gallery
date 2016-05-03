@@ -148,9 +148,7 @@ public class AlbumResource {
 	
 	@GET
 	@Path("/get/{filename}")
-	//@Path("/search/{pattern}")
 	@Produces("image/jpg")
-	//@Produces(MediaType.APPLICATION_JSON)
 	public Response getPicture(@PathParam("filename") String filename) {
 		File file = new File(basePath+ "/" + filename);
 		System.out.println("request " + filename);
@@ -169,16 +167,6 @@ public class AlbumResource {
 		} 
 	}
 	
-	
-//	@GET
-//	@Path("{url}")
-//	@Produces("image/jpg")
-//	public Response returnPic(@PathParam("pattern") String url){
-//		
-//		
-//		
-//		return null;
-//	}
 
 }
 
