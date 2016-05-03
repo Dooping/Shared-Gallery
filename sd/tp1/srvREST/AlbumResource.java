@@ -19,8 +19,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-//@Path("/albums")
-@Path("")
+@Path("/albums")
+//@Path("")
 public class AlbumResource {
 	File basePath;
 	
@@ -57,23 +57,23 @@ public class AlbumResource {
 		
 	}
 	
-//	@GET
-//	@Path("/{album}/{picture}")
-//	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-//	public Response getPicture(@PathParam("album") String album, @PathParam("picture") String picture) throws IOException {
-//		//System.err.printf("getPicture()\n");
-//		File f = new File(basePath, album);
-//		if (f.exists()){
-//			f = new File(basePath, album + "/"+ picture);
-//			if (f.exists())
-//				return Response.ok(Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture))).build();
-//			else
-//				return Response.status(Status.NOT_FOUND).build();
-//		}
-//		else
-//			return Response.status(Status.NOT_FOUND).build();
-//		
-//	}
+	@GET
+	@Path("/{album}/{picture}")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response getPicture(@PathParam("album") String album, @PathParam("picture") String picture) throws IOException {
+		//System.err.printf("getPicture()\n");
+		File f = new File(basePath, album);
+		if (f.exists()){
+			f = new File(basePath, album + "/"+ picture);
+			if (f.exists())
+				return Response.ok(Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture))).build();
+			else
+				return Response.status(Status.NOT_FOUND).build();
+		}
+		else
+			return Response.status(Status.NOT_FOUND).build();
+		
+	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -146,26 +146,26 @@ public class AlbumResource {
 			
 	}
 	
-	@GET
-	@Path("/get/{filename}")
-	@Produces("image/jpg")
-	public Response getPicture(@PathParam("filename") String filename) {
-		File file = new File(basePath+ "/" + filename);
-		System.out.println("request " + filename);
-		try {
-			if (file.exists()) {
-				System.out.println("Found");
-				
-				Response rep = Response.ok(file).build();
-				rep.getHeaders().add("Access-Control-Allow-Origin",  "*");
-				System.out.println(rep);
-				return rep;
-			}else
-				return Response.status(Status.NOT_FOUND).build();
-		} catch( Exception x ) {
-			return Response.status(Status.BAD_REQUEST).build();
-		} 
-	}
+//	@GET
+//	@Path("/get/{filename}")
+//	@Produces("image/jpg")
+//	public Response getPicture(@PathParam("filename") String filename) {
+//		File file = new File(basePath+ "/" + filename);
+//		System.out.println("request " + filename);
+//		try {
+//			if (file.exists()) {
+//				System.out.println("Found");
+//				
+//				Response rep = Response.ok(file).build();
+//				rep.getHeaders().add("Access-Control-Allow-Origin",  "*");
+//				System.out.println(rep);
+//				return rep;
+//			}else
+//				return Response.status(Status.NOT_FOUND).build();
+//		} catch( Exception x ) {
+//			return Response.status(Status.BAD_REQUEST).build();
+//		} 
+//	}
 	
 
 }

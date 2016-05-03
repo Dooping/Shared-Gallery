@@ -30,13 +30,13 @@ public class ImgurRestServer {
 
 		ResourceConfig config = new ResourceConfig();
 
-		config.register(AlbumResource.class);
+		config.register(ImgurProxy.class);
 		
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
 		
 		System.err.println("GalleryServer started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
-		String url = "http://"+serviceURL+ "/GalleryServerREST";
+		String url = "http://"+serviceURL+ "/GalleryServerIMGUR";
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
