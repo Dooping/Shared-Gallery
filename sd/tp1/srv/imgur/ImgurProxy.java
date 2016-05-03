@@ -41,6 +41,8 @@ import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
+import sun.misc.BASE64Encoder;
+
 @Path("/albums")
 public class ImgurProxy {
 	File basePath;
@@ -87,8 +89,7 @@ public class ImgurProxy {
 		nameToId = new HashMap<String, String>();
 		albumToId = new HashMap<String, String>();
 		idToPicName = new HashMap<String, String>();
-		
-		
+
 	}
 
 	@GET
@@ -158,7 +159,6 @@ public class ImgurProxy {
 		return Response.ok(getPicturesLocal(a)).build();
 	}
 	
-	
 	@GET
 	@Path("/{album}/{picture}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -175,6 +175,7 @@ public class ImgurProxy {
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
 			JSONObject p = (JSONObject) res.get("data");
 			String link = (String) p.get("link");
+			System.out.println(link);
 			URL imageURL = new URL(link);
 			BufferedImage originalImage = ImageIO.read(imageURL);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -230,6 +231,85 @@ public class ImgurProxy {
 		return Response.status(Status.NOT_FOUND).build();	
 	}
 	
+
+	@DELETE
+	@Path("/{album}/{picture}")
+	public Response deletePicture(@PathParam("album") String album, @PathParam("picture") String picture) {
+		if(this.deletePic(album, picture))
+			return Response.ok().build();
+		return Response.status(Status.NOT_FOUND).build();	
+	}
+	
+	@POST
+	@Path("/{album}/{pictureName}")
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String picture, byte[] data) throws IOException {
+		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
+				"https://api.imgur.com/3/image", service);
+		//TODO: erro, nao passa o nome do album nem da imagem
+		
+//		newPictureReq.addBodyParameter("image", data);//String enconded em base64
+//		//O data pode ser, conforme esta na API A binary file, base64 data, or a URL for an image
+//		//Nos fizemos com base64 mas talvez funcione com bytes diretamente, mas não sei. Testa.
+//		newPictureReq.addBodyParameter("album",(String)albumJson.get("id"));
+//		newPictureReq.addBodyParameter("name", picture);
+							
+		//String image = new String(data);
+		
+		//albumsReq.addBodyParameter("image", image);
+		
+		@SuppressWarnings("restriction")
+		BASE64Encoder encoder = new BASE64Encoder();
+		@SuppressWarnings("restriction")
+		String s = encoder.encode(data);
+		albumsReq.addBodyParameter("image", s);
+		
+		albumsReq.addBodyParameter("name", picture);
+		String albumName = albumToId.get(album);
+		albumsReq.addBodyParameter("album", albumName);
+		//albumsReq.addPayload(data);
+		service.signRequest(accessToken, albumsReq);
+		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
+		if(albumsRes.getCode()==200){
+			System.err.println("sucess");
+			try {
+				JSONParser parser = new JSONParser();
+				JSONObject res;
+				res = (JSONObject) parser.parse(albumsRes.getBody());
+				JSONObject p = (JSONObject) res.get("data");
+				String id = (String) p.get("id");
+				String namePic = (String) p.get("name");
+				System.out.println("Name online: " + namePic);
+				System.out.println("id of new pic: " + id);
+				nameToId.put(picture, id);
+				
+				//TODO temp:
+				idToPicName.put(id, picture);
+				
+//				//colocar a imagem no album correto
+//				OAuthRequest picMove = new OAuthRequest(Verb.PUT,
+//						"https://api.imgur.com/3/album/"+albumName+"/add", service);
+//				picMove.addBodyParameter("ids[]", id);
+//				service.signRequest(accessToken, picMove);
+//				final com.github.scribejava.core.model.Response picRes = picMove.send();
+//				//TODO: verificar codigos
+//				if(picRes.getCode() == 200){
+//					//System.out.println("Nice");
+//					idToPicName.put(id, picture);
+//				}
+				
+				return Response.ok().build();
+			} catch (ParseException e) {
+				
+				e.printStackTrace();
+			}
+		}
+		return Response.status(Status.NOT_FOUND).build();
+			
+	}
+
+	
+
 	/** To delete all photos before deleting an album
 	 * @param album
 	 */
@@ -237,9 +317,31 @@ public class ImgurProxy {
 		List<String> pics =  this.getPicturesLocal(album);
 		Iterator <String> it = pics.iterator();
 		while(it.hasNext())
-			this.deletePicture(album, it.next());
+			this.deletePic(album, it.next());
 	}
 	
+	/**
+	 * @param album
+	 * @param picture
+	 * @return true if the picture was deleted
+	 */
+	private boolean deletePic(String album, String picture) {
+		String picName = nameToId.get(picture);
+		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
+				"https://api.imgur.com/3/account/GonaloMoncada/image/"+picName, service);
+		service.signRequest(accessToken, albumsReq);
+		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
+		if(albumsRes.getCode()==200){
+			nameToId.remove(picture);
+			return true;
+		}	
+		return false;
+	}
+	
+	/**
+	 * @param album
+	 * @return a list with the names of the albuns
+	 */
 	private List<String> getPicturesLocal(String album) {
 		List<String> al = new LinkedList<String>();
 		try{
@@ -273,58 +375,6 @@ public class ImgurProxy {
 		} catch (ParseException e) {
 		}
 		return al;
-	}
-	
-	
-	
-	private void deleteDir(File file) {
-	    File[] contents = file.listFiles();
-	    if (contents != null) {
-	        for (File f : contents) {
-	            deleteDir(f);
-	        }
-	    }
-	    file.delete();
-	}
-	
-	
-	
-	
-	
-	
-	@DELETE
-	@Path("/{album}/{picture}")
-	public Response deletePicture(@PathParam("album") String album, @PathParam("picture") String picture) {
-		//System.err.printf("deletePicture()\n");
-		File f = new File(basePath, album+"/"+picture);
-		if (f.exists()){
-			f.delete();
-			return Response.ok().build();
-		}
-		return Response.status(Status.NOT_FOUND).build();	
-	}
-	
-	@POST
-	@Path("/{album}/{pictureName}")
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String pictureName, byte[] picture) throws IOException {
-		//System.err.printf("uploadPicture()\n");
-		File dir = new File(basePath + "/" + album);
-		if (dir.exists()) {
-			dir = new File(basePath, album + "/"+ pictureName);
-			
-			if (!dir.exists()){
-				FileOutputStream out = new FileOutputStream(dir);
-				out.write(picture);
-				out.close();
-				return Response.ok().build();
-			}
-			else return Response.status(422).build();
-
-		}
-		else 
-			return Response.status(Status.NOT_FOUND).build();
-			
 	}
 
 }

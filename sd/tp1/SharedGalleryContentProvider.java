@@ -288,6 +288,7 @@ private void sendRequests(){
 private void registServer (){
 	String SERVER_SOAP = "GalleryServerSOAP";
 	String SERVER_REST = "GalleryServerREST";
+	String IMGUR_REST = "GalleryServerImgur";
 	new Thread(() -> {
 		try {
 			while (true){
@@ -309,7 +310,7 @@ private void registServer (){
 							sv = new SOAPClientClass(serviceURI);
 
 						}
-						else if(compare[3].equalsIgnoreCase(SERVER_REST)){
+						else if(compare[3].equalsIgnoreCase(SERVER_REST)|| compare[3].equalsIgnoreCase(IMGUR_REST)){
 							sv = new RESTClientClass(serviceURI);
 						}
 						System.out.println("Adding server: " + serviceURI.toString() );

@@ -30,7 +30,7 @@ public class ImgurRestServer {
 
 		ResourceConfig config = new ResourceConfig();
 
-		config.register(ImgurProxy.class);
+		config.register(new ImgurProxy());
 		
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
 		
