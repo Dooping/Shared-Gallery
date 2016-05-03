@@ -26,7 +26,7 @@ public class ImgurRestServer {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 
-		URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(8080).path("GalleryServerIMGUR").build();
+		URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(8080).path("GalleryServerImgur").build();
 
 		ResourceConfig config = new ResourceConfig();
 
@@ -36,7 +36,7 @@ public class ImgurRestServer {
 		
 		System.err.println("GalleryServer started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
-		String url = "http://"+serviceURL+ "/GalleryServerIMGUR";
+		String url = "http://"+serviceURL+ "/GalleryServerImgur";
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
