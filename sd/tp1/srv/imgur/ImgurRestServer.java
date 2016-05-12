@@ -60,7 +60,7 @@ public class ImgurRestServer {
 		
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config, sslContext);
 		
-		System.err.println("GalleryServer started");
+		System.err.println("GalleryServer proxy started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
 		String url = "https://"+serviceURL+ "/GalleryServerImgur";
 		System.out.println(url);

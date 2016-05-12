@@ -1,10 +1,13 @@
 package sd.tp1.srv;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -12,7 +15,14 @@ import java.net.*;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import javax.xml.ws.Endpoint;
+
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 
 import sd.tp1.common.Discovery;
 import sd.tp1.common.MulticastDiscovery;
@@ -21,6 +31,9 @@ import sd.tp1.exeptions.*;
 
 @WebService
 public class GalleryServerImplWS{
+	static final File KEYSTORE = new File("./server.jks");
+	static final char[] JKS_PASSWORD = "moncada".toCharArray();
+	static final char[] KEY_PASSWORD = "moncada".toCharArray();
 	
 	private File basePath;
 	
@@ -184,13 +197,48 @@ public class GalleryServerImplWS{
 	public static void main(String[] args) throws Exception {
 		String path = args.length > 0 ? args[0] : "./gallery";
 		final int servicePort = 8080;
-		Endpoint.publish("http://0.0.0.0:" +servicePort+"/GalleryServerSOAP", new GalleryServerImplWS(path));
+		
+		KeyManagerFactory keyFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		KeyStore store = KeyStore.getInstance("JKS");
+		try( FileInputStream fis = new FileInputStream( KEYSTORE )){
+			store.load(fis, JKS_PASSWORD);			
+			keyFactory.init(store, KEY_PASSWORD);
+		}
+
+		// Prepare the server's trust manager 
+		TrustManagerFactory trustFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		trustFactory.init(store);
+
+		// Create and initialize the ssl context.
+		SSLContext ssl = SSLContext.getInstance("TLS");
+		ssl.init(keyFactory.getKeyManagers(), trustFactory.getTrustManagers(), new SecureRandom());
+
+		// Create the HTTPS server using the ssl context.
+		HttpsConfigurator configurator = new HttpsConfigurator(ssl);
+		HttpsServer httpsServer = HttpsServer.create(new InetSocketAddress("0.0.0.0", servicePort), -1);
+		httpsServer.setHttpsConfigurator(configurator);
+		HttpContext httpContext = httpsServer.createContext("/GalleryServerSOAP");
+		httpsServer.start();
+
+		// Instantiate the soap webservice and publish it on the the https server.
+		GalleryServerImplWS impl = new GalleryServerImplWS(path);
+		Endpoint ep = Endpoint.create( impl);
+		ep.publish(httpContext);
+		System.err.println("GalleryServer started");
+		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
+		String url = "https://"+serviceURL+ "/GalleryServerSOAP";
+		System.out.println(url);
+		Discovery discovery = new MulticastDiscovery();
+		discovery.registerService(new URL(url));
+		
+		
+		/*Endpoint.publish("http://0.0.0.0:" +servicePort+"/GalleryServerSOAP", new GalleryServerImplWS(path));
 		System.err.println("GalleryServer started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
 		String url = "http://"+serviceURL+ "/GalleryServerSOAP";
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
-		discovery.registerService(new URL(url));
+		discovery.registerService(new URL(url));*/
 	}
 	
 	/**

@@ -2,7 +2,17 @@ package sd.tp1;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import sd.tp1.clt.ws.AlbumAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.AlbumNotFoundException_Exception;
@@ -19,8 +29,25 @@ public class SOAPClientClass implements RequestInterface{
 	private GalleryServerImplWS server;
 	
 	public SOAPClientClass(URI serverURI) throws MalformedURLException{
-		GalleryServerImplWSService service = new GalleryServerImplWSService(serverURI.toURL());
-		this.server = service.getGalleryServerImplWSPort();
+		//GalleryServerImplWSService service = new GalleryServerImplWSService(serverURI.toURL());
+		//this.server = service.getGalleryServerImplWSPort();
+		
+		try{
+			SSLContext sc = SSLContext.getInstance("TLSv1");			
+			TrustManager[] trustAllCerts = { new InsecureTrustManager() };
+	        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			HttpsURLConnection.setDefaultHostnameVerifier( new InsecureHostnameVerifier());
+	
+			
+			GalleryServerImplWSService service = new GalleryServerImplWSService(serverURI.toURL());
+			
+	        
+			this.server = service.getGalleryServerImplWSPort();
+		} catch (Exception e) {
+			System.err.println("Erro: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -240,6 +267,32 @@ public class SOAPClientClass implements RequestInterface{
 			}
 		}
 		return true;
+	}
+	
+	static public class InsecureHostnameVerifier implements HostnameVerifier {
+		@Override
+		public boolean verify(String hostname, SSLSession session) {
+			//System.err.println(hostname);
+			return true;
+		}
+	}
+
+	static public class InsecureTrustManager implements X509TrustManager {
+	    @Override
+	    public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+	    }
+
+	    @Override
+	    public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+	    	Arrays.asList( chain ).forEach( i -> {
+	    		//System.err.println( "type: " + i.getType() + "from: " + i.getNotBefore() + " to: " + i.getNotAfter() );
+	    	});
+	    }
+
+	    @Override
+	    public X509Certificate[] getAcceptedIssuers() {
+	        return new X509Certificate[0];
+	    }
 	}
 
 }
