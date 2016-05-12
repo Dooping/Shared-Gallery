@@ -4,22 +4,24 @@ import java.util.HashMap;
 
 public class PictureCacheClass {
 	public static final int DEFAULT_SIZE = 100;
-	private HashMap<String, byte[]> cache;
+	private HashMap<String, PictureClass> cache;
 	private int size;
+	private long delta;
 	
 	/**
 	 * @param size
 	 */
-	public PictureCacheClass(int size){
-		cache = new HashMap<String, byte[]>(size);
+	public PictureCacheClass(int size, long delta){
+		cache = new HashMap<String, PictureClass>(size);
 		this.size = size;
+		this.delta = delta;
 	}
 	
 	/**
 	 * 
 	 */
 	public PictureCacheClass(){
-		this(DEFAULT_SIZE);
+		this(DEFAULT_SIZE, 30000);
 	}
 	
 	/**
@@ -31,7 +33,7 @@ public class PictureCacheClass {
 			this.clear();
 		if(cache.containsKey(path))
 			cache.remove(path);
-		cache.put(path, picture);
+		cache.put(path, new PictureClass(picture));
 	}
 	
 	/**
@@ -39,7 +41,10 @@ public class PictureCacheClass {
 	 * @return the data in the cache (null if doesn't exist)
 	 */
 	public byte[] get(String path){
-		return cache.get(path);
+		PictureClass pic = cache.get(path);
+		if(pic != null && (pic.getTimestamp()+this.delta)>System.currentTimeMillis())
+			return pic.getPicture();
+		else return null;
 	}
 	
 	/**

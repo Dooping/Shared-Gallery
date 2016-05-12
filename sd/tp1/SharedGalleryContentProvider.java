@@ -37,7 +37,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		
 		
 		
-		cache = new PictureCacheClass(100);
+		cache = new PictureCacheClass();
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
