@@ -28,14 +28,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	Gui gui;
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
-	private List<serverObjectClass> servers;
+	private List<ServerObjectClass> servers;
 	private PictureCacheClass cache;
 	
 
 	SharedGalleryContentProvider() {
-		servers = Collections.synchronizedList(new LinkedList<serverObjectClass>());
-		
-		
+		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
 		
 		cache = new PictureCacheClass();
 		discovery = new MulticastDiscovery();
@@ -75,7 +73,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		List<String> albuns = new ArrayList<String>();
 		List<Album> toReturn = new ArrayList<Album>();
 		if (servers != null){
-			for (serverObjectClass server: servers){
+			for (ServerObjectClass server: servers){
 				if (server != null){
 					try{
 						List <String> al = server.getServer().getAlbums();
@@ -104,7 +102,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Picture> getListOfPictures(Album album) {
-		serverObjectClass s = this.findServer(album.getName());
+		ServerObjectClass s = this.findServer(album.getName());
 		if(s!= null){
 			RequestInterface i = s.getServer();
 			List<String> pictNames = i.getPictures(album.getName());
@@ -122,7 +120,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public byte[] getPictureData(Album album, Picture picture) {	
-		serverObjectClass s = this.findServer(album.getName());
+		ServerObjectClass s = this.findServer(album.getName());
 		byte[] pic = cache.get(album.getName()+"/"+picture.getName());
 		if(s!= null && pic == null){
 			RequestInterface i = s.getServer();
@@ -139,11 +137,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Album createAlbum(String name) {
-		serverObjectClass s = this.findServer(name);
+		ServerObjectClass s = this.findServer(name);
 		if(s == null){
 			Random r = new Random();
 			int i = r.nextInt(servers.size());
-			serverObjectClass server = servers.get(i);
+			ServerObjectClass server = servers.get(i);
 			boolean c = server.getServer().createAlbum(name);
 			if(c){
 				//System.out.println("New album");
@@ -162,7 +160,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public void deleteAlbum(Album album) {
-		serverObjectClass s = this.findServer(album.getName());
+		ServerObjectClass s = this.findServer(album.getName());
 		if(s!= null){
 			if(s.getServer().deleteAlbum(album.getName())){
 				//System.out.println("Deleting");
@@ -180,7 +178,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public Picture uploadPicture(Album album, String name, byte[] data) {
-		serverObjectClass s = this.findServer(album.getName());
+		ServerObjectClass s = this.findServer(album.getName());
 		if(s!= null){
 			s.getServer().uploadPicture(album.getName(), name, data);
 			return new SharedPicture(name);
@@ -196,7 +194,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
 		
-		serverObjectClass s = this.findServer(album.getName());
+		ServerObjectClass s = this.findServer(album.getName());
 		if(s!= null){
 			s.getServer().deletePicture(album.getName(), picture.getName());
 			return true;
@@ -209,9 +207,9 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 * @param album
 	 * @return the server of the album, or null
 	 */
-	private serverObjectClass findServer(String album){
+	private ServerObjectClass findServer(String album){
 		try{
-			for (serverObjectClass server: servers){
+			for (ServerObjectClass server: servers){
 				if (server.containsAlbuns(album)){
 					return server;
 				}
@@ -261,9 +259,9 @@ private void sendRequests(){
 	new Thread(() -> {
 		try {
 			while (true){
-				Iterator<serverObjectClass> i = servers.iterator();
+				Iterator<ServerObjectClass> i = servers.iterator();
 				while(i.hasNext()){
-					serverObjectClass s = i.next();
+					ServerObjectClass s = i.next();
 					
 					if(s.getCounter() == TIMEOUT_CYCLES ){
 						System.out.println("Removing server: " + s.getServerName());
@@ -298,7 +296,7 @@ private void registServer (){
 					RequestInterface sv = null;
 					
 					boolean exits = false;
-					for (serverObjectClass s: servers){
+					for (ServerObjectClass s: servers){
 						if (s.equals(serviceURI.toString())){
 							exits = true;
 							s.resetCounter();
@@ -314,7 +312,7 @@ private void registServer (){
 							sv = new RESTClientClass(serviceURI);
 						}
 						System.out.println("Adding server: " + serviceURI.toString() );
-						serverObjectClass obj = new serverObjectClass(sv, serviceURI.toString());
+						ServerObjectClass obj = new ServerObjectClass(sv, serviceURI.toString());
 						servers.add(obj);
 						gui.updateAlbums();
 					}
