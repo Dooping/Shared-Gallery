@@ -139,17 +139,18 @@ public class ServerManager {
 				while (true){
 					Map<String,AlbumClass> albums = new HashMap<>();
 					for(ServerObjectClass s : servers){
-						try{
-							List<String> as = s.getServer().getAlbums();
-							s.addListAlbuns(as);
-							for(String albumName : as){
-								AlbumClass a = albums.get(albumName);
-								if(a != null)
-									a.addServer(s);
-								else
-									albums.put(albumName, new AlbumClass(albumName, s));
-							}
-						} catch(Exception e){}
+						if(s.isConnected())
+							try{
+								List<String> as = s.getServer().getAlbums();
+								s.addListAlbuns(as);
+								for(String albumName : as){
+									AlbumClass a = albums.get(albumName);
+									if(a != null)
+										a.addServer(s);
+									else
+										albums.put(albumName, new AlbumClass(albumName, s));
+								}
+							} catch(Exception e){}
 					}
 					ArrayList<String> names = new ArrayList<String>(Arrays.asList(new File("./gallery").list()));
 					for(String name : names){
