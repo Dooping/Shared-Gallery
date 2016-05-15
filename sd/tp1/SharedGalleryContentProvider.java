@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import sd.tp1.common.MulticastDiscovery;
+import sd.tp1.common.UtilsClass;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
 import sd.tp1.srv.imgur.ImgurClient;
@@ -70,15 +70,18 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Album> getListOfAlbums() {
-		List<String> albuns = new ArrayList<String>();
+		List<String> albums = new ArrayList<String>();
 		List<Album> toReturn = new ArrayList<Album>();
 		if (servers != null){
 			for (ServerObjectClass server: servers){
 				if (server != null){
 					try{
 						List <String> al = server.getServer().getAlbums();
+						for(String album : al)
+							if (!albums.contains(album))
+								albums.add(album);
 						//adicionar ao albuns para devolver
-						albuns.addAll(al);
+						//albuns.addAll(al);
 						//adicionar ao serverObjectClass
 						server.addListAlbuns(al);
 					}catch (Exception e ){
@@ -87,7 +90,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 					}
 				}
 			}
-			for(String a: albuns)
+			for(String a: albums)
 				toReturn.add( new SharedAlbum(a));
 		}
 		else return null;
@@ -139,9 +142,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public Album createAlbum(String name) {
 		ServerObjectClass s = this.findServer(name);
 		if(s == null){
-			Random r = new Random();
-			int i = r.nextInt(servers.size());
-			ServerObjectClass server = servers.get(i);
+			ServerObjectClass server = servers.get(UtilsClass.getNextServerIndex(servers, name));
 			boolean c = server.getServer().createAlbum(name);
 			if(c){
 				//System.out.println("New album");
@@ -263,12 +264,11 @@ private void sendRequests(){
 				while(i.hasNext()){
 					ServerObjectClass s = i.next();
 					
-					if(s.getCounter() == TIMEOUT_CYCLES ){
+					if(s.getCounter() == TIMEOUT_CYCLES && s.isConnected()){
 						System.out.println("Removing server: " + s.getServerName());
-						i.remove();
-						gui.updateAlbums();
+						s.setConnected(false);
 					}
-					else
+					else if (s.isConnected())
 						s.incrementCounter();
 				}
 				discovery.findService(socket);

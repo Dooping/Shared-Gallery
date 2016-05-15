@@ -48,6 +48,8 @@ public class GalleryServerImplWS{
 	protected GalleryServerImplWS(String pathname) {
 		super();
 		basePath = new File(pathname);
+		if (!basePath.exists())
+			basePath.mkdir();
 	}
 	
 	/**
