@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -19,16 +20,23 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import sd.tp1.common.PictureClass;
+
 @Path("/albums")
 //@Path("")
 public class AlbumResource {
 	File basePath;
+	String url;
 	
 	public AlbumResource(){
 		super();
 		basePath = new File("./gallery");
 		if (!basePath.exists())
 			basePath.mkdir();
+	}
+	
+	public void setUrl(String url){
+		this.url = url;
 	}
 
 	@GET
@@ -61,14 +69,17 @@ public class AlbumResource {
 	
 	@GET
 	@Path("/{album}/{picture}")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPicture(@PathParam("album") String album, @PathParam("picture") String picture) throws IOException {
 		//System.err.printf("getPicture()\n");
 		File f = new File(basePath, album);
 		if (f.exists()){
 			f = new File(basePath, album + "/"+ picture);
-			if (f.exists())
-				return Response.ok(Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture))).build();
+			if (f.exists()){
+				BasicFileAttributes attrs = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
+				PictureClass pic = new PictureClass(picture, Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture)), attrs.lastModifiedTime().toMillis(),url);
+				return Response.ok(pic).build();
+			}
 			else
 				return Response.status(Status.NOT_FOUND).build();
 		}

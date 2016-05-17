@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import com.sun.net.httpserver.HttpsServer;
 
 import sd.tp1.common.Discovery;
 import sd.tp1.common.MulticastDiscovery;
+import sd.tp1.common.PictureClass;
 import sd.tp1.common.ServerManager;
 import sd.tp1.exeptions.*;
 
@@ -37,6 +40,7 @@ public class GalleryServerImplWS{
 	static final char[] KEY_PASSWORD = "moncada".toCharArray();
 	
 	private File basePath;
+	private static String url;
 	
 	public GalleryServerImplWS() {
 		this(".");
@@ -96,8 +100,11 @@ public class GalleryServerImplWS{
 		File f = new File(basePath, album);
 		if (f.exists()){
 			f = new File(basePath, album + "/"+ picture);
-			if (f.exists())
-				return new PictureClass(picture, Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture)));
+			if (f.exists()){
+				Path path = f.toPath();
+				BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+				return new PictureClass(picture, Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture)), attrs.lastModifiedTime().toMillis(),url);
+			}
 			else
 				throw new PictureNotfoundException("Picture not found");
 		}
@@ -229,7 +236,7 @@ public class GalleryServerImplWS{
 		ep.publish(httpContext);
 		System.err.println("GalleryServer started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+servicePort;
-		String url = "https://"+serviceURL+ "/GalleryServerSOAP";
+		url = "https://"+serviceURL+ "/GalleryServerSOAP";
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));

@@ -40,7 +40,8 @@ public class BasicRestServer {
 
 		ResourceConfig config = new ResourceConfig();
 
-		config.register(AlbumResource.class);
+		AlbumResource resource = new AlbumResource();
+		config.register(resource);
 		
 		SSLContext sslContext = SSLContext.getInstance("TLSv1");
 
@@ -66,6 +67,7 @@ public class BasicRestServer {
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
+		resource.setUrl(url);
 		ServerManager manager = new ServerManager();
 	}
 	

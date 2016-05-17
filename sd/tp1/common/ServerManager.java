@@ -46,10 +46,6 @@ public class ServerManager {
 		this.registServer();
 		this.albumReplicationThread();
 		
-		try {
-		} catch (Exception e) {
-			//e.printStackTrace();
-		}
 		
 		
 	}

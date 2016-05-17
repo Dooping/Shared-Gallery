@@ -1,10 +1,10 @@
 package sd.tp1;
 
-public class PictureClass {
+public class PictureForCacheClass {
 	private byte[] picture;
 	private long timestamp;
 	
-	public PictureClass(byte[] picture) {
+	public PictureForCacheClass(byte[] picture) {
 		this.picture = picture;
 		this.timestamp = System.currentTimeMillis();
 	}
