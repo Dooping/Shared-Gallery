@@ -3,13 +3,8 @@ package sd.tp1.srv.imgur;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,6 +29,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import sun.misc.BASE64Encoder;
+
 import com.github.scribejava.apis.ImgurApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
@@ -41,13 +38,11 @@ import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
-import sun.misc.BASE64Encoder;
-
+@SuppressWarnings("restriction")
 @Path("/albums")
 public class ImgurProxy {
 	File basePath;
 	
-	//TODO: nao e possivel passar os nomes das imgem no upload!
 	private OAuth2AccessToken accessToken;
 	private OAuth20Service service;
 	//estrutura para associar o nome de uma image com um id
@@ -107,6 +102,7 @@ public class ImgurProxy {
 			JSONParser parser = new JSONParser();
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
 			JSONArray albums = (JSONArray) res.get("data");
+			@SuppressWarnings("rawtypes")
 			Iterator albumsIt = albums.iterator();
 			while (albumsIt.hasNext()) {
 				String s = albumsIt.next().toString();
@@ -246,28 +242,13 @@ public class ImgurProxy {
 	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String picture, byte[] data) throws IOException {
 		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
 				"https://api.imgur.com/3/image", service);
-		//TODO: erro, nao passa o nome do album nem da imagem
-		
-//		newPictureReq.addBodyParameter("image", data);//String enconded em base64
-//		//O data pode ser, conforme esta na API A binary file, base64 data, or a URL for an image
-//		//Nos fizemos com base64 mas talvez funcione com bytes diretamente, mas não sei. Testa.
-//		newPictureReq.addBodyParameter("album",(String)albumJson.get("id"));
-//		newPictureReq.addBodyParameter("name", picture);
-							
-		//String image = new String(data);
-		
-		//albumsReq.addBodyParameter("image", image);
-		
-		@SuppressWarnings("restriction")
 		BASE64Encoder encoder = new BASE64Encoder();
-		@SuppressWarnings("restriction")
 		String s = encoder.encode(data);
 		albumsReq.addBodyParameter("image", s);
 		
 		albumsReq.addBodyParameter("name", picture);
 		String albumName = albumToId.get(album);
 		albumsReq.addBodyParameter("album", albumName);
-		//albumsReq.addPayload(data);
 		service.signRequest(accessToken, albumsReq);
 		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
@@ -282,21 +263,9 @@ public class ImgurProxy {
 				System.out.println("Name online: " + namePic);
 				System.out.println("id of new pic: " + id);
 				nameToId.put(picture, id);
-				
-				//TODO temp:
+
 				idToPicName.put(id, picture);
-				
-//				//colocar a imagem no album correto
-//				OAuthRequest picMove = new OAuthRequest(Verb.PUT,
-//						"https://api.imgur.com/3/album/"+albumName+"/add", service);
-//				picMove.addBodyParameter("ids[]", id);
-//				service.signRequest(accessToken, picMove);
-//				final com.github.scribejava.core.model.Response picRes = picMove.send();
-//				//TODO: verificar codigos
-//				if(picRes.getCode() == 200){
-//					//System.out.println("Nice");
-//					idToPicName.put(id, picture);
-//				}
+
 				
 				return Response.ok().build();
 			} catch (ParseException e) {
@@ -361,6 +330,9 @@ public class ImgurProxy {
 				JSONObject p = (JSONObject) albumsIt.next();
 				String piI = (String) p.get("id");
 				String name = (String) p.get("name");
+				//Integer dateTime =  (Integer) p.get("datetime");
+				
+				System.out.println(piI + " " + name + " " + " date time : " + p.get("datetime"));
 				if(!idToPicName.containsKey(piI)){
 					//existem imagem no igmur sem nome, temos de lhe atribuir um nome
 					if(name == null)

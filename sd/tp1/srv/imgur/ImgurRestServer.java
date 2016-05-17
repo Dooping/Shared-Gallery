@@ -30,8 +30,8 @@ import com.sun.net.httpserver.HttpServer;
 
 public class ImgurRestServer {
 	static final File KEYSTORE = new File("./server.jks");
-	static final char[] JKS_PASSWORD = "changeit".toCharArray();
-	static final char[] KEY_PASSWORD = "changeit".toCharArray();
+	static final char[] JKS_PASSWORD = "moncada".toCharArray();
+	static final char[] KEY_PASSWORD = "moncada".toCharArray();
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {

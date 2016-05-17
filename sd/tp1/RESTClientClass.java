@@ -69,7 +69,6 @@ public class RESTClientClass implements RequestInterface {
 	    		.request()
 	    		.accept(MediaType.APPLICATION_JSON)
 	    		.get(String[].class);
-		
 		return Arrays.asList(pictures);
 	}
 
