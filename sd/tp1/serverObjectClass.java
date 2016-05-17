@@ -60,6 +60,7 @@ public class ServerObjectClass {
 	 * to add list of albuns
 	 */
 	public void addListAlbuns(List <String> listAlbuns){
+		this.listAlbuns = new HashMap<String, String>();
 		for(String a: listAlbuns){
 			this.listAlbuns.put(a, a);
 		}
