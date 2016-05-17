@@ -12,23 +12,34 @@ import java.util.Map;
  * @author Moncada
  *
  */
-public class serverObjectClass {
+public class ServerObjectClass {
 	
 	private RequestInterface server;
 	private Map <String, String> listAlbuns;
 	private int counter;
 	private String serverName;
+	private boolean connected;
 
 	
-	public serverObjectClass (RequestInterface sv, String serverName){
+	public ServerObjectClass (RequestInterface sv, String serverName){
 		this.server = sv;
 		this.counter = 0;
 		this.serverName = serverName;
 		listAlbuns = new HashMap<String, String>();
-
+		this.connected = true;
 	}
 
 	
+	public boolean isConnected() {
+		return connected;
+	}
+
+
+	public void setConnected(boolean connected) {
+		this.connected = connected;
+	}
+
+
 	/**
 	 * @return
 	 */
@@ -111,6 +122,12 @@ public class serverObjectClass {
 	 */
 	public int getCounter() {
 		return counter;
+	}
+
+
+	@Override
+	public String toString() {
+		return "ServerObjectClass [serverName=" + serverName + "]";
 	}
 	
 	

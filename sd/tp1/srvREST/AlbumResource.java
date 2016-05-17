@@ -27,6 +27,8 @@ public class AlbumResource {
 	public AlbumResource(){
 		super();
 		basePath = new File("./gallery");
+		if (!basePath.exists())
+			basePath.mkdir();
 	}
 
 	@GET

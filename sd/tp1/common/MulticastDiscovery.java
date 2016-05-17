@@ -52,33 +52,35 @@ public class MulticastDiscovery implements Discovery {
 
 	@Override
 	public void registerService(URL url) {
-		InetAddress address;
-		MulticastSocket socket;
-		try {
-			address = InetAddress.getByName(MULTICAST_IP);
-			if( ! address.isMulticastAddress()) { 
-				 System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255"); 
-			} 
-			socket = new MulticastSocket(port);
-			socket.joinGroup(address);
-
-			while(true){
-				byte [] buffer = new byte [65536];
-				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-				socket.receive(packet);
-				byte [] send = new byte[128];
-				String s = url.toString();
-				send = s.getBytes();
-				DatagramPacket toSend = new DatagramPacket(send, s.length());
-				toSend.setAddress(packet.getAddress());
-				toSend.setPort(packet.getPort());
-				socket.send(toSend);
+		new Thread(() -> {
+			InetAddress address;
+			MulticastSocket socket;
+			try {
+				address = InetAddress.getByName(MULTICAST_IP);
+				if( ! address.isMulticastAddress()) { 
+					 System.out.println( "Use range : 224.0.0.0 -- 239.255.255.255"); 
+				} 
+				socket = new MulticastSocket(port);
+				socket.joinGroup(address);
+	
+				while(true){
+					byte [] buffer = new byte [65536];
+					DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+					socket.receive(packet);
+					byte [] send = new byte[128];
+					String s = url.toString();
+					send = s.getBytes();
+					DatagramPacket toSend = new DatagramPacket(send, s.length());
+					toSend.setAddress(packet.getAddress());
+					toSend.setPort(packet.getPort());
+					socket.send(toSend);
+				}
+	
+			} catch (UnknownHostException e) {
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-
-		} catch (UnknownHostException e) {
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+			
+		}).start();
 	}
 }

@@ -24,6 +24,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import sd.tp1.common.Discovery;
 import sd.tp1.common.MulticastDiscovery;
+import sd.tp1.common.ServerManager;
 import sd.tp1.srvREST.AlbumResource;
 
 import com.sun.net.httpserver.HttpServer;
@@ -66,6 +67,7 @@ public class ImgurRestServer {
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
+		ServerManager manager = new ServerManager();
 	}
 	
 	/**

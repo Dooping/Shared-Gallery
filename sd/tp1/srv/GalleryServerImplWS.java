@@ -26,6 +26,7 @@ import com.sun.net.httpserver.HttpsServer;
 
 import sd.tp1.common.Discovery;
 import sd.tp1.common.MulticastDiscovery;
+import sd.tp1.common.ServerManager;
 import sd.tp1.exeptions.*;
 
 
@@ -47,6 +48,8 @@ public class GalleryServerImplWS{
 	protected GalleryServerImplWS(String pathname) {
 		super();
 		basePath = new File(pathname);
+		if (!basePath.exists())
+			basePath.mkdir();
 	}
 	
 	/**
@@ -196,7 +199,7 @@ public class GalleryServerImplWS{
 
 	public static void main(String[] args) throws Exception {
 		String path = args.length > 0 ? args[0] : "./gallery";
-		final int servicePort = 8080;
+		final int servicePort = 9090;
 		
 		KeyManagerFactory keyFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		KeyStore store = KeyStore.getInstance("JKS");
@@ -230,6 +233,7 @@ public class GalleryServerImplWS{
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
+		ServerManager manager = new ServerManager();
 		
 		
 		/*Endpoint.publish("http://0.0.0.0:" +servicePort+"/GalleryServerSOAP", new GalleryServerImplWS(path));

@@ -57,6 +57,8 @@ public class ImgurProxy {
 	public ImgurProxy(){
 		super();
 		basePath = new File("./gallery");
+		if (!basePath.exists())
+			basePath.mkdir();
 		
 		try {
 			final String apiKey = "87d56e838ce5413"; 
