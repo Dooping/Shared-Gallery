@@ -173,7 +173,7 @@ public class ImgurProxy {
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
 			JSONObject p = (JSONObject) res.get("data");
 			String link = (String) p.get("link");
-			System.out.println(link);
+			//System.out.println(link);
 			URL imageURL = new URL(link);
 			BufferedImage originalImage = ImageIO.read(imageURL);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -262,8 +262,8 @@ public class ImgurProxy {
 				JSONObject p = (JSONObject) res.get("data");
 				String id = (String) p.get("id");
 				String namePic = (String) p.get("name");
-				System.out.println("Name online: " + namePic);
-				System.out.println("id of new pic: " + id);
+				//System.out.println("Name online: " + namePic);
+				//System.out.println("id of new pic: " + id);
 				nameToId.put(picture, id);
 
 				idToPicName.put(id, picture);
@@ -334,7 +334,7 @@ public class ImgurProxy {
 				String name = (String) p.get("name");
 				//Integer dateTime =  (Integer) p.get("datetime");
 				
-				System.out.println(piI + " " + name + " " + " date time : " + p.get("datetime"));
+				//System.out.println(piI + " " + name + " " + " date time : " + p.get("datetime"));
 				if(!idToPicName.containsKey(piI)){
 					//existem imagem no igmur sem nome, temos de lhe atribuir um nome
 					if(name == null)
