@@ -22,6 +22,9 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientConfig;
 
+import sd.tp1.common.AlbumFolderClass;
+import sd.tp1.common.PictureClass;
+
 
 public class RESTClientClass implements RequestInterface {
 	
@@ -54,21 +57,20 @@ public class RESTClientClass implements RequestInterface {
 	}
 
 	@Override
-	public List<String> getAlbums() {
-		String[] albums = target.path("/albums")
+	public List<AlbumFolderClass> getAlbums() {
+		AlbumFolderClass[] albums = target.path("/albums")
 	    		.request()
 	    		.accept(MediaType.APPLICATION_JSON)
-	    		.get(String[].class);
-		
+	    		.get(AlbumFolderClass[].class);
 		return Arrays.asList(albums);
 	}
 
 	@Override
-	public List<String> getPictures(String album) {
-		String[] pictures = target.path("/albums/"+album)
+	public List<PictureClass> getPictures(String album) {
+		PictureClass[] pictures = target.path("/albums/"+album)
 	    		.request()
 	    		.accept(MediaType.APPLICATION_JSON)
-	    		.get(String[].class);
+	    		.get(PictureClass[].class);
 		return Arrays.asList(pictures);
 	}
 
@@ -105,8 +107,8 @@ public class RESTClientClass implements RequestInterface {
 	}
 
 	@Override
-	public boolean uploadPicture(String album, String picture, byte[] data) {
-		Response response = target.path("/albums/"+album+"/"+picture)
+	public boolean uploadPicture(String album, String picture, byte[] data, boolean isNew) {
+		Response response = target.path("/albums/"+album+"/"+picture+"/"+isNew)
 				.request()
 				.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 		return response.getStatus()==200;

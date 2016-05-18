@@ -2,18 +2,21 @@ package sd.tp1;
 
 import java.util.List;
 
+import sd.tp1.common.AlbumFolderClass;
+import sd.tp1.common.PictureClass;
+
 public interface RequestInterface {
 
 	/**
 	 * @return the list with the names of albuns
 	 */
-	List<String> getAlbums();
+	List<AlbumFolderClass> getAlbums();
 	
 	/**
 	 * @param album
 	 * @return the list with the names of pictures
 	 */
-	List<String> getPictures(String album);
+	List<PictureClass> getPictures(String album);
 	
 	/**
 	 * @param album
@@ -47,6 +50,6 @@ public interface RequestInterface {
 	 * @param data
 	 * @return true if the picture was upload 
 	 */
-	boolean uploadPicture(String album, String picture, byte[] data);
+	boolean uploadPicture(String album, String picture, byte[] data, boolean isNew);
 
 }

@@ -23,6 +23,7 @@ import sd.tp1.clt.ws.IOException_Exception;
 import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.PictureClass;
 import sd.tp1.clt.ws.PictureNotfoundException_Exception;
+import sd.tp1.common.AlbumFolderClass;
 
 
 public class SOAPClientClass implements RequestInterface{
@@ -51,7 +52,7 @@ public class SOAPClientClass implements RequestInterface{
 	}
 
 	@Override
-	public List<String> getAlbums() {
+	public List<AlbumFolderClass> getAlbums() {
 		boolean executed = false;
 		List<String> albums = null;
 		for (int i =0; !executed && i<3; i++){
@@ -75,11 +76,12 @@ public class SOAPClientClass implements RequestInterface{
 				}
 			}
 		}
-		return albums;
+		//return albums;
+		return null;
 	}
 
 	@Override
-	public List<String> getPictures(String album) {
+	public List<sd.tp1.common.PictureClass> getPictures(String album) {
 		List<String> pictures = null;
 		boolean executed = false;
 		//System.out.println("getting: " + album);
@@ -108,7 +110,8 @@ public class SOAPClientClass implements RequestInterface{
 
 			} 
 		}
-		return pictures;
+		//return pictures;
+		return null;
 	}
 
 	@Override
@@ -233,7 +236,7 @@ public class SOAPClientClass implements RequestInterface{
 	}
 
 	@Override
-	public boolean uploadPicture(String album, String picture, byte[] data) {
+	public boolean uploadPicture(String album, String picture, byte[] data, boolean isNew) {
 		boolean executed = false;
 		for (int i =0; !executed && i<3; i++){
 			try{

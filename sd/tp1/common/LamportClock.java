@@ -12,6 +12,8 @@ public class LamportClock implements Serializable{
 		this.lamportNumber = lamportNumber;
 	}
 	
+	public LamportClock() {}
+	
 	public String getServerUrl() {
 		return serverUrl;
 	}
