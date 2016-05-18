@@ -1,13 +1,20 @@
 package sd.tp1.srvREST;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -20,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import sd.tp1.common.AlbumFolderClass;
 import sd.tp1.common.PictureClass;
 
 @Path("/albums")
@@ -44,8 +52,19 @@ public class AlbumResource {
 	public Response getAlbums() {
 		//System.err.printf("getAlbums()\n");
 		if (basePath.exists()){
-			ArrayList<String> names = new ArrayList<String>(Arrays.asList(basePath.list()));
-			return Response.ok(names).build();
+			ArrayList<File> names = new ArrayList<File>(Arrays.asList(basePath.listFiles()));
+			ObjectInputStream input;
+			ArrayList<AlbumFolderClass> albums = new ArrayList<>();
+			for(File f : names){
+				try {
+					input = new ObjectInputStream(new FileInputStream(f));
+		            albums.add((AlbumFolderClass)input.readObject());
+		            input.close();
+				} catch (IOException e) {
+				} catch (ClassNotFoundException e) {
+				}
+			}
+			return Response.ok(albums).build();
 		}
 		else
 			return Response.status(Status.NOT_FOUND).build();
@@ -76,9 +95,7 @@ public class AlbumResource {
 		if (f.exists()){
 			f = new File(basePath, album + "/"+ picture);
 			if (f.exists()){
-				BasicFileAttributes attrs = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
-				PictureClass pic = new PictureClass(picture, Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture)), attrs.lastModifiedTime().toMillis(),url);
-				return Response.ok(pic).build();
+				return Response.ok(Files.readAllBytes(Paths.get(basePath+"/"+album + "/"+ picture))).build();
 			}
 			else
 				return Response.status(Status.NOT_FOUND).build();
@@ -97,6 +114,19 @@ public class AlbumResource {
 			return Response.status(422).build();
 		else{
 			f.mkdir();
+			File file = new File(basePath,album+".dat");
+			File albumDat = new File(basePath,album+"/album.dat");
+			List<PictureClass> list = new LinkedList<>();
+			AlbumFolderClass a = new AlbumFolderClass(album, this.url);
+			ObjectOutput out;
+			try {
+				out = new ObjectOutputStream(new FileOutputStream(file));
+				out.writeObject(a);
+	            out.close();
+	            out = new ObjectOutputStream(new FileOutputStream(albumDat));
+				out.writeObject(list);
+	            out.close();
+			} catch (IOException e) {}
 			return Response.ok().build();
 		}
 			
@@ -105,10 +135,22 @@ public class AlbumResource {
 	@DELETE
 	@Path("/{album}")
 	public Response deleteAlbum(@PathParam("album") String album) {
-		//System.err.printf("deleteAlbum()\n");
-		File f = new File(basePath, album);
+		File f = new File(basePath, album+".dat");
 		if (f.exists()){
-			deleteDir(f);
+			ObjectInputStream input;
+			try {
+				input = new ObjectInputStream(new FileInputStream(f));
+				AlbumFolderClass albumDat = (AlbumFolderClass)input.readObject();
+	            input.close();
+	            albumDat.erase();
+	            ObjectOutput out;
+	            out = new ObjectOutputStream(new FileOutputStream(f));
+				out.writeObject(albumDat);
+	            out.close();
+			} catch (IOException e) {
+			} catch (ClassNotFoundException e) {
+			}
+			//deleteDir(f);
 			return Response.ok().build();
 		}
 		return Response.status(Status.NOT_FOUND).build();	
@@ -158,27 +200,6 @@ public class AlbumResource {
 			return Response.status(Status.NOT_FOUND).build();
 			
 	}
-	
-//	@GET
-//	@Path("/get/{filename}")
-//	@Produces("image/jpg")
-//	public Response getPicture(@PathParam("filename") String filename) {
-//		File file = new File(basePath+ "/" + filename);
-//		System.out.println("request " + filename);
-//		try {
-//			if (file.exists()) {
-//				System.out.println("Found");
-//				
-//				Response rep = Response.ok(file).build();
-//				rep.getHeaders().add("Access-Control-Allow-Origin",  "*");
-//				System.out.println(rep);
-//				return rep;
-//			}else
-//				return Response.status(Status.NOT_FOUND).build();
-//		} catch( Exception x ) {
-//			return Response.status(Status.BAD_REQUEST).build();
-//		} 
-//	}
 	
 
 }

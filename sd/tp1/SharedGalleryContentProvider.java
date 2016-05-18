@@ -5,6 +5,7 @@ import java.net.MulticastSocket;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,17 +25,17 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 	public static final int DISCOVERY_INTERVAL = 1000;
 	public static final int TIMEOUT_CYCLES = 5;
-	
+
 	Gui gui;
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
 	private List<ServerObjectClass> servers;
 	private PictureCacheClass cache;
-	
+
 
 	SharedGalleryContentProvider() {
 		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
-		
+
 		cache = new PictureCacheClass();
 		discovery = new MulticastDiscovery();
 		try {
@@ -44,16 +45,16 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}
 		this.sendRequests();
 		this.registServer();
-		
+
 		try {
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
-		
-		
+
+
 	}
 
-	
+
 	/**
 	 *  Downcall from the GUI to register itself, so that it can be updated via upcalls.
 	 */
@@ -94,8 +95,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 				toReturn.add( new SharedAlbum(a));
 		}
 		else return null;
-		
-		
+
+
 		return toReturn;
 	}
 
@@ -168,11 +169,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 				s.deleteAlbum(album.getName());
 				gui.updateAlbums();
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Add a new picture to an album.
 	 * On error this method should return null.
@@ -194,7 +195,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public boolean deletePicture(Album album, Picture picture) {
-		
+
 		ServerObjectClass s = this.findServer(album.getName());
 		if(s!= null){
 			s.getServer().deletePicture(album.getName(), picture.getName());
@@ -203,7 +204,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		else
 			return false;
 	}
-	
+
 	/**
 	 * @param album
 	 * @return the server of the album, or null
@@ -220,7 +221,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Represents a shared album.
 	 */
@@ -253,76 +254,83 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	}
 
 
-/**
- * to send the requests to the network
- */
-private void sendRequests(){
-	new Thread(() -> {
-		try {
-			while (true){
-				Iterator<ServerObjectClass> i = servers.iterator();
-				while(i.hasNext()){
-					ServerObjectClass s = i.next();
-					
-					if(s.getCounter() == TIMEOUT_CYCLES && s.isConnected()){
-						System.out.println("Removing server: " + s.getServerName());
-						s.setConnected(false);
+	/**
+	 * to send the requests to the network
+	 */
+	private void sendRequests(){
+		new Thread(() -> {
+			try {
+				while (true){
+					Iterator<ServerObjectClass> i = servers.iterator();
+					while(i.hasNext()){
+						ServerObjectClass s = i.next();
+
+						if(s.getCounter() == TIMEOUT_CYCLES && s.isConnected()){
+							System.out.println("Removing server: " + s.getServerName());
+							s.setConnected(false);
+						}
+						else if (s.isConnected())
+							s.incrementCounter();
 					}
-					else if (s.isConnected())
-						s.incrementCounter();
+					discovery.findService(socket);
+					Thread.sleep(DISCOVERY_INTERVAL);
 				}
-				discovery.findService(socket);
-				Thread.sleep(DISCOVERY_INTERVAL);
-			}
-		}catch(Exception e){
-		};
-	}).start();
-}
+			}catch(Exception e){
+			};
+		}).start();
+	}
 
 
-/**
- * to catch the servers 
- */
-private void registServer (){
-	String SERVER_SOAP = "GalleryServerSOAP";
-	String SERVER_REST = "GalleryServerREST";
-	String IMGUR_REST = "GalleryServerImgur";
-	new Thread(() -> {
-		try {
-			while (true){
-				URI serviceURI = discovery.getService(socket);
-				if(serviceURI!=null){
-					String [] compare = serviceURI.toString().split("/");
-					RequestInterface sv = null;
-					
-					boolean exits = false;
-					for (ServerObjectClass s: servers){
-						if (s.equals(serviceURI.toString())){
-							exits = true;
-							s.resetCounter();
-							break;
-						}
-					}
-					if (!exits){
-						if(compare[3].equalsIgnoreCase(SERVER_SOAP)){
-							sv = new SOAPClientClass(serviceURI);
+	/**
+	 * to catch the servers 
+	 */
+	private void registServer (){
+		String SERVER_SOAP = "GalleryServerSOAP";
+		String SERVER_REST = "GalleryServerREST";
+		String IMGUR_REST = "GalleryServerImgur";
+		new Thread(() -> {
+			try {
+				while (true){
+					URI serviceURI = discovery.getService(socket);
+					if(serviceURI!=null){
+						String [] compare = serviceURI.toString().split("/");
+						RequestInterface sv = null;
 
+						boolean exits = false;
+						for (ServerObjectClass s: servers){
+							if (s.equals(serviceURI.toString())){
+								exits = true;
+								s.resetCounter();
+								s.setConnected(true);
+								break;
+							}
 						}
-						else if(compare[3].equalsIgnoreCase(SERVER_REST)|| compare[3].equalsIgnoreCase(IMGUR_REST)){
-							sv = new RESTClientClass(serviceURI);
+						if (!exits){
+							if(compare[3].equalsIgnoreCase(SERVER_SOAP)){
+								sv = new SOAPClientClass(serviceURI);
+
+							}
+							else if(compare[3].equalsIgnoreCase(SERVER_REST)|| compare[3].equalsIgnoreCase(IMGUR_REST)){
+								sv = new RESTClientClass(serviceURI);
+							}
+							System.out.println("Adding server: " + serviceURI.toString() );
+							ServerObjectClass obj = new ServerObjectClass(sv, serviceURI.toString());
+							servers.add(obj);
+							Collections.sort(servers, new Comparator<ServerObjectClass>(){
+								@Override
+								public int compare(ServerObjectClass o1, ServerObjectClass o2){
+									return o1.getServerName().compareTo(o2.getServerName());
+								}
+							}); 
+							gui.updateAlbums();
 						}
-						System.out.println("Adding server: " + serviceURI.toString() );
-						ServerObjectClass obj = new ServerObjectClass(sv, serviceURI.toString());
-						servers.add(obj);
-						gui.updateAlbums();
 					}
 				}
-			}
-		}catch(Exception e){
-			//e.printStackTrace();
-		};
-	}).start();
-}
+			}catch(Exception e){
+				//e.printStackTrace();
+			};
+		}).start();
+	}
 
 
 
