@@ -38,6 +38,7 @@ public class ServerManager {
 	public static final int NUMBER_OF_REPLICS = 2;
 	public static final int SYNCHRONIZATION_DELAY = 10000;
 	public static final int SYNCHRONIZATION_CYCLE = 10000;
+	public static final int GARBAGE_INTERVAL = 100000;
 	
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
@@ -299,6 +300,13 @@ public class ServerManager {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	
+	public void garbageCollector(){
+		new Thread(() -> {
+			
+		}).start();
 	}
 }
 
