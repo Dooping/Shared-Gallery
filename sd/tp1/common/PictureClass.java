@@ -15,16 +15,22 @@ public class PictureClass implements Serializable{
 	public String name;
 	public boolean erased;
 	public LamportClock lamportClock;
+	public String server;
 	
 	public PictureClass(String name, String server){
 		this.name = name;
+		this.server = server;
 		this.lamportClock = new LamportClock(server, 1);
 	}
 	
 	public PictureClass(){}
 
-	public LamportClock getLamportClock() {
-		return lamportClock;
+//	public LamportClock getLamportClock() {
+//		return lamportClock;
+//	}
+	
+	public String getServer(){
+		return server;
 	}
 
 	public void setLamportClock(LamportClock lamportClock) {
@@ -41,12 +47,12 @@ public class PictureClass implements Serializable{
 	
 	public void erase(){
 		erased = true;
-		lamportClock.setLamportNumber(lamportClock.getLamportNumber()+1);
+		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
 	}
 	
 	public void recreate(){
 		erased = false;
-		lamportClock.setLamportNumber(lamportClock.getLamportNumber()+1);
+		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
 	}
 
 	@Override

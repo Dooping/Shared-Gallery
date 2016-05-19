@@ -7,19 +7,19 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for pictureClass complex type.
+ * <p>Java class for albumFolderClass complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="pictureClass">
+ * &lt;complexType name="albumFolderClass">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="erased" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         &lt;element name="lamportClock" type="{http://srv.tp1.sd/}lamportClock" minOccurs="0"/>
- *         &lt;element name="server" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="erased" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         &lt;element name="serverUrl" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,18 +29,18 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "pictureClass", propOrder = {
+@XmlType(name = "albumFolderClass", propOrder = {
     "name",
-    "erased",
     "lamportClock",
-    "server"
+    "erased",
+    "serverUrl"
 })
-public class PictureClass {
+public class AlbumFolderClass {
 
     protected String name;
-    protected boolean erased;
     protected LamportClock lamportClock;
-    protected String server;
+    protected boolean erased;
+    protected String serverUrl;
 
     /**
      * Gets the value of the name property.
@@ -64,22 +64,6 @@ public class PictureClass {
      */
     public void setName(String value) {
         this.name = value;
-    }
-
-    /**
-     * Gets the value of the erased property.
-     * 
-     */
-    public boolean isErased() {
-        return erased;
-    }
-
-    /**
-     * Sets the value of the erased property.
-     * 
-     */
-    public void setErased(boolean value) {
-        this.erased = value;
     }
 
     /**
@@ -107,27 +91,43 @@ public class PictureClass {
     }
 
     /**
-     * Gets the value of the server property.
+     * Gets the value of the erased property.
+     * 
+     */
+    public boolean isErased() {
+        return erased;
+    }
+
+    /**
+     * Sets the value of the erased property.
+     * 
+     */
+    public void setErased(boolean value) {
+        this.erased = value;
+    }
+
+    /**
+     * Gets the value of the serverUrl property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getServer() {
-        return server;
+    public String getServerUrl() {
+        return serverUrl;
     }
 
     /**
-     * Sets the value of the server property.
+     * Sets the value of the serverUrl property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setServer(String value) {
-        this.server = value;
+    public void setServerUrl(String value) {
+        this.serverUrl = value;
     }
 
 }

@@ -45,6 +45,7 @@ public class ObjectFactory {
     private final static QName _CreatAlbum_QNAME = new QName("http://srv.tp1.sd/", "creatAlbum");
     private final static QName _DeletePicture_QNAME = new QName("http://srv.tp1.sd/", "deletePicture");
     private final static QName _UploadPictureArg1_QNAME = new QName("", "arg1");
+    private final static QName _GetPictureResponseReturn_QNAME = new QName("", "return");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: sd.tp1.clt.ws
@@ -219,6 +220,22 @@ public class ObjectFactory {
      */
     public PictureClass createPictureClass() {
         return new PictureClass();
+    }
+
+    /**
+     * Create an instance of {@link AlbumFolderClass }
+     * 
+     */
+    public AlbumFolderClass createAlbumFolderClass() {
+        return new AlbumFolderClass();
+    }
+
+    /**
+     * Create an instance of {@link LamportClock }
+     * 
+     */
+    public LamportClock createLamportClock() {
+        return new LamportClock();
     }
 
     /**
@@ -408,6 +425,15 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "", name = "arg1", scope = UploadPicture.class)
     public JAXBElement<byte[]> createUploadPictureArg1(byte[] value) {
         return new JAXBElement<byte[]>(_UploadPictureArg1_QNAME, byte[].class, UploadPicture.class, ((byte[]) value));
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "", name = "return", scope = GetPictureResponse.class)
+    public JAXBElement<byte[]> createGetPictureResponseReturn(byte[] value) {
+        return new JAXBElement<byte[]>(_GetPictureResponseReturn_QNAME, byte[].class, GetPictureResponse.class, ((byte[]) value));
     }
 
 }

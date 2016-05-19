@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="return" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="return" type="{http://srv.tp1.sd/}pictureClass" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlType;
 public class ListPicturesResponse {
 
     @XmlElement(name = "return")
-    protected List<String> _return;
+    protected List<PictureClass> _return;
 
     /**
      * Gets the value of the return property.
@@ -55,13 +55,13 @@ public class ListPicturesResponse {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link String }
+     * {@link PictureClass }
      * 
      * 
      */
-    public List<String> getReturn() {
+    public List<PictureClass> getReturn() {
         if (_return == null) {
-            _return = new ArrayList<String>();
+            _return = new ArrayList<PictureClass>();
         }
         return this._return;
     }

@@ -14,17 +14,17 @@ public class LamportClock implements Serializable{
 	
 	public LamportClock() {}
 	
-	public String getServerUrl() {
-		return serverUrl;
-	}
+//	public String getServerUrl() {
+//		return serverUrl;
+//	}
 	
 	public void setServerUrl(String serverUrl) {
 		this.serverUrl = serverUrl;
 	}
 	
-	public int getLamportNumber() {
-		return lamportNumber;
-	}
+//	public int getLamportNumber() {
+//		return lamportNumber;
+//	}
 	
 	public void setLamportNumber(int lamportNumber) {
 		this.lamportNumber = lamportNumber;
@@ -52,10 +52,10 @@ public class LamportClock implements Serializable{
 	}
 
 	public int compareTo(LamportClock other) {
-		if (this.lamportNumber != other.getLamportNumber())
-	       return this.lamportNumber-other.getLamportNumber();
+		if (this.lamportNumber != other.lamportNumber)
+	       return this.lamportNumber-other.lamportNumber;
 		else
-			return this.serverUrl.compareTo(other.getServerUrl());
+			return this.serverUrl.compareTo(other.serverUrl);
 	} 
 
 }

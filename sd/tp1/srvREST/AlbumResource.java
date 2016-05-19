@@ -149,7 +149,6 @@ public class AlbumResource {
 			} catch (IOException e) {}
 			return Response.ok().build();
 		}
-
 	}
 
 	@DELETE

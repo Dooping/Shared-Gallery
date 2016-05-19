@@ -7,9 +7,11 @@ public class AlbumFolderClass implements Serializable{
 	public String name;
 	public LamportClock lamportClock;
 	public boolean erased;
+	public String serverUrl;
 	
 	public AlbumFolderClass(String name, String serverUrl) {
 		this.name = name;
+		this.serverUrl  = serverUrl;
 		this.lamportClock = new LamportClock(serverUrl, 1);
 	}
 
@@ -17,6 +19,10 @@ public class AlbumFolderClass implements Serializable{
 		this.lamportClock = new LamportClock();
 	}
 
+	public String getServer(){
+		return serverUrl;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -40,12 +46,12 @@ public class AlbumFolderClass implements Serializable{
 	
 	public void erase(){
 		erased = true;
-		lamportClock.setLamportNumber(lamportClock.getLamportNumber()+1);
+		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
 	}
 	
 	public void recreate(){
 		erased = false;
-		lamportClock.setLamportNumber(lamportClock.getLamportNumber()+1);
+		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
 	}
 	
 	public boolean isErased(){

@@ -10,7 +10,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import sd.tp1.common.AlbumFolderClass;
 import sd.tp1.common.MulticastDiscovery;
+import sd.tp1.common.PictureClass;
 import sd.tp1.common.UtilsClass;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
@@ -77,14 +79,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			for (ServerObjectClass server: servers){
 				if (server != null){
 					try{
-						List <String> al = server.getServer().getAlbums();
-						for(String album : al)
+						List<AlbumFolderClass> al = server.getServer().getAlbums();
+						for(AlbumFolderClass album : al)
 							if (!albums.contains(album))
-								albums.add(album);
+								albums.add(album.getName());
 						//adicionar ao albuns para devolver
 						//albuns.addAll(al);
 						//adicionar ao serverObjectClass
-						server.addListAlbuns(al);
+						server.addListAlbuns(albums);
 					}catch (Exception e ){
 						System.out.println(e.getMessage());
 						return null;
@@ -109,10 +111,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		ServerObjectClass s = this.findServer(album.getName());
 		if(s!= null){
 			RequestInterface i = s.getServer();
-			List<String> pictNames = i.getPictures(album.getName());
+			List<PictureClass> pictNames = i.getPictures(album.getName());
 			List<Picture> lst = new ArrayList<Picture>();
-			for(String p: pictNames)
-				lst.add( new SharedPicture(p));
+			for(PictureClass p: pictNames){
+				SharedPicture pic = new SharedPicture(p.getName());
+				lst.add(pic);
+			}
 			return lst;
 		}
 		return null;
