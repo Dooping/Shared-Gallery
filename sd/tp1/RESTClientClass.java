@@ -5,9 +5,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
@@ -23,11 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientConfig;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import sd.tp1.common.AlbumFolderClass;
 
 
 public class RESTClientClass implements RequestInterface {
@@ -62,43 +55,12 @@ public class RESTClientClass implements RequestInterface {
 
 	@Override
 	public List<String> getAlbums() {
-		
-		List<String> names = new ArrayList<String>();
-
-		JSONArray albums = target.path("/albums")
+		String[] albums = target.path("/albums")
 	    		.request()
 	    		.accept(MediaType.APPLICATION_JSON)
-	    		.get(JSONArray.class);
+	    		.get(String[].class);
 		
-		
-	
-		System.out.println(albums.toString());
-		@SuppressWarnings("rawtypes")
-		Iterator albumsIt = albums.iterator();
-		while (albumsIt.hasNext()) {
-			String a = (String) albumsIt.next().toString();
-			String[] s = a.split(",");
-			String c[] = s[0].split("=");
-			System.out.println(c[1]);
-		} 
-		
-//		
-//		String[] albums = target.path("/albums")
-//	    		.request()
-//	    		.accept(MediaType.APPLICATION_JSON)
-//	    		.get(String[].class);
-		
-		
-		
-		
-		
-//		String[] albums = target.path("/albums")
-//	    		.request()
-//	    		.accept(MediaType.APPLICATION_JSON)
-//	    		.get(String[].class);
-		
-		//return Arrays.asList(albums);
-		return null;
+		return Arrays.asList(albums);
 	}
 
 	@Override
