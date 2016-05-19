@@ -305,8 +305,95 @@ public class ServerManager {
 	
 	public void garbageCollector(){
 		new Thread(() -> {
+			File basePath = new File("./gallery");
 			
+			try {
+				while(true){
+					Thread.sleep(GARBAGE_INTERVAL);
+					ObjectInputStream input;
+					ArrayList<File> names = new ArrayList<File>(Arrays.asList(basePath.listFiles()));
+					ArrayList<AlbumFolderClass> albums = new ArrayList<>();
+					for(File f : names){
+						try {
+							input = new ObjectInputStream(new FileInputStream(f));
+							albums.add((AlbumFolderClass)input.readObject());
+							input.close();
+
+							input.close();
+						} catch (IOException e) {
+						} catch (ClassNotFoundException e) {
+						}
+					}
+					
+					//TODO: iterar enquanto se apaga?!
+					List <Integer> picToDelete = new LinkedList<Integer>();
+					List <Integer> albumsToDelete = new LinkedList<Integer>();
+					for(AlbumFolderClass al: albums){
+						if(al.isErased()){
+							this.deleteDir(new File(basePath,al.getName()));
+							//TODO: apagar o .dat!
+							this.deleteDir(new File(basePath,al.getName()+"/album.dat"));
+						}
+							
+						else{
+							List<PictureClass> pictures;
+							File f = new File(basePath, al.getName()+"/album.dat");
+							input = new ObjectInputStream(new FileInputStream(f));
+							pictures = (LinkedList<PictureClass>)input.readObject();
+							input.close();
+							
+							for(PictureClass p: pictures){
+								if(p.isErased()){
+									File pic = new File(basePath, al.getName() + p.getName());
+									deleteDir(pic);
+									//TODO:apagar a ref do server
+									picToDelete.add(pictures.indexOf(p));
+								}
+							}
+							//TODO: altamente ineficiente...
+							input.close();
+							//write do .dat with new list of pic
+							if(!picToDelete.isEmpty()){
+								List<PictureClass> list = new LinkedList<PictureClass>();
+								for(int i = 0; i< pictures.size(); i++){
+									if(!picToDelete.contains(i))
+										list.add(pictures.get(i));
+									
+								}
+								//apagar antigo .dat
+								this.deleteDir(new File(basePath,al.getName()+"/album.dat"));
+								//escrever o novo com a nova lista
+								ObjectOutput outt;
+								outt = new ObjectOutputStream(new FileOutputStream(f));
+								outt.writeObject(list);
+								outt.close();
+							}
+						}	
+					}
+					
+					
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 		}).start();
+	}
+	
+	
+	/**
+	 * @param file
+	 * to delete a directory and all of it's content's
+	 */
+	private void deleteDir(File file) {
+	    File[] contents = file.listFiles();
+	    if (contents != null) {
+	        for (File f : contents) {
+	            deleteDir(f);
+	        }
+	    }
+	    file.delete();
 	}
 }
 
