@@ -1,13 +1,7 @@
 package sd.tp1.common;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.MulticastSocket;
 import java.net.URI;
 import java.nio.file.Files;
@@ -22,8 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import sd.tp1.RESTClientClass;
 import sd.tp1.RequestInterface;
 import sd.tp1.SOAPClientClass;
@@ -36,9 +28,12 @@ public class ServerManager {
 	public static final int REPLICATION_DELAY = 30000;
 	public static final int TIMEOUT_CYCLES = 5;
 	public static final int NUMBER_OF_REPLICS = 2;
+<<<<<<< HEAD
 	public static final int SYNCHRONIZATION_DELAY = 10000;
 	public static final int SYNCHRONIZATION_CYCLE = 10000;
 	public static final int GARBAGE_INTERVAL = 100000;
+=======
+>>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 	
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
@@ -55,8 +50,10 @@ public class ServerManager {
 		}
 		this.sendRequests();
 		this.registServer();
-		//this.albumReplicationThread();
-		this.albumSynchronizationThread();
+		this.albumReplicationThread();
+		
+		
+		
 	}
 	
 	/**
@@ -137,39 +134,39 @@ public class ServerManager {
 		}).start();
 	}
 	
-//	private void albumReplicationThread(){
-//		new Thread(() -> {
-//			try {
-//				Thread.sleep(REPLICATION_DELAY);
-//				while (true){
-//					Map<String,AlbumClass> albums = new HashMap<>();
-//					for(ServerObjectClass s : servers)
-//						if(s.isConnected())
-//							try{
-//								List<String> as = s.getServer().getAlbums();
-//								s.addListAlbuns(as);
-//								for(String albumName : as){
-//									AlbumClass a = albums.get(albumName);
-//									if(a != null)
-//										a.addServer(s);
-//									else
-//										albums.put(albumName, new AlbumClass(albumName, s));
-//								}
-//							} catch(Exception e){}
-//					
-//					ArrayList<String> names = new ArrayList<String>(Arrays.asList(new File("./gallery").list()));
-//					for(String name : names){
-//						AlbumClass album = albums.get(name);
-//						if(album.getServers().size()<NUMBER_OF_REPLICS && servers.size() >= NUMBER_OF_REPLICS){
-//							replicateAlbumToServer(servers.get(UtilsClass.getNextServerIndex(servers, name)), name);
-//						}
-//					}
-//					Thread.sleep(REPLICATION_INTERVAL);
-//				}
-//			}catch(Exception e){
-//			};
-//		}).start();
-//	}
+	private void albumReplicationThread(){
+		new Thread(() -> {
+			try {
+				Thread.sleep(REPLICATION_DELAY);
+				while (true){
+					Map<String,AlbumClass> albums = new HashMap<>();
+					for(ServerObjectClass s : servers){
+						if(s.isConnected())
+							try{
+								List<String> as = s.getServer().getAlbums();
+								s.addListAlbuns(as);
+								for(String albumName : as){
+									AlbumClass a = albums.get(albumName);
+									if(a != null)
+										a.addServer(s);
+									else
+										albums.put(albumName, new AlbumClass(albumName, s));
+								}
+							} catch(Exception e){}
+					}
+					ArrayList<String> names = new ArrayList<String>(Arrays.asList(new File("./gallery").list()));
+					for(String name : names){
+						AlbumClass album = albums.get(name);
+						if(album.getServers().size()<NUMBER_OF_REPLICS && servers.size() >= NUMBER_OF_REPLICS){
+							replicateAlbumToServer(servers.get(UtilsClass.getNextServerIndex(servers, name)), name);
+						}
+					}
+					Thread.sleep(REPLICATION_INTERVAL);
+				}
+			}catch(Exception e){
+			};
+		}).start();
+	}
 	
 	private void replicateAlbumToServer(ServerObjectClass s, String album){
 		try{
@@ -180,12 +177,16 @@ public class ServerManager {
 				File albumFolder = new File("./gallery/"+album);
 				ArrayList<String> names = new ArrayList<String>(Arrays.asList(albumFolder.list()));
 				for(String pic : names){
-					server.uploadPicture(album, pic, Files.readAllBytes(Paths.get("./gallery"+"/"+album + "/"+ pic)), false);
+					server.uploadPicture(album, pic, Files.readAllBytes(Paths.get("./gallery"+"/"+album + "/"+ pic)));
 				}
+				//System.out.println(s);
 			}
+			//else
+				//System.out.println("Not Replicated");
 		} catch(Exception e){}
 		
 	}
+<<<<<<< HEAD
 	
 	private void albumSynchronizationThread(){
 		new Thread(() -> {
@@ -394,6 +395,8 @@ public class ServerManager {
 	    }
 	    file.delete();
 	}
+=======
+>>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 }
 
 

@@ -22,8 +22,6 @@ public class PictureClass implements Serializable{
 		this.server = server;
 		this.lamportClock = new LamportClock(server, 1);
 	}
-	
-	public PictureClass(){}
 
 //	public LamportClock getLamportClock() {
 //		return lamportClock;
@@ -47,6 +45,7 @@ public class PictureClass implements Serializable{
 	
 	public void erase(){
 		erased = true;
+<<<<<<< HEAD
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
 	}
 	
@@ -73,4 +72,7 @@ public class PictureClass implements Serializable{
 	}
 	
 	
+=======
+	}	
+>>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 }

@@ -36,8 +36,8 @@ public class BasicRestServer {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 
-		//URI baseUri = UriBuilder.fromUri("https://0.0.0.0/").port(9090).path("GalleryServerREST").build();
-		URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(9090).path("GalleryServerREST").build();
+		URI baseUri = UriBuilder.fromUri("https://0.0.0.0/").port(9090).path("GalleryServerREST").build();
+		//URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(9090).path("GalleryServerREST").build();
 
 		ResourceConfig config = new ResourceConfig();
 
@@ -60,13 +60,13 @@ public class BasicRestServer {
 
 		sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 		
-		//HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config, sslContext);
-		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
+		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config, sslContext);
+		//HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
 		
 		System.err.println("GalleryServer started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
-		//String url = "https://"+serviceURL+ "/GalleryServerREST";
-		String url = "http://"+serviceURL+ "/GalleryServerREST";
+		String url = "https://"+serviceURL+ "/GalleryServerREST";
+		//String url = "http://"+serviceURL+ "/GalleryServerREST";
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));

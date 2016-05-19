@@ -186,7 +186,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public Picture uploadPicture(Album album, String name, byte[] data) {
 		ServerObjectClass s = this.findServer(album.getName());
 		if(s!= null){
-			s.getServer().uploadPicture(album.getName(), name, data, true);
+			s.getServer().uploadPicture(album.getName(), name, data);
 			return new SharedPicture(name);
 		}
 		else

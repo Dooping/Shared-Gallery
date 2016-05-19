@@ -12,11 +12,17 @@ public class LamportClock implements Serializable{
 		this.lamportNumber = lamportNumber;
 	}
 	
+<<<<<<< HEAD
 	public LamportClock() {}
 	
 //	public String getServerUrl() {
 //		return serverUrl;
 //	}
+=======
+	public String getServerUrl() {
+		return serverUrl;
+	}
+>>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 	
 	public void setServerUrl(String serverUrl) {
 		this.serverUrl = serverUrl;
