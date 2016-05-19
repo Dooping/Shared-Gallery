@@ -2,8 +2,13 @@ package sd.tp1.srv.imgur;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,6 +17,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
+import javax.ws.rs.core.Response.Status;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -20,6 +26,7 @@ import org.json.simple.parser.ParseException;
 
 import sd.tp1.RequestInterface;
 import sd.tp1.common.AlbumFolderClass;
+import sd.tp1.common.PictureClass;
 
 import com.github.scribejava.apis.ImgurApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
@@ -40,6 +47,7 @@ public class ImgurClient implements RequestInterface{
 	//estrutura para associar um id de uma imagem com o seu nome
 	Map<String, String> idToPicName;
 	int newName;
+	private String authorizationUrl;
 	
 	public ImgurClient() {
 		try {
@@ -50,7 +58,7 @@ public class ImgurClient implements RequestInterface{
 			final Scanner in = new Scanner(System.in);
 			// Obtain the Authorization URL
 			System.out.println("A obter o Authorization URL...");
-			final String authorizationUrl = service.getAuthorizationUrl();
+			authorizationUrl = service.getAuthorizationUrl();
 			System.out.println("Necessario dar permissao neste URL:");
 			System.out.println(authorizationUrl);
 			System.out.println("e copiar o codigo obtido para aqui:");
@@ -73,7 +81,7 @@ public class ImgurClient implements RequestInterface{
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<AlbumFolderClass> getAlbums() {
-		List<String> al = new LinkedList<String>();
+		List<AlbumFolderClass> al = new LinkedList<AlbumFolderClass>();
 		
 		try{
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
@@ -88,13 +96,14 @@ public class ImgurClient implements RequestInterface{
 			Iterator albumsIt = albums.iterator();
 			while (albumsIt.hasNext()) {
 				String s = albumsIt.next().toString();
-				al.add(s);
+				AlbumFolderClass a = new AlbumFolderClass(s, this.authorizationUrl);
+				al.add(a);
 			} 
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		List<String> t = this.getAllAlbumInfo(al);
-		return t;
+
+		return al;
 	}
 	
 	
@@ -130,8 +139,8 @@ public class ImgurClient implements RequestInterface{
 	}
 
 	@Override
-	public List<String> getPictures(String album) {
-		List<String> al = new LinkedList<String>();
+	public List<PictureClass> getPictures(String album) {
+		List<PictureClass> al = new LinkedList<PictureClass>();
 		try{
 			String albumName = albumToId.get(album);
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
@@ -154,11 +163,14 @@ public class ImgurClient implements RequestInterface{
 					if(name == null)
 						name = String.valueOf(newName++);
 					nameToId.put(name, piI);
-					al.add(name);
+					PictureClass pic = new PictureClass(name, this.authorizationUrl);
+					al.add(pic);
 					idToPicName.put(piI, name);
 				}
-				else
-					al.add(idToPicName.get(piI));
+				else{
+					PictureClass pic = new PictureClass(idToPicName.get(piI), this.authorizationUrl);
+					al.add(pic);
+				}
 			}
 		} catch (ParseException e) {
 		}
@@ -237,10 +249,12 @@ public class ImgurClient implements RequestInterface{
 	 * @param album
 	 */
 	private void deleteAlbumPhotos(String album){
-		List<String> pics =  this.getPictures(album);
-		Iterator <String> it = pics.iterator();
-		while(it.hasNext())
-			this.deletePicture(album, it.next());
+		List<PictureClass> pics =  this.getPictures(album);
+		Iterator <PictureClass> it = pics.iterator();
+		while(it.hasNext()){
+			this.deletePicture(album, it.next().getName());
+		}
+			
 	}
 
 	@Override
@@ -258,7 +272,7 @@ public class ImgurClient implements RequestInterface{
 	}
 
 	@Override
-	public boolean uploadPicture(String album, String picture, byte[] data) {
+	public boolean uploadPicture(String album, String picture, byte[] data,boolean isNew) {
 		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
 				"https://api.imgur.com/3/image", service);
 		//TODO: erro, nao passa o nome do album nem da imagem
