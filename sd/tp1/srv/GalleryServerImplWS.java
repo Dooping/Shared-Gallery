@@ -292,8 +292,15 @@ public class GalleryServerImplWS{
 				input = new ObjectInputStream(new FileInputStream(dat));
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
-				PictureClass p = list.get(list.indexOf(new PictureClass(album, this.url)));
-				p.erase();
+				for(PictureClass p: list){
+					if(p.getName().equals(picture))
+						p.erase();
+				}
+				//System.out.println("deleting: " + picture);
+				//int l = list.indexOf(new PictureClass(album, this.url));
+				//System.out.println("Index: " +l);
+				//PictureClass p = list.get(l);
+				//p.erase();
 				ObjectOutput outt;
 				outt = new ObjectOutputStream(new FileOutputStream(dat));
 				outt.writeObject(list);
@@ -353,7 +360,7 @@ public class GalleryServerImplWS{
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
-		ServerManager manager = new ServerManager();
+		//ServerManager manager = new ServerManager();
 
 		
 		
