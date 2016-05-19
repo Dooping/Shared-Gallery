@@ -303,6 +303,7 @@ public class ServerManager {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public void garbageCollector(){
 		new Thread(() -> {
 			File basePath = new File("./gallery");
@@ -327,12 +328,11 @@ public class ServerManager {
 					
 					//TODO: iterar enquanto se apaga?!
 					List <Integer> picToDelete = new LinkedList<Integer>();
-					List <Integer> albumsToDelete = new LinkedList<Integer>();
 					for(AlbumFolderClass al: albums){
 						if(al.isErased()){
 							this.deleteDir(new File(basePath,al.getName()));
 							//TODO: apagar o .dat!
-							this.deleteDir(new File(basePath,al.getName()+"/album.dat"));
+							this.deleteDir(new File(basePath,al.getName()+".dat"));
 						}
 							
 						else{
@@ -351,14 +351,13 @@ public class ServerManager {
 								}
 							}
 							//TODO: altamente ineficiente...
-							input.close();
+							//input.close();
 							//write do .dat with new list of pic
 							if(!picToDelete.isEmpty()){
 								List<PictureClass> list = new LinkedList<PictureClass>();
 								for(int i = 0; i< pictures.size(); i++){
 									if(!picToDelete.contains(i))
 										list.add(pictures.get(i));
-									
 								}
 								//apagar antigo .dat
 								this.deleteDir(new File(basePath,al.getName()+"/album.dat"));
