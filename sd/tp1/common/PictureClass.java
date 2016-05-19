@@ -45,7 +45,6 @@ public class PictureClass implements Serializable{
 	
 	public void erase(){
 		erased = true;
-<<<<<<< HEAD
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
 	}
 	
@@ -70,9 +69,4 @@ public class PictureClass implements Serializable{
 			return false;
 		return true;
 	}
-	
-	
-=======
-	}	
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 }

@@ -28,12 +28,9 @@ public class ServerManager {
 	public static final int REPLICATION_DELAY = 30000;
 	public static final int TIMEOUT_CYCLES = 5;
 	public static final int NUMBER_OF_REPLICS = 2;
-<<<<<<< HEAD
 	public static final int SYNCHRONIZATION_DELAY = 10000;
 	public static final int SYNCHRONIZATION_CYCLE = 10000;
 	public static final int GARBAGE_INTERVAL = 100000;
-=======
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 	
 	private MulticastDiscovery discovery;
 	public MulticastSocket socket;
@@ -186,7 +183,6 @@ public class ServerManager {
 		} catch(Exception e){}
 		
 	}
-<<<<<<< HEAD
 	
 	private void albumSynchronizationThread(){
 		new Thread(() -> {
@@ -395,8 +391,6 @@ public class ServerManager {
 	    }
 	    file.delete();
 	}
-=======
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 }
 
 

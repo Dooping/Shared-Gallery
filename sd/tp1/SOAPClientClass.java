@@ -23,10 +23,7 @@ import sd.tp1.clt.ws.GalleryServerImplWSService;
 import sd.tp1.clt.ws.IOException_Exception;
 import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
 import sd.tp1.clt.ws.PictureNotfoundException_Exception;
-<<<<<<< HEAD
 import sd.tp1.common.*;
-=======
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 
 
 public class SOAPClientClass implements RequestInterface{
@@ -79,7 +76,6 @@ public class SOAPClientClass implements RequestInterface{
 				}
 			}
 		}
-<<<<<<< HEAD
 		List<AlbumFolderClass> alb = new ArrayList<AlbumFolderClass>(albums.size());
 		for(sd.tp1.clt.ws.AlbumFolderClass al: albums){
 			AlbumFolderClass temp = new AlbumFolderClass(al.getName(), al.getServerUrl());
@@ -93,14 +89,12 @@ public class SOAPClientClass implements RequestInterface{
 	@Override
 	public List<PictureClass> getPictures(String album) {
 		List<sd.tp1.clt.ws.PictureClass> pictures = null;
-=======
 		return albums;
 	}
 
 	@Override
 	public List<String> getPictures(String album) {
 		List<String> pictures = null;
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 		boolean executed = false;
 		for (int i =0; !executed && i<3; i++){
 			try {
@@ -123,16 +117,12 @@ public class SOAPClientClass implements RequestInterface{
 				}
 			} 
 		}
-<<<<<<< HEAD
 		List<PictureClass> pics = new ArrayList<PictureClass>(pictures.size());
-		for(sd.tp1.clt.ws.PictureClass p: pictures){
+		for(sd.tp1.clt.ws.PictureClass p: pics){
 			PictureClass temp = new PictureClass(p.getName(), p.getServer());
 			pics.add(temp);
 		}
 		return pics;
-=======
-		return pictures;
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 	}
 
 	@Override

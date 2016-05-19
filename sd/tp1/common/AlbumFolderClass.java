@@ -17,7 +17,6 @@ public class AlbumFolderClass implements Serializable{
 		this.serverUrl  = serverUrl;
 		this.lamportClock = new LamportClock(serverUrl, 1);
 	}
-<<<<<<< HEAD
 
 	public AlbumFolderClass() {
 		this.lamportClock = new LamportClock();
@@ -44,23 +43,18 @@ public class AlbumFolderClass implements Serializable{
 		return true;
 	}
 
-=======
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 	public String getName() {
 		return name;
 	}
 	
 	public void erase(){
 		erased = true;
-<<<<<<< HEAD
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
 	}
 	
 	public void recreate(){
 		erased = false;
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
-=======
->>>>>>> 0f4fe37ca6f95cc21633b7601f86a325cdc627a3
 	}
 	
 	public boolean isErased(){
