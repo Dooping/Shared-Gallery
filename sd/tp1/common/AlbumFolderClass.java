@@ -2,6 +2,7 @@ package sd.tp1.common;
 
 import java.io.Serializable;
 
+
 public class AlbumFolderClass implements Serializable{
 	private static final long serialVersionUID = 0L;
 	public String name;
