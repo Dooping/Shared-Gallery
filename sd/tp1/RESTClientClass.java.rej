@@ -1,0 +1,29 @@
+diff a/sd/tp1/RESTClientClass.java b/sd/tp1/RESTClientClass.java	(rejected hunks)
+@@ -57,21 +57,20 @@
+ 	}
+ 
+ 	@Override
+-	public List<String> getAlbums() {
+-		String[] albums = target.path("/albums")
++	public List<AlbumFolderClass> getAlbums() {
++		AlbumFolderClass[] albums = target.path("/albums")
+ 	    		.request()
+ 	    		.accept(MediaType.APPLICATION_JSON)
+-	    		.get(String[].class);
+-		
++	    		.get(AlbumFolderClass[].class);
+ 		return Arrays.asList(albums);
+ 	}
+ 
+ 	@Override
+-	public List<String> getPictures(String album) {
+-		String[] pictures = target.path("/albums/"+album)
++	public List<PictureClass> getPictures(String album) {
++		PictureClass[] pictures = target.path("/albums/"+album)
+ 	    		.request()
+ 	    		.accept(MediaType.APPLICATION_JSON)
+-	    		.get(String[].class);
++	    		.get(PictureClass[].class);
+ 		return Arrays.asList(pictures);
+ 	}
+ 
