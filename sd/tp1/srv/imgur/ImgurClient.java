@@ -19,6 +19,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import sd.tp1.RequestInterface;
+import sd.tp1.common.AlbumFolderClass;
 
 import com.github.scribejava.apis.ImgurApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
@@ -71,7 +72,7 @@ public class ImgurClient implements RequestInterface{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<String> getAlbums() {
+	public List<AlbumFolderClass> getAlbums() {
 		List<String> al = new LinkedList<String>();
 		
 		try{

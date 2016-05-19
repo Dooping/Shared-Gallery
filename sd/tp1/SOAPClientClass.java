@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,9 +22,8 @@ import sd.tp1.clt.ws.GalleryServerImplWS;
 import sd.tp1.clt.ws.GalleryServerImplWSService;
 import sd.tp1.clt.ws.IOException_Exception;
 import sd.tp1.clt.ws.PictureAlreadyExistsException_Exception;
-import sd.tp1.clt.ws.PictureClass;
 import sd.tp1.clt.ws.PictureNotfoundException_Exception;
-import sd.tp1.common.AlbumFolderClass;
+import sd.tp1.common.*;
 
 
 public class SOAPClientClass implements RequestInterface{
@@ -54,10 +54,10 @@ public class SOAPClientClass implements RequestInterface{
 	@Override
 	public List<AlbumFolderClass> getAlbums() {
 		boolean executed = false;
-		List<String> albums = null;
+		List<sd.tp1.clt.ws.AlbumFolderClass> albums = null;
 		for (int i =0; !executed && i<3; i++){
 			try {
-				albums = server.listAlbums();
+				albums =  server.listAlbums();
 				executed = true;
 			} catch (GalleryNotFoundException_Exception e1){
 				System.err.println("Erro: " + e1.getMessage());
@@ -76,20 +76,23 @@ public class SOAPClientClass implements RequestInterface{
 				}
 			}
 		}
-		//return albums;
-		return null;
+		List<AlbumFolderClass> alb = new ArrayList<AlbumFolderClass>(albums.size());
+		for(sd.tp1.clt.ws.AlbumFolderClass al: albums){
+			AlbumFolderClass temp = new AlbumFolderClass(al.getName(), al.getServerUrl());
+			alb.add(temp);
+		}
+		
+		return alb;
+		//return null;
 	}
 
 	@Override
-	public List<sd.tp1.common.PictureClass> getPictures(String album) {
-		List<String> pictures = null;
+	public List<PictureClass> getPictures(String album) {
+		List<sd.tp1.clt.ws.PictureClass> pictures = null;
 		boolean executed = false;
-		//System.out.println("getting: " + album);
 		for (int i =0; !executed && i<3; i++){
 			try {
 				pictures = server.listPictures(album);
-				//for(String s: pictures)
-					//System.out.println(s);
 				executed = true;
 			} catch (AlbumNotFoundException_Exception e1){
 				System.err.println("Erro: " + e1.getMessage());
@@ -103,15 +106,17 @@ public class SOAPClientClass implements RequestInterface{
 					}
 				}
 				else {
-					System.err.println("Erro: " + e.getMessage());
-					//pictures = new ArrayList<String>();
+					System.err.println("Erro: " + e.getMessage());;
 					return null;
 				}
-
 			} 
 		}
-		//return pictures;
-		return null;
+		List<PictureClass> pics = new ArrayList<PictureClass>(pictures.size());
+		for(sd.tp1.clt.ws.PictureClass p: pictures){
+			PictureClass temp = new PictureClass(p.getName(), p.getServer());
+			pics.add(temp);
+		}
+		return pics;
 	}
 
 	@Override
@@ -121,8 +126,7 @@ public class SOAPClientClass implements RequestInterface{
 		//System.out.println("Getting picture: " + picture + " of album: " + album);
 		for (int i =0; !executed && i<3; i++){
 			try {
-				PictureClass p = server.getPicture(album, picture);
-				pic = p.getContents();
+				pic = server.getPicture(album, picture);
 				executed = true;
 				//tratamento dos vários erros possiveis
 			} catch (AlbumNotFoundException_Exception e1){
@@ -240,9 +244,6 @@ public class SOAPClientClass implements RequestInterface{
 		boolean executed = false;
 		for (int i =0; !executed && i<3; i++){
 			try{
-				PictureClass pic = new PictureClass();
-				pic.setContents(data);
-				pic.setName(picture);
 				server.uploadPicture(album,data, picture);
 				executed = true;
 			} catch (AlbumNotFoundException_Exception e1){
