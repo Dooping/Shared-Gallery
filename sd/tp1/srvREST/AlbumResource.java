@@ -151,6 +151,7 @@ public class AlbumResource {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@DELETE
 	@Path("/{album}")
 	public Response deleteAlbum(@PathParam("album") String album) {
@@ -165,6 +166,15 @@ public class AlbumResource {
 				ObjectOutput out;
 				out = new ObjectOutputStream(new FileOutputStream(f));
 				out.writeObject(albumDat);
+				out.close();
+				File dat = new File(basePath + "/" + album + "/album.dat");
+				input = new ObjectInputStream(new FileInputStream(dat));
+				List<PictureClass> list = (List<PictureClass>)input.readObject();
+				input.close();
+				for(PictureClass p : list)
+					p.erase();
+				out = new ObjectOutputStream(new FileOutputStream(dat));
+				out.writeObject(list);
 				out.close();
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
