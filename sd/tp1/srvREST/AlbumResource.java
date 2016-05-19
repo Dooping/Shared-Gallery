@@ -199,7 +199,7 @@ public class AlbumResource {
 				input = new ObjectInputStream(new FileInputStream(dat));
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
-				PictureClass p = list.get(list.indexOf(new PictureClass(album, this.url)));
+				PictureClass p = list.get(list.indexOf(new PictureClass(picture, this.url)));
 				p.erase();
 				ObjectOutput outt;
 				outt = new ObjectOutputStream(new FileOutputStream(dat));
