@@ -11,7 +11,6 @@ import java.io.ObjectOutputStream;
 import java.net.MulticastSocket;
 import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
 
 import sd.tp1.RESTClientClass;
 import sd.tp1.RequestInterface;
@@ -55,8 +53,8 @@ public class ServerManager {
 		}
 		this.sendRequests();
 		this.registServer();
-		this.albumReplicationThread();
-		//this.albumSynchronizationThread();
+		//this.albumReplicationThread();
+		this.albumSynchronizationThread();
 		//this.garbageCollector();
 	}
 
@@ -148,18 +146,20 @@ public class ServerManager {
 				Thread.sleep(REPLICATION_DELAY);
 				File basePath = new File("./gallery");
 				while (true){
+					int onlineServers = 0;
 					Map<String,AlbumClass> albums = new HashMap<>();
 					for(ServerObjectClass s : servers)
 						if(s.isConnected())
 							try{
 								List<AlbumFolderClass> as = s.getServer().getAlbums();
 								if(as!=null){
+									onlineServers++;
 									for(AlbumFolderClass album : as){
-										AlbumClass a = albums.get(album.getName());
+										AlbumClass a = albums.get(album.name);
 										if(a != null)
 											a.addServer(s);
 										else
-											albums.put(album.getName(), new AlbumClass(album.getName(), s));
+											albums.put(album.name, new AlbumClass(album.name, s));
 									}
 									s.addListAlbuns(as);
 								}
@@ -179,9 +179,9 @@ public class ServerManager {
 						}
 					}
 					for(AlbumFolderClass selfAlbum : selfAlbums){
-						AlbumClass album = albums.get(selfAlbum.getName());
-						if(album.getServers().size()<NUMBER_OF_REPLICS && servers.size() >= NUMBER_OF_REPLICS){
-							replicateAlbumToServer(servers.get(UtilsClass.getNextServerIndex(servers, selfAlbum.getName())), selfAlbum.getName());
+						AlbumClass album = albums.get(selfAlbum.name);
+						if(album.getServers().size()<NUMBER_OF_REPLICS && onlineServers >= NUMBER_OF_REPLICS){
+							replicateAlbumToServer(servers.get(UtilsClass.getNextServerIndex(servers, selfAlbum.name)), selfAlbum.name);
 						}
 					}
 					Thread.sleep(REPLICATION_INTERVAL);
@@ -229,6 +229,8 @@ public class ServerManager {
 
 	private void synchronizationAlbum(ServerObjectClass s){
 		List<AlbumFolderClass> otherAlbums = s.getServer().getAlbums();
+		if(otherAlbums==null)
+			return;
 		File basePath = new File("./gallery");
 		if (basePath.exists()){
 			ArrayList<File> names = new ArrayList<File>(Arrays.asList(basePath.listFiles()));
@@ -248,20 +250,20 @@ public class ServerManager {
 					AlbumFolderClass oa = otherAlbums.get(otherAlbums.indexOf(a));
 					if(oa.isErased()!=a.isErased()){
 						if(oa.lamportClock.compareTo(a.lamportClock) > 0){
-							if(oa.isErased())
-								a.erase(oa.getServerUrl());
-							else{
-								a.recreate(oa.getServerUrl());
+							if(oa.isErased() && !a.isErased())
+								a.erase(oa.serverUrl);
+							else if(!oa.isErased() && a.isErased()){
+								a.recreate(oa.serverUrl);
 							}
 							ObjectOutput out;
 							try {
-								out = new ObjectOutputStream(new FileOutputStream(new File(basePath,a.getName()+".dat")));
+								out = new ObjectOutputStream(new FileOutputStream(new File(basePath,a.name+".dat")));
 								out.writeObject(a);
 								out.close();
 							} catch (IOException e) {}
 						}
 					}
-					synchronizationPictures(s, a.getName());
+					synchronizationPictures(s, a.name);
 				}
 		}
 	}
@@ -269,12 +271,12 @@ public class ServerManager {
 	@SuppressWarnings("unchecked")
 	private void synchronizationPictures(ServerObjectClass s, String album){
 		File basePath = new File("./gallery");
-		File ownAlbumDat = new File(basePath, album+".dat");
+		File ownAlbumDat = new File(basePath, album+"/album.dat");
 		ObjectInputStream input;
 		List<PictureClass> ownPictures = null;
 		try {
 			input = new ObjectInputStream(new FileInputStream(ownAlbumDat));
-			ownPictures = (LinkedList<PictureClass>)input.readObject();
+			ownPictures = (List<PictureClass>)input.readObject();
 			input.close();
 		} catch (IOException e) {
 		} catch (ClassNotFoundException e) {
@@ -356,21 +358,21 @@ public class ServerManager {
 					List <Integer> picToDelete = new LinkedList<Integer>();
 					for(AlbumFolderClass al: albums){
 						if(al.isErased()){
-							this.deleteDir(new File(basePath,al.getName()));
+							this.deleteDir(new File(basePath,al.name));
 							//TODO: apagar o .dat!
-							this.deleteDir(new File(basePath,al.getName()+".dat"));
+							this.deleteDir(new File(basePath,al.name+".dat"));
 						}
 
 						else{
 							List<PictureClass> pictures;
-							File f = new File(basePath, al.getName()+"/album.dat");
+							File f = new File(basePath, al.name+"/album.dat");
 							input = new ObjectInputStream(new FileInputStream(f));
 							pictures = (LinkedList<PictureClass>)input.readObject();
 							input.close();
 
 							for(PictureClass p: pictures){
 								if(p.isErased()){
-									File pic = new File(basePath, al.getName() + p.getName());
+									File pic = new File(basePath, al.name + p.getName());
 									deleteDir(pic);
 									//TODO:apagar a ref do server
 									picToDelete.add(pictures.indexOf(p));
@@ -386,7 +388,7 @@ public class ServerManager {
 										list.add(pictures.get(i));
 								}
 								//apagar antigo .dat
-								this.deleteDir(new File(basePath,al.getName()+"/album.dat"));
+								this.deleteDir(new File(basePath,al.name+"/album.dat"));
 								//escrever o novo com a nova lista
 								ObjectOutput outt;
 								outt = new ObjectOutputStream(new FileOutputStream(f));

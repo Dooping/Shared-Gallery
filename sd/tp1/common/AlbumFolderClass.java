@@ -19,10 +19,6 @@ public class AlbumFolderClass implements Serializable{
 	public AlbumFolderClass() {
 		this.lamportClock = new LamportClock();
 	}
-
-	public String getServerUrl(){
-		return serverUrl;
-	}
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -40,10 +36,6 @@ public class AlbumFolderClass implements Serializable{
 			return false;
 		return true;
 	}
-
-	public String getName() {
-		return name;
-	}
 	
 	public void erase(String serverUrl){
 		erased = true;
@@ -59,8 +51,5 @@ public class AlbumFolderClass implements Serializable{
 	
 	public boolean isErased(){
 		return erased;
-	}
-	public LamportClock getLamportClock() {
-		return lamportClock;
 	}
 }

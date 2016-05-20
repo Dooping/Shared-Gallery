@@ -50,9 +50,9 @@ public class AlbumResource {
 	public Response getAlbums() {
 		//System.err.printf("getAlbums()\n");
 		if (basePath.exists()){
-			ArrayList<File> names = new ArrayList<File>(Arrays.asList(basePath.listFiles()));
+			List<File> names = new ArrayList<File>(Arrays.asList(basePath.listFiles()));
 			ObjectInputStream input;
-			ArrayList<AlbumFolderClass> albums = new ArrayList<>();
+			List<AlbumFolderClass> albums = new ArrayList<>();
 			for(File f : names){
 				try {
 					input = new ObjectInputStream(new FileInputStream(f));

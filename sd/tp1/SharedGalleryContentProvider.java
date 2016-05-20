@@ -81,14 +81,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 					try{
 						List<AlbumFolderClass> al = server.getServer().getAlbums();
 						for(AlbumFolderClass album : al)
-							if (!albums.contains(album))
-								albums.add(album.getName());
+							if (!albums.contains(album.name) && !album.isErased())
+								albums.add(album.name);
 						//adicionar ao albuns para devolver
 						//albuns.addAll(al);
 						//adicionar ao serverObjectClass
 						server.addListAlbuns(al);
 					}catch (Exception e ){
-						System.out.println(e.getMessage());
+						//System.out.println(e.getMessage());
 						return null;
 					}
 				}
@@ -113,10 +113,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			RequestInterface i = s.getServer();
 			List<PictureClass> pictNames = i.getPictures(album.getName());
 			List<Picture> lst = new ArrayList<Picture>();
-			for(PictureClass p: pictNames){
-				SharedPicture pic = new SharedPicture(p.getName());
-				lst.add(pic);
-			}
+			for(PictureClass p: pictNames)
+				if(!p.isErased()){
+					SharedPicture pic = new SharedPicture(p.getName());
+					lst.add(pic);
+				}
 			return lst;
 		}
 		return null;
@@ -305,7 +306,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 							if (s.equals(serviceURI.toString())){
 								exits = true;
 								s.resetCounter();
-								s.setConnected(true);
+								if(!s.isConnected()){
+									s.setConnected(true);
+									System.out.println("Adding server: " + serviceURI.toString() );
+									gui.updateAlbums();
+								}
 								break;
 							}
 						}

@@ -64,7 +64,7 @@ public class ServerObjectClass {
 	public void addListAlbuns(List<AlbumFolderClass> listAlbuns){
 		this.listAlbuns = new HashMap<String, AlbumFolderClass>();
 		for(AlbumFolderClass a: listAlbuns){
-			this.listAlbuns.put(a.getName(), a);
+			this.listAlbuns.put(a.name, a);
 		}
 	}
 	
@@ -74,7 +74,7 @@ public class ServerObjectClass {
 	 */
 	public void addAlbum(AlbumFolderClass album){
 		if(listAlbuns.containsKey(album)){
-			listAlbuns.put(album.getName(), album);
+			listAlbuns.put(album.name, album);
 		}
 	}
 	
