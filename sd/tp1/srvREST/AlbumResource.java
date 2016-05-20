@@ -128,6 +128,10 @@ public class AlbumResource {
 				if(!albumDat.isErased())
 					return Response.status(422).build();
 				albumDat.recreate(this.url);
+				ObjectOutput out;
+				out = new ObjectOutputStream(new FileOutputStream(file));
+				out.writeObject(albumDat);
+				out.close();
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
 			}
@@ -252,6 +256,10 @@ public class AlbumResource {
 						return Response.status(422).build();
 					pic = list.get(index);
 					pic.recreate(this.url);
+					ObjectOutput outt;
+					outt = new ObjectOutputStream(new FileOutputStream(dat));
+					outt.writeObject(list);
+					outt.close();
 				}
 				FileOutputStream out = new FileOutputStream(dir);
 				out.write(picture);

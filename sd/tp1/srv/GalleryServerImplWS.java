@@ -159,6 +159,10 @@ public class GalleryServerImplWS{
 				if(!albumDat.isErased())
 					throw new AlbumAlreadyExistsException("Album already exists");
 				albumDat.recreate(this.url);
+				ObjectOutput out;
+				out = new ObjectOutputStream(new FileOutputStream(file));
+				out.writeObject(albumDat);
+				out.close();
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
 			}
@@ -188,6 +192,7 @@ public class GalleryServerImplWS{
 	 * @throws AlbumNotFoundException
 	 * deletes an album
 	 */
+	@SuppressWarnings("unchecked")
 	@WebMethod
 	public void deleteAlbum (String name)throws AlbumNotFoundException{
 		
@@ -202,6 +207,15 @@ public class GalleryServerImplWS{
 				ObjectOutput out;
 				out = new ObjectOutputStream(new FileOutputStream(f));
 				out.writeObject(albumDat);
+				out.close();
+				File dat = new File(basePath + "/" + name + "/album.dat");
+				input = new ObjectInputStream(new FileInputStream(dat));
+				List<PictureClass> list = (List<PictureClass>)input.readObject();
+				input.close();
+				for(PictureClass p : list)
+					p.erase(this.url);
+				out = new ObjectOutputStream(new FileOutputStream(dat));
+				out.writeObject(list);
 				out.close();
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
@@ -257,6 +271,10 @@ public class GalleryServerImplWS{
 						throw new PictureAlreadyExistsException("picture already exists");
 					pic = list.get(index);
 					pic.recreate(this.url);
+					ObjectOutput outt;
+					outt = new ObjectOutputStream(new FileOutputStream(dat));
+					outt.writeObject(list);
+					outt.close();
 				}
 				FileOutputStream out = new FileOutputStream(dir);
 				out.write(data);
