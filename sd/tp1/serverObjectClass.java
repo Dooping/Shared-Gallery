@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sd.tp1.common.AlbumFolderClass;
+
 
 /**
  * @author Moncada
@@ -15,7 +17,7 @@ import java.util.Map;
 public class ServerObjectClass {
 	
 	private RequestInterface server;
-	private Map <String, String> listAlbuns;
+	private Map <String, AlbumFolderClass> listAlbuns;
 	private int counter;
 	private String serverName;
 	private boolean connected;
@@ -25,7 +27,7 @@ public class ServerObjectClass {
 		this.server = sv;
 		this.counter = 0;
 		this.serverName = serverName;
-		listAlbuns = new HashMap<String, String>();
+		listAlbuns = new HashMap<String, AlbumFolderClass>();
 		this.connected = true;
 	}
 
@@ -59,10 +61,10 @@ public class ServerObjectClass {
 	 * @param listAlbuns
 	 * to add list of albuns
 	 */
-	public void addListAlbuns(List <String> listAlbuns){
-		this.listAlbuns = new HashMap<String, String>();
-		for(String a: listAlbuns){
-			this.listAlbuns.put(a, a);
+	public void addListAlbuns(List<AlbumFolderClass> listAlbuns){
+		this.listAlbuns = new HashMap<String, AlbumFolderClass>();
+		for(AlbumFolderClass a: listAlbuns){
+			this.listAlbuns.put(a.getName(), a);
 		}
 	}
 	
@@ -70,9 +72,9 @@ public class ServerObjectClass {
 	 * @param album
 	 * add an album
 	 */
-	public void addAlbum(String album){
+	public void addAlbum(AlbumFolderClass album){
 		if(listAlbuns.containsKey(album)){
-			listAlbuns.put(album, album);
+			listAlbuns.put(album.getName(), album);
 		}
 	}
 	
@@ -114,7 +116,7 @@ public class ServerObjectClass {
 	/**
 	 * @return the list of albuns
 	 */
-	public Map<String, String> getListAlbuns() {
+	public Map<String, AlbumFolderClass> getListAlbuns() {
 		return listAlbuns;
 	}
 

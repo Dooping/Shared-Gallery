@@ -86,7 +86,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 						//adicionar ao albuns para devolver
 						//albuns.addAll(al);
 						//adicionar ao serverObjectClass
-						server.addListAlbuns(albums);
+						server.addListAlbuns(al);
 					}catch (Exception e ){
 						System.out.println(e.getMessage());
 						return null;
@@ -151,7 +151,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			boolean c = server.getServer().createAlbum(name);
 			if(c){
 				//System.out.println("New album");
-				server.addAlbum(name);
+				server.addAlbum(new AlbumFolderClass(name, server.getServerName()));
 				gui.updateAlbums();
 				return new SharedAlbum(name);
 			}

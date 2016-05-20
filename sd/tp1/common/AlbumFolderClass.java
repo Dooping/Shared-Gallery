@@ -20,7 +20,7 @@ public class AlbumFolderClass implements Serializable{
 		this.lamportClock = new LamportClock();
 	}
 
-	public String getServer(){
+	public String getServerUrl(){
 		return serverUrl;
 	}
 	
@@ -45,14 +45,16 @@ public class AlbumFolderClass implements Serializable{
 		return name;
 	}
 	
-	public void erase(){
+	public void erase(String serverUrl){
 		erased = true;
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
+		lamportClock.setServerUrl(serverUrl);
 	}
 	
-	public void recreate(){
+	public void recreate(String serverUrl){
 		erased = false;
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
+		lamportClock.setServerUrl(serverUrl);
 	}
 	
 	public boolean isErased(){

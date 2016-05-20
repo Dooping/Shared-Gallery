@@ -127,7 +127,7 @@ public class AlbumResource {
 				input.close();
 				if(!albumDat.isErased())
 					return Response.status(422).build();
-				albumDat.recreate();
+				albumDat.recreate(this.url);
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
 			}
@@ -162,7 +162,7 @@ public class AlbumResource {
 				input = new ObjectInputStream(new FileInputStream(f));
 				AlbumFolderClass albumDat = (AlbumFolderClass)input.readObject();
 				input.close();
-				albumDat.erase();
+				albumDat.erase(this.url);
 				ObjectOutput out;
 				out = new ObjectOutputStream(new FileOutputStream(f));
 				out.writeObject(albumDat);
@@ -172,7 +172,7 @@ public class AlbumResource {
 				List<PictureClass> list = (List<PictureClass>)input.readObject();
 				input.close();
 				for(PictureClass p : list)
-					p.erase();
+					p.erase(this.url);
 				out = new ObjectOutputStream(new FileOutputStream(dat));
 				out.writeObject(list);
 				out.close();
@@ -209,7 +209,7 @@ public class AlbumResource {
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
 				PictureClass p = list.get(list.indexOf(new PictureClass(picture, this.url)));
-				p.erase();
+				p.erase(this.url);
 				ObjectOutput outt;
 				outt = new ObjectOutputStream(new FileOutputStream(dat));
 				outt.writeObject(list);
@@ -251,7 +251,7 @@ public class AlbumResource {
 					if (!pic.isErased())
 						return Response.status(422).build();
 					pic = list.get(index);
-					pic.recreate();
+					pic.recreate(this.url);
 				}
 				FileOutputStream out = new FileOutputStream(dir);
 				out.write(picture);

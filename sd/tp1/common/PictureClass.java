@@ -45,14 +45,16 @@ public class PictureClass implements Serializable{
 		return erased;
 	}
 	
-	public void erase(){
+	public void erase(String serverUrl){
 		erased = true;
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
+		lamportClock.setServerUrl(serverUrl);
 	}
 	
-	public void recreate(){
+	public void recreate(String serverUrl){
 		erased = false;
 		lamportClock.setLamportNumber(lamportClock.lamportNumber+1);
+		lamportClock.setServerUrl(serverUrl);
 	}
 
 	@Override

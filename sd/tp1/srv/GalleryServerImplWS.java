@@ -158,7 +158,7 @@ public class GalleryServerImplWS{
 				input.close();
 				if(!albumDat.isErased())
 					throw new AlbumAlreadyExistsException("Album already exists");
-				albumDat.recreate();
+				albumDat.recreate(this.url);
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
 			}
@@ -198,7 +198,7 @@ public class GalleryServerImplWS{
 				input = new ObjectInputStream(new FileInputStream(f));
 				AlbumFolderClass albumDat = (AlbumFolderClass)input.readObject();
 				input.close();
-				albumDat.erase();
+				albumDat.erase(this.url);
 				ObjectOutput out;
 				out = new ObjectOutputStream(new FileOutputStream(f));
 				out.writeObject(albumDat);
@@ -256,7 +256,7 @@ public class GalleryServerImplWS{
 					if (!pic.isErased())
 						throw new PictureAlreadyExistsException("picture already exists");
 					pic = list.get(index);
-					pic.recreate();
+					pic.recreate(this.url);
 				}
 				FileOutputStream out = new FileOutputStream(dir);
 				out.write(data);
@@ -294,7 +294,7 @@ public class GalleryServerImplWS{
 				input.close();
 				for(PictureClass p: list){
 					if(p.getName().equals(picture))
-						p.erase();
+						p.erase(this.url);
 				}
 				//System.out.println("deleting: " + picture);
 				//int l = list.indexOf(new PictureClass(album, this.url));
@@ -360,7 +360,7 @@ public class GalleryServerImplWS{
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
-		//ServerManager manager = new ServerManager();
+		ServerManager manager = new ServerManager();
 
 		
 		
