@@ -67,7 +67,7 @@ public class ImgurRestServer {
 		System.out.println(url);
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
-		ServerManager manager = new ServerManager();
+		//ServerManager manager = new ServerManager();
 	}
 	
 	/**

@@ -107,8 +107,8 @@ public class RESTClientClass implements RequestInterface {
 	}
 
 	@Override
-	public boolean uploadPicture(String album, String picture, byte[] data, boolean isNew) {
-		Response response = target.path("/albums/"+album+"/"+picture+"/"+isNew)
+	public boolean uploadPicture(String album, String picture, byte[] data) {
+		Response response = target.path("/albums/"+album+"/"+picture)
 				.request()
 				.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 		return response.getStatus()==200;

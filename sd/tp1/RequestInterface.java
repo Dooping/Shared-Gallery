@@ -50,6 +50,6 @@ public interface RequestInterface {
 	 * @param data
 	 * @return true if the picture was upload 
 	 */
-	boolean uploadPicture(String album, String picture, byte[] data, boolean isNew);
+	boolean uploadPicture(String album, String picture, byte[] data);
 
 }

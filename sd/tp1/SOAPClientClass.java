@@ -240,7 +240,7 @@ public class SOAPClientClass implements RequestInterface{
 	}
 
 	@Override
-	public boolean uploadPicture(String album, String picture, byte[] data, boolean isNew) {
+	public boolean uploadPicture(String album, String picture, byte[] data) {
 		boolean executed = false;
 		for (int i =0; !executed && i<3; i++){
 			try{

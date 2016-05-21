@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import sun.misc.BASE64Encoder;
+
 import javax.imageio.ImageIO;
 import javax.ws.rs.core.Response.Status;
 
@@ -37,41 +39,21 @@ import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
 public class ImgurClient implements RequestInterface{
-	//TODO: nao e possivel passar os nomes das imgem no upload!
+	
 	private OAuth2AccessToken accessToken;
 	private OAuth20Service service;
 	//estrutura para associar o nome de uma image com um id
-	Map<String, String> nameToId;
+	private Map<String, String> nameToId;
 	//Estrutura para associar um nome de um album com o seu id
-	Map<String, String> albumToId;
+	private Map<String, String> albumToId;
 	//estrutura para associar um id de uma imagem com o seu nome
-	Map<String, String> idToPicName;
+	private Map<String, String> idToPicName;
 	int newName;
 	private String authorizationUrl;
 	
-	public ImgurClient() {
-		try {
-			final String apiKey = "87d56e838ce5413"; 
-			final String apiSecret = "b5ed4dadbc629cfd1058c678d10a795f9dbcb5a9"; 
-			service = new ServiceBuilder().apiKey(apiKey).apiSecret(apiSecret)
-					.build(ImgurApi.instance());
-			final Scanner in = new Scanner(System.in);
-			// Obtain the Authorization URL
-			System.out.println("A obter o Authorization URL...");
-			authorizationUrl = service.getAuthorizationUrl();
-			System.out.println("Necessario dar permissao neste URL:");
-			System.out.println(authorizationUrl);
-			System.out.println("e copiar o codigo obtido para aqui:");
-			System.out.print(">>");
-			final String code = in.nextLine();
-			// Trade the Request Token and Verifier for the Access Token
-			System.out.println("A obter o Access Token!");
-			accessToken = service.getAccessToken(code);
-			in.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public ImgurClient(OAuth2AccessToken accessToken, OAuth20Service service) {
+		this.accessToken =accessToken;
+		this.service = service;
 		newName = 0;
 		nameToId = new HashMap<String, String>();
 		albumToId = new HashMap<String, String>();
@@ -81,7 +63,7 @@ public class ImgurClient implements RequestInterface{
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<AlbumFolderClass> getAlbums() {
-		List<AlbumFolderClass> al = new LinkedList<AlbumFolderClass>();
+		List<String> al = new LinkedList<String>();
 		
 		try{
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
@@ -96,14 +78,14 @@ public class ImgurClient implements RequestInterface{
 			Iterator albumsIt = albums.iterator();
 			while (albumsIt.hasNext()) {
 				String s = albumsIt.next().toString();
-				AlbumFolderClass a = new AlbumFolderClass(s, this.authorizationUrl);
-				al.add(a);
+				//AlbumFolderClass a = new AlbumFolderClass(s, this.authorizationUrl);
+				al.add(s);
 			} 
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-
-		return al;
+		List<AlbumFolderClass> t = this.getAllAlbumInfo(al);
+		return t;
 	}
 	
 	
@@ -111,8 +93,8 @@ public class ImgurClient implements RequestInterface{
 	 * @param l: a list wiht the albuns id's
 	 * @return the list with the names of albuns
 	 */
-	private List<String> getAllAlbumInfo(List<String> l){
-		List<String> al = new LinkedList<String>();
+	private List<AlbumFolderClass> getAllAlbumInfo(List<String> l){
+		List<AlbumFolderClass> al = new LinkedList<AlbumFolderClass>();
 		try{
 			Iterator <String> it = l.iterator();
 			while(it.hasNext()){
@@ -128,7 +110,8 @@ public class ImgurClient implements RequestInterface{
 					String piI = (String) p.get("id");
 					String title = (String) p.get("title");
 					albumToId.put(title, piI);
-					al.add(title);
+					AlbumFolderClass a = new AlbumFolderClass(title, this.authorizationUrl);
+					al.add(a);
 				}
 			}
 
@@ -176,7 +159,6 @@ public class ImgurClient implements RequestInterface{
 		}
 		return al;
 	}
-	
 	
 	@Override
 	public byte[] getPicture(String album, String picture) {
@@ -272,18 +254,20 @@ public class ImgurClient implements RequestInterface{
 	}
 
 	@Override
-	public boolean uploadPicture(String album, String picture, byte[] data,boolean isNew) {
+	public boolean uploadPicture(String album, String picture, byte[] data) {
 		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
-				"https://api.imgur.com/3/image", service);
-		//TODO: erro, nao passa o nome do album nem da imagem
+		"https://api.imgur.com/3/image", service);
+		BASE64Encoder encoder = new BASE64Encoder();
+		String s = encoder.encode(data);
+		albumsReq.addBodyParameter("image", s);
+
 		albumsReq.addBodyParameter("name", picture);
 		String albumName = albumToId.get(album);
 		albumsReq.addBodyParameter("album", albumName);
-		albumsReq.addPayload(data);
 		service.signRequest(accessToken, albumsReq);
-		final Response albumsRes = albumsReq.send();
+		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
-			System.err.println("sucess");
+			//System.err.println("sucess");
 			try {
 				JSONParser parser = new JSONParser();
 				JSONObject res;
@@ -291,26 +275,20 @@ public class ImgurClient implements RequestInterface{
 				JSONObject p = (JSONObject) res.get("data");
 				String id = (String) p.get("id");
 				String namePic = (String) p.get("name");
-				System.out.println("Name online: " + namePic);
-				System.out.println("id of new pic: " + id);
+				//System.out.println("Name online: " + namePic);
+				//System.out.println("id of new pic: " + id);
 				nameToId.put(picture, id);
-				//colocar a imagem no album correto
-				OAuthRequest picMove = new OAuthRequest(Verb.PUT,
-						"https://api.imgur.com/3/album/"+albumName+"/add", service);
-				picMove.addBodyParameter("ids[]", id);
-				service.signRequest(accessToken, picMove);
-				final Response picRes = picMove.send();
-				if(picRes.getCode() == 200){
-					System.out.println("Nice");
-					idToPicName.put(id, picture);
-				}
-				return true;
-			} catch (ParseException e) {
-				
-				e.printStackTrace();
-			}
-		}
-		return false;
+
+				idToPicName.put(id, picture);
+
+		
+		return true;
+	} catch (ParseException e) {
+		
+		e.printStackTrace();
+	}
+}
+return false;
 	}
 	
 

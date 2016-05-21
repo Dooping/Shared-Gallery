@@ -202,7 +202,7 @@ public class ServerManager {
 				List<File> files = new ArrayList<File>(Arrays.asList(albumFolder.listFiles()));
 				for(File pic : files)
 					if(!pic.getName().equals("album.dat"))
-						server.uploadPicture(album, pic.getName(), Files.readAllBytes(pic.toPath()), false);
+						server.uploadPicture(album, pic.getName(), Files.readAllBytes(pic.toPath()));
 
 			}
 		} catch(Exception e){}

@@ -29,6 +29,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import sd.tp1.common.AlbumFolderClass;
 import sun.misc.BASE64Encoder;
 
 import com.github.scribejava.apis.ImgurApi;
@@ -42,23 +43,16 @@ import com.github.scribejava.core.oauth.OAuth20Service;
 @Path("/albums")
 public class ImgurProxy {
 	File basePath;
-	
-	private OAuth2AccessToken accessToken;
-	private OAuth20Service service;
-	//estrutura para associar o nome de uma image com um id
-	Map<String, String> nameToId;
-	//Estrutura para associar um nome de um album com o seu id
-	Map<String, String> albumToId;
-	//estrutura para associar um id de uma imagem com o seu nome
-	Map<String, String> idToPicName;
-	int newName;
-		
+	private ImgurClient imgur;
 	
 	public ImgurProxy(){
-		super();
+		super();		
 		basePath = new File("./gallery");
 		if (!basePath.exists())
 			basePath.mkdir();
+		
+		OAuth2AccessToken accessToken = null;
+		OAuth20Service service = null;
 		
 		try {
 			final String apiKey = "87d56e838ce5413"; 
@@ -82,273 +76,56 @@ public class ImgurProxy {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		newName = 0;
-		nameToId = new HashMap<String, String>();
-		albumToId = new HashMap<String, String>();
-		idToPicName = new HashMap<String, String>();
-
+		imgur = new ImgurClient(accessToken, service);
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAlbums() {
-		//System.err.printf("getAlbums()\n");
-		List<String> al = new LinkedList<String>();
-		try{
-			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/GonaloMoncada/albums/ids", service);
-			service.signRequest(accessToken, albumsReq);
-			final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-			if(albumsRes.getCode() != 200)
-				return null;
-			JSONParser parser = new JSONParser();
-			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
-			JSONArray albums = (JSONArray) res.get("data");
-			@SuppressWarnings("rawtypes")
-			Iterator albumsIt = albums.iterator();
-			while (albumsIt.hasNext()) {
-				String s = albumsIt.next().toString();
-				al.add(s);
-			} 
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		List<String> t = this.getAllAlbumInfo(al);
-		return Response.ok(t).build();
-
-	}
-	
-	
-	/**
-	 * @param l: a list with the albuns id's
-	 * @return the list with the names of albuns
-	 */
-	private List<String> getAllAlbumInfo(List<String> l){
-		List<String> al = new LinkedList<String>();
-		try{
-			Iterator <String> it = l.iterator();
-			while(it.hasNext()){
-				String s = it.next();
-				OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-						"https://api.imgur.com/3/account/GonaloMoncada/album/" + s, service);
-				service.signRequest(accessToken, albumsReq);
-				final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-				if(albumsRes.getCode() == 200){
-					JSONParser parser = new JSONParser();
-					JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
-					JSONObject p = (JSONObject) res.get("data");
-					String piI = (String) p.get("id");
-					String title = (String) p.get("title");
-					albumToId.put(title, piI);
-					al.add(title);
-				}
-			}
-
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return al;
+		return Response.ok(imgur.getAlbums()).build();
 	}
 
 	@GET
 	@Path("/{album}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPictures(@PathParam("album") String a) {
-		return Response.ok(getPicturesLocal(a)).build();
+		return Response.ok(imgur.getPictures(a)).build();
 	}
 	
 	@GET
 	@Path("/{album}/{picture}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getPicture(@PathParam("album") String album, @PathParam("picture") String picture) throws IOException {
-		try{
-			String picName = nameToId.get(picture);
-			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/GonaloMoncada/image/" + picName, service);
-			service.signRequest(accessToken, albumsReq);
-			final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-			if(albumsRes.getCode() != 200)
-				return Response.status(Status.NOT_FOUND).build();
-			JSONParser parser = new JSONParser();
-			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
-			JSONObject p = (JSONObject) res.get("data");
-			String link = (String) p.get("link");
-			//System.out.println(link);
-			URL imageURL = new URL(link);
-			BufferedImage originalImage = ImageIO.read(imageURL);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ImageIO.write(originalImage, "jpg", baos );
-			byte[] imageInByte=baos.toByteArray();
-			return Response.ok(imageInByte).build();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return Response.status(Status.NOT_FOUND).build();
+		return Response.ok(imgur.getPicture(album, picture)).build();
 	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createAlbum(String album) {
-		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
-				"https://api.imgur.com/3/album", service);
-		albumsReq.addBodyParameter("title", album);
-		service.signRequest(accessToken, albumsReq);
-		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-		if(albumsRes.getCode()==200){
-			try {
-				JSONParser parser = new JSONParser();
-				JSONObject res;
-				res = (JSONObject) parser.parse(albumsRes.getBody());
-				JSONObject p = (JSONObject) res.get("data");
-				String id = (String) p.get("id");
-				albumToId.put(album, id);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			return Response.ok().build();
-		}	
-		return Response.status(422).build();	
+		return imgur.createAlbum(album) ? Response.ok().build() : Response.status(422).build();
 	}
 	
 	@DELETE
 	@Path("/{album}")
 	public Response deleteAlbum(@PathParam("album") String album) {
-		//apagar as fotos primeiro
-		this.deleteAlbumPhotos(album);
-		String albumName = albumToId.get(album);
-		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/GonaloMoncada/album/"+albumName, service);
-		service.signRequest(accessToken, albumsReq);
-		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-		if(albumsRes.getCode()==200){
-			albumToId.remove(album);
-			return Response.ok().build();
-		}
-		return Response.status(Status.NOT_FOUND).build();	
+		return imgur.deleteAlbum(album) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();	
 	}
 	
 
 	@DELETE
 	@Path("/{album}/{picture}")
 	public Response deletePicture(@PathParam("album") String album, @PathParam("picture") String picture) {
-		if(this.deletePic(album, picture))
-			return Response.ok().build();
-		return Response.status(Status.NOT_FOUND).build();	
+		return imgur.deletePicture(album, picture) ? Response.ok().build() : Response.status(422).build();
 	}
 	
 	@POST
 	@Path("/{album}/{pictureName}")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String picture, byte[] data) throws IOException {
-		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
-				"https://api.imgur.com/3/image", service);
-		BASE64Encoder encoder = new BASE64Encoder();
-		String s = encoder.encode(data);
-		albumsReq.addBodyParameter("image", s);
-		
-		albumsReq.addBodyParameter("name", picture);
-		String albumName = albumToId.get(album);
-		albumsReq.addBodyParameter("album", albumName);
-		service.signRequest(accessToken, albumsReq);
-		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-		if(albumsRes.getCode()==200){
-			System.err.println("sucess");
-			try {
-				JSONParser parser = new JSONParser();
-				JSONObject res;
-				res = (JSONObject) parser.parse(albumsRes.getBody());
-				JSONObject p = (JSONObject) res.get("data");
-				String id = (String) p.get("id");
-				String namePic = (String) p.get("name");
-				//System.out.println("Name online: " + namePic);
-				//System.out.println("id of new pic: " + id);
-				nameToId.put(picture, id);
-
-				idToPicName.put(id, picture);
-
-				
-				return Response.ok().build();
-			} catch (ParseException e) {
-				
-				e.printStackTrace();
-			}
-		}
-		return Response.status(Status.NOT_FOUND).build();
-			
+		return imgur.uploadPicture(album, picture, data) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
 	}
 
-	
 
-	/** To delete all photos before deleting an album
-	 * @param album
-	 */
-	private void deleteAlbumPhotos(String album){
-		List<String> pics =  this.getPicturesLocal(album);
-		Iterator <String> it = pics.iterator();
-		while(it.hasNext())
-			this.deletePic(album, it.next());
-	}
-	
-	/**
-	 * @param album
-	 * @param picture
-	 * @return true if the picture was deleted
-	 */
-	private boolean deletePic(String album, String picture) {
-		String picName = nameToId.get(picture);
-		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/GonaloMoncada/image/"+picName, service);
-		service.signRequest(accessToken, albumsReq);
-		final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-		if(albumsRes.getCode()==200){
-			nameToId.remove(picture);
-			return true;
-		}	
-		return false;
-	}
-	
-	/**
-	 * @param album
-	 * @return a list with the names of the albuns
-	 */
-	private List<String> getPicturesLocal(String album) {
-		List<String> al = new LinkedList<String>();
-		try{
-			String albumName = albumToId.get(album);
-			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/GonaloMoncada/album/"+albumName+"/images", service);
-			service.signRequest(accessToken, albumsReq);
-			final com.github.scribejava.core.model.Response albumsRes = albumsReq.send();
-			if(albumsRes.getCode() != 200)
-				return null;
-			JSONParser parser = new JSONParser();
-			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
-			JSONArray albums = (JSONArray) res.get("data");
-			@SuppressWarnings("rawtypes")
-			Iterator albumsIt = albums.iterator();
-			while (albumsIt.hasNext()) {
-				JSONObject p = (JSONObject) albumsIt.next();
-				String piI = (String) p.get("id");
-				String name = (String) p.get("name");
-				//Integer dateTime =  (Integer) p.get("datetime");
-				
-				//System.out.println(piI + " " + name + " " + " date time : " + p.get("datetime"));
-				if(!idToPicName.containsKey(piI)){
-					//existem imagem no igmur sem nome, temos de lhe atribuir um nome
-					if(name == null)
-						name = String.valueOf(newName++);
-					nameToId.put(name, piI);
-					al.add(name);
-					idToPicName.put(piI, name);
-				}
-				else
-					al.add(idToPicName.get(piI));
-			}
-		} catch (ParseException e) {
-		}
-		return al;
-	}
+
 
 }

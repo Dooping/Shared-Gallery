@@ -228,7 +228,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		List<ServerObjectClass> servers = this.findServer(album.getName());
 		ServerObjectClass s = servers.get(random.nextInt(servers.size()));
 		if(s!= null){
-			s.getServer().uploadPicture(album.getName(), name, data, true);
+			s.getServer().uploadPicture(album.getName(), name, data);
 			return new SharedPicture(name);
 		}
 		else
