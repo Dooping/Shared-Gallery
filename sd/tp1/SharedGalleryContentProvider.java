@@ -17,7 +17,10 @@ import java.util.Random;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import sd.tp1.common.AlbumClass;
 import sd.tp1.common.AlbumFolderClass;
@@ -44,6 +47,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private List<ServerObjectClass> servers;
 	private PictureCacheClass cache;
 	private Random random;
+	private KafkaProducer<String, String> producer;
 
 
 	SharedGalleryContentProvider(String messageServerHost) {
@@ -60,6 +64,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		this.sendRequests();
 		this.registServer();
 		this.kafkaSubscriber(messageServerHost);
+		this.kafKaPublisher(messageServerHost);
 
 
 	}
@@ -81,8 +86,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	@Override
 	public List<Album> getListOfAlbums() {
-		int onlineServers = 0;
-		Map<String,AlbumClass> albums = new HashMap<>();
+		Map<String,AlbumFolderClass> albums = new HashMap<>();
 		List<Album> toReturn = new ArrayList<Album>();
 		if (servers != null){
 			for (ServerObjectClass server: servers){
@@ -91,32 +95,24 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 						List<AlbumFolderClass> al = server.getServer().getAlbums();
 						List<AlbumFolderClass> toAdd = new LinkedList<>();
 						if(al != null){
-							onlineServers++;
-							for(AlbumFolderClass album : al)
-								if(!album.isErased()){
-									toAdd.add(album);
-									AlbumClass a = albums.get(album.name);
-									if(a != null)
-										a.addServer(server);
-									else
-										albums.put(album.name, new AlbumClass(album.name, server));
-								}
-							//adicionar ao albuns para devolver
-							//albuns.addAll(al);
-							//adicionar ao serverObjectClass
+							for(AlbumFolderClass album : al){
+								toAdd.add(album);
+								AlbumFolderClass a = albums.get(album.name);
+								if((a != null && album.lamportClock.compareTo(a.lamportClock)>0) || a == null)
+									albums.put(album.name, album);
+							}
 							server.addListAlbuns(toAdd);
 						}
 					}catch (Exception e ){
-						//System.out.println(e.getMessage());
 						return null;
 					}
 				}
 			}
 			Iterator<String> it = albums.keySet().iterator();
 			while(it.hasNext()){
-				AlbumClass a = albums.get(it.next());
-				if(a.getServers().size() >= NUMBER_OF_REPLICS || a.getServers().size() == onlineServers)
-					toReturn.add(new SharedAlbum(a.getName()));
+				AlbumFolderClass a = albums.get(it.next());
+				if(!a.isErased())
+					toReturn.add(new SharedAlbum(a.name));
 			}
 		}
 		else return null;
@@ -133,28 +129,24 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public List<Picture> getListOfPictures(Album album) {
 		List<Picture> toReturn = new ArrayList<Picture>();
 		List<ServerObjectClass> servers = this.findServer(album.getName());
-		int onlineServers = 0;
-		Map<String,SharedPicture> pictures = new HashMap<>();
+		Map<String,PictureClass> pictures = new HashMap<>();
 		if(!servers.isEmpty()){
 			for(ServerObjectClass s : servers){
 				List<PictureClass> serverPictures = s.getServer().getPictures(album.getName());
 				if(serverPictures != null){
-					onlineServers++;
 					for(PictureClass picture : serverPictures)
 						if(!picture.isErased()){
-							SharedPicture p = pictures.get(picture.name);
-							if(p != null)
-								p.addServer(s);
-							else
-								pictures.put(picture.name, new SharedPicture(picture.name, s));
+							PictureClass p = pictures.get(picture.name);
+							if((p != null && picture.lamportClock.compareTo(p.lamportClock)>0) || p == null)
+								pictures.put(picture.name, picture);
 						}
 				}
 			}
 			Iterator<String> it = pictures.keySet().iterator();
 			while(it.hasNext()){
-				SharedPicture a = pictures.get(it.next());
-				if(a.getServers().size() >= NUMBER_OF_REPLICS || a.getServers().size() == onlineServers)
-					toReturn.add(a);
+				PictureClass p = pictures.get(it.next());
+				if(!p.isErased())
+					toReturn.add(new SharedPicture(p.name));
 			}
 			return toReturn;
 		}
@@ -193,7 +185,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			if(c){
 				//System.out.println("New album");
 				server.addAlbum(new AlbumFolderClass(name, server.getServerName()));
-				gui.updateAlbums();
+				ProducerRecord<String, String> data = new ProducerRecord<>("albumCreated" , name);
+				producer.send(data);
 				return new SharedAlbum(name);
 			}
 			else return null;
@@ -213,7 +206,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			if(s.getServer().deleteAlbum(album.getName())){
 				//System.out.println("Deleting");
 				s.deleteAlbum(album.getName());
-				gui.updateAlbums();
+				ProducerRecord<String, String> data = new ProducerRecord<>("albumDeleted" , album.getName());
+				producer.send(data);
 			}
 
 		}
@@ -228,8 +222,11 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public Picture uploadPicture(Album album, String name, byte[] data) {
 		List<ServerObjectClass> servers = this.findServer(album.getName());
 		ServerObjectClass s = servers.get(random.nextInt(servers.size()));
+		System.out.println(s);
 		if(s!= null){
 			s.getServer().uploadPicture(album.getName(), name, data);
+			ProducerRecord<String, String> kafka = new ProducerRecord<>("pictureCreated" , album.getName());
+			producer.send(kafka);
 			return new SharedPicture(name);
 		}
 		else
@@ -246,6 +243,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		ServerObjectClass s = servers.get(random.nextInt(servers.size()));
 		if(s!= null){
 			s.getServer().deletePicture(album.getName(), picture.getName());
+			ProducerRecord<String, String> data = new ProducerRecord<>("pictureDeleted" , album.getName());
+			producer.send(data);
 			return true;
 		}
 		else
@@ -291,30 +290,14 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	 */
 	static class SharedPicture implements GalleryContentProvider.Picture {
 		final String name;
-		final List<ServerObjectClass> servers;
 
 		SharedPicture(String name) {
 			this.name = name;
-			servers = new LinkedList<>();
-		}
-		
-		SharedPicture(String name, ServerObjectClass server) {
-			this.name = name;
-			servers = new LinkedList<>();
-			servers.add(server);
 		}
 		
 		@Override
 		public String getName() {
 			return name;
-		}
-		
-		public List<ServerObjectClass> getServers(){
-			return servers;
-		}
-		
-		public void addServer(ServerObjectClass s){
-			servers.add(s);
 		}
 	}
 
@@ -404,7 +387,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private void kafkaSubscriber (String messageServerHost){
 		new Thread(() -> {
 			Properties props = new Properties();
-			props.put("bootstrap.servers", messageServerHost);
+			props.put("bootstrap.servers", messageServerHost+":9092");
 			props.put("group.id", "consumer-tutorial" + System.nanoTime());
 			props.put("key.deserializer", StringDeserializer.class.getName());
 			props.put("value.deserializer", StringDeserializer.class.getName());
@@ -430,5 +413,37 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}).start();
 	}
 
+	private void kafKaPublisher(String messageServerHost){
+		Properties env = System.getProperties();
+		Properties props = new Properties();
+		
+		props.put("zk.connect", env.getOrDefault("zk.connect", messageServerHost+":2181/"));
+		props.put("bootstrap.servers", env.getOrDefault("bootstrap.servers", messageServerHost+":9092"));
+		props.put("log.retention.ms", 1000);
+
+		props.put("serializer.class", "kafka.serializer.StringEncoder");
+		props.put("key.serializer", StringSerializer.class.getName());
+		props.put("value.serializer", StringSerializer.class.getName());
+
+		//System.err.println(props);
+
+		producer = new KafkaProducer<>(props);
+
+//		Random rnd = new Random();
+//		try {
+//			for(;;) {
+//				
+//				String topic = "topic" + rnd.nextInt(5);
+//				String event = "" + System.nanoTime();
+//				
+//				ProducerRecord<String, String> data = new ProducerRecord<>(topic , event);
+//				producer.send(data);
+//				Thread.sleep(1000);
+//			}
+//		} catch (Exception x) {
+//			x.printStackTrace();
+//		}
+//		producer.close();
+	}
 
 }
