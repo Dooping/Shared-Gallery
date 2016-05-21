@@ -332,7 +332,7 @@ public class ServerManager {
 
 
 	@SuppressWarnings("unchecked")
-	public void garbageCollector(){
+	private void garbageCollector(){
 		new Thread(() -> {
 			File basePath = new File("./gallery");
 
@@ -407,7 +407,6 @@ public class ServerManager {
 
 		}).start();
 	}
-
 
 	/**
 	 * @param file

@@ -141,8 +141,8 @@ public class ImgurClient implements RequestInterface{
 				String piI = (String) p.get("id");
 				String name = (String) p.get("name");
 				long datetime = (long) p.get("datetime");
-				int size = (int) p.get("size");
-				System.out.println(datetime);
+				long size = (long) p.get("size");
+				//System.out.println(datetime);
 				//System.out.println("Name: " + name);
 				//System.out.println("width: " + p.get("width"));
 				//System.out.println("height: " + p.get("height"));
@@ -188,6 +188,7 @@ public class ImgurClient implements RequestInterface{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ImageIO.write(originalImage, "jpg", baos );
 			byte[] imageInByte=baos.toByteArray();
+			//System.out.println("here is " + picture);
 			return imageInByte;
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -265,7 +266,7 @@ public class ImgurClient implements RequestInterface{
 	@Override
 	public boolean uploadPicture(String album, String picture, byte[] data) {
 		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
-		"https://api.imgur.com/3/image", service);
+				"https://api.imgur.com/3/image", service);
 		BASE64Encoder encoder = new BASE64Encoder();
 		String s = encoder.encode(data);
 		albumsReq.addBodyParameter("image", s);
@@ -286,18 +287,16 @@ public class ImgurClient implements RequestInterface{
 				String namePic = (String) p.get("name");
 				//System.out.println("Name online: " + namePic);
 				//System.out.println("id of new pic: " + id);
+				//System.out.println(picture + " uploaded suc");
 				nameToId.put(picture, id);
-
 				idToPicName.put(id, picture);
+				return true;
+			} catch (ParseException e) {
 
-		
-		return true;
-	} catch (ParseException e) {
-		
-		e.printStackTrace();
-	}
-}
-return false;
+				e.printStackTrace();
+			}
+		}
+		return false;
 	}
 	
 

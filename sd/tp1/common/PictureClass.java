@@ -17,13 +17,13 @@ public class PictureClass implements Serializable{
 	public LamportClock lamportClock;
 	public String server;
 	public long datetime;
-	public int picSize;
+	public long picSize;
 	
-	public int getPicSize() {
+	public long getPicSize() {
 		return picSize;
 	}
 
-	public void setPicSize(int picSize) {
+	public void setPicSize(long picSize) {
 		this.picSize = picSize;
 	}
 
