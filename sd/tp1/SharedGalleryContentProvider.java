@@ -22,7 +22,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-import sd.tp1.common.AlbumClass;
 import sd.tp1.common.AlbumFolderClass;
 import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.common.PictureClass;
@@ -39,7 +38,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 	public static final int DISCOVERY_INTERVAL = 1000;
 	public static final int TIMEOUT_CYCLES = 5;
-	public static final int NUMBER_OF_REPLICS = 2;
 
 	Gui gui;
 	private MulticastDiscovery discovery;
