@@ -7,17 +7,20 @@ import sd.tp1.gui.impl.GalleryWindow;
 /*
  * Launches the local shared gallery application.
  */
-@SuppressWarnings("restriction")
 public class SharedGallery extends Application {
 
 	GalleryWindow window;
+	static String messageServerHost;
 	
 	public SharedGallery() {
-		window = new GalleryWindow( new SharedGalleryContentProvider());
+		window = new GalleryWindow( new SharedGalleryContentProvider(messageServerHost));
 	}	
 	
 	
     public static void main(String[] args){
+    	if ((args.length != 1))
+			throw new IllegalArgumentException("Syntax: SharedGallery <messageServerHost>");
+    	messageServerHost = args[0];
         launch(args);
     }
     

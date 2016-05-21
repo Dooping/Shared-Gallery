@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MulticastSocket;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,7 +12,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
+
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
 import sd.tp1.common.AlbumClass;
 import sd.tp1.common.AlbumFolderClass;
@@ -20,7 +26,6 @@ import sd.tp1.common.PictureClass;
 import sd.tp1.common.UtilsClass;
 import sd.tp1.gui.GalleryContentProvider;
 import sd.tp1.gui.Gui;
-import sd.tp1.srv.imgur.ImgurClient;
 
 /*
  * This class provides the album/picture content to the gui/main application.
@@ -41,7 +46,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	private Random random;
 
 
-	SharedGalleryContentProvider() {
+	SharedGalleryContentProvider(String messageServerHost) {
 		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
 		random = new Random(System.currentTimeMillis());
 
@@ -54,11 +59,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}
 		this.sendRequests();
 		this.registServer();
-
-		try {
-		} catch (Exception e) {
-			//e.printStackTrace();
-		}
+		this.kafkaSubscriber(messageServerHost);
 
 
 	}
@@ -400,7 +401,34 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}).start();
 	}
 
+	private void kafkaSubscriber (String messageServerHost){
+		new Thread(() -> {
+			Properties props = new Properties();
+			props.put("bootstrap.servers", messageServerHost);
+			props.put("group.id", "consumer-tutorial" + System.nanoTime());
+			props.put("key.deserializer", StringDeserializer.class.getName());
+			props.put("value.deserializer", StringDeserializer.class.getName());
+			KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+			
+			
+			consumer.subscribe(Arrays.asList("albumCreated", "albumDeleted", "pictureCreated", "pictureDeleted")); 
 
+			try {
+				  for(;;) {
+				    ConsumerRecords<String, String> records = consumer.poll(1000);
+				    records.forEach( r -> {			    	
+				    	System.err.println( r.topic() + "/" + r.value());
+				    	if(r.topic().equals("albumCreated") || r.topic().equals("albumDeleted"))
+				    		gui.updateAlbums();
+				    	else if(r.topic().equals("pictureCreated") || r.topic().equals("pictureDeleted"))
+				    		gui.updateAlbum(new SharedAlbum(r.value()));
+				    });
+				  }
+				} finally {
+				  consumer.close();
+			}
+		}).start();
+	}
 
 
 }
