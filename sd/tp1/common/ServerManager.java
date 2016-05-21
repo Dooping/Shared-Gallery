@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 import sd.tp1.RESTClientClass;
 import sd.tp1.RequestInterface;
 import sd.tp1.SOAPClientClass;
@@ -29,22 +28,21 @@ import sd.tp1.ServerObjectClass;
 import sd.tp1.common.UtilsClass;
 
 public class ServerManager {
-	public static final int DISCOVERY_INTERVAL = 1000;
-	public static final int REPLICATION_INTERVAL = 10000;
-	public static final int REPLICATION_DELAY = 10000;
-	public static final int TIMEOUT_CYCLES = 5;
-	public static final int NUMBER_OF_REPLICS = 2;
-	public static final int SYNCHRONIZATION_DELAY = 10000;
-	public static final int SYNCHRONIZATION_CYCLE = 10000;
-	public static final int GARBAGE_INTERVAL = 100000;
+	protected static final int DISCOVERY_INTERVAL = 1000;
+	protected static final int REPLICATION_INTERVAL = 10000;
+	protected static final int REPLICATION_DELAY = 10000;
+	protected static final int TIMEOUT_CYCLES = 5;
+	protected static final int NUMBER_OF_REPLICS = 2;
+	protected static final int SYNCHRONIZATION_DELAY = 10000;
+	protected static final int SYNCHRONIZATION_CYCLE = 10000;
+	protected static final int GARBAGE_INTERVAL = 100000;
 
-	private MulticastDiscovery discovery;
-	public MulticastSocket socket;
-	private List<ServerObjectClass> servers;
+	protected MulticastDiscovery discovery;
+	protected MulticastSocket socket;
+	protected List<ServerObjectClass> servers;
 
 	public ServerManager() {
 		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
-
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
@@ -61,7 +59,7 @@ public class ServerManager {
 	/**
 	 * to send the requests to the network
 	 */
-	private void sendRequests(){
+	protected void sendRequests(){
 		new Thread(() -> {
 			try {
 				while (true){
@@ -90,7 +88,7 @@ public class ServerManager {
 	/**
 	 * to catch the servers 
 	 */
-	private void registServer (){
+	protected void registServer (){
 		String SERVER_SOAP = "GalleryServerSOAP";
 		String SERVER_REST = "GalleryServerREST";
 		String IMGUR_REST = "GalleryServerImgur";
@@ -140,7 +138,7 @@ public class ServerManager {
 		}).start();
 	}
 
-	private void albumReplicationThread(){
+	protected void albumReplicationThread(){
 		new Thread(() -> {
 			try {
 				Thread.sleep(REPLICATION_DELAY);
@@ -192,7 +190,7 @@ public class ServerManager {
 		}).start();
 	}
 
-	private void replicateAlbumToServer(ServerObjectClass s, String album){
+	protected void replicateAlbumToServer(ServerObjectClass s, String album){
 		try{
 			RequestInterface server = s.getServer();
 			//System.out.println(s);
@@ -209,7 +207,7 @@ public class ServerManager {
 
 	}
 
-	private void albumSynchronizationThread(){
+	protected void albumSynchronizationThread(){
 		new Thread(() -> {
 			try {
 				Thread.sleep(SYNCHRONIZATION_DELAY);
@@ -227,7 +225,7 @@ public class ServerManager {
 		}).start();
 	}
 
-	private void synchronizationAlbum(ServerObjectClass s){
+	protected void synchronizationAlbum(ServerObjectClass s){
 		List<AlbumFolderClass> otherAlbums = s.getServer().getAlbums();
 		if(otherAlbums==null)
 			return;
@@ -269,7 +267,7 @@ public class ServerManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void synchronizationPictures(ServerObjectClass s, String album){
+	protected void synchronizationPictures(ServerObjectClass s, String album){
 		File basePath = new File("./gallery");
 		File ownAlbumDat = new File(basePath, album+"/album.dat");
 		ObjectInputStream input;
@@ -332,7 +330,7 @@ public class ServerManager {
 
 
 	@SuppressWarnings("unchecked")
-	private void garbageCollector(){
+	protected void garbageCollector(){
 		new Thread(() -> {
 			File basePath = new File("./gallery");
 
@@ -354,12 +352,10 @@ public class ServerManager {
 						}
 					}
 
-					//TODO: iterar enquanto se apaga?!
 					List <Integer> picToDelete = new LinkedList<Integer>();
 					for(AlbumFolderClass al: albums){
 						if(al.isErased()){
 							this.deleteDir(new File(basePath,al.name));
-							//TODO: apagar o .dat!
 							this.deleteDir(new File(basePath,al.name+".dat"));
 						}
 
@@ -374,11 +370,11 @@ public class ServerManager {
 								if(p.isErased()){
 									File pic = new File(basePath, al.name + p.getName());
 									deleteDir(pic);
-									//TODO:apagar a ref do server
+
 									picToDelete.add(pictures.indexOf(p));
 								}
 							}
-							//TODO: altamente ineficiente...
+
 							//input.close();
 							//write do .dat with new list of pic
 							if(!picToDelete.isEmpty()){
