@@ -246,10 +246,13 @@ public class ServerManager {
 			for(AlbumFolderClass a : selfAlbums)
 				if(otherAlbums.contains(a)){
 					AlbumFolderClass oa = otherAlbums.get(otherAlbums.indexOf(a));
-					if(oa.isErased()!=a.isErased()){
+					if(oa.isErased()!= a.isErased()){
 						if(oa.lamportClock.compareTo(a.lamportClock) > 0){
-							if(oa.isErased() && !a.isErased())
+							if(oa.isErased() && !a.isErased()){
 								a.erase(oa.serverUrl);
+								
+							}
+								
 							else if(!oa.isErased() && a.isErased()){
 								a.recreate(oa.serverUrl);
 							}
@@ -297,7 +300,7 @@ public class ServerManager {
 			}
 			else{
 				PictureClass ownPic = ownPictures.get(ownPictures.indexOf(p));
-				if(p.isErased()!=ownPic.isErased())
+				if(p.isErased()!=ownPic.isErased()  || p.lamportClock.lamportNumber!= ownPic.lamportClock.lamportNumber)
 					if(p.lamportClock.compareTo(ownPic.lamportClock) > 0){
 						if(!p.isErased()){
 							byte[] picture = s.getServer().getPicture(album, p.getName());
@@ -365,36 +368,23 @@ public class ServerManager {
 							input = new ObjectInputStream(new FileInputStream(f));
 							pictures = (LinkedList<PictureClass>)input.readObject();
 							input.close();
-
+							List<PictureClass> newSetPictures = new LinkedList<PictureClass>();
 							for(PictureClass p: pictures){
 								if(p.isErased()){
 									File pic = new File(basePath, al.name + p.getName());
 									deleteDir(pic);
-
-									picToDelete.add(pictures.indexOf(p));
 								}
+								else
+									newSetPictures.add(p);
 							}
 
-							//input.close();
-							//write do .dat with new list of pic
-							if(!picToDelete.isEmpty()){
-								List<PictureClass> list = new LinkedList<PictureClass>();
-								for(int i = 0; i< pictures.size(); i++){
-									if(!picToDelete.contains(i))
-										list.add(pictures.get(i));
-								}
-								//apagar antigo .dat
-								this.deleteDir(new File(basePath,al.name+"/album.dat"));
-								//escrever o novo com a nova lista
-								ObjectOutput outt;
-								outt = new ObjectOutputStream(new FileOutputStream(f));
-								outt.writeObject(list);
-								outt.close();
-							}
+							ObjectOutput outt;
+							outt = new ObjectOutputStream(new FileOutputStream(f));
+							outt.writeObject(newSetPictures);
+							outt.close();
+							
 						}	
 					}
-
-
 				}
 
 			} catch (Exception e) {
@@ -408,7 +398,7 @@ public class ServerManager {
 	 * @param file
 	 * to delete a directory and all of it's content's
 	 */
-	private void deleteDir(File file) {
+	protected void deleteDir(File file) {
 		File[] contents = file.listFiles();
 		if (contents != null) {
 			for (File f : contents) {
