@@ -220,7 +220,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 	public Picture uploadPicture(Album album, String name, byte[] data) {
 		List<ServerObjectClass> servers = this.findServer(album.getName());
 		ServerObjectClass s = servers.get(random.nextInt(servers.size()));
-		System.out.println(s);
 		if(s!= null){
 			s.getServer().uploadPicture(album.getName(), name, data);
 			ProducerRecord<String, String> kafka = new ProducerRecord<>("pictureCreated" , album.getName());
