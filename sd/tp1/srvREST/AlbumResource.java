@@ -189,16 +189,6 @@ public class AlbumResource {
 		return Response.status(Status.NOT_FOUND).build();	
 	}
 
-	private void deleteDir(File file) {
-		File[] contents = file.listFiles();
-		if (contents != null) {
-			for (File f : contents) {
-				deleteDir(f);
-			}
-		}
-		file.delete();
-	}
-
 	@SuppressWarnings("unchecked")
 	@DELETE
 	@Path("/{album}/{picture}")
@@ -229,9 +219,9 @@ public class AlbumResource {
 
 	@SuppressWarnings("unchecked")
 	@POST
-	@Path("/{album}/{pictureName}/{isNew}")
+	@Path("/{album}/{pictureName}")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String pictureName, @PathParam("isNew") boolean isNew, byte[] picture) throws IOException {
+	public Response uploadPicture(@PathParam("album") String album, @PathParam("pictureName") String pictureName, byte[] picture) throws IOException {
 		//System.err.printf("uploadPicture()\n");
 		File dir = new File(basePath + "/" + album);
 		if (dir.exists()) {
