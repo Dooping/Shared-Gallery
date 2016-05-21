@@ -88,7 +88,6 @@ public class ImgurClient implements RequestInterface{
 		return t;
 	}
 	
-	
 	/**
 	 * @param l: a list wiht the albuns id's
 	 * @return the list with the names of albuns
@@ -141,12 +140,22 @@ public class ImgurClient implements RequestInterface{
 				JSONObject p = (JSONObject) albumsIt.next();
 				String piI = (String) p.get("id");
 				String name = (String) p.get("name");
+				long datetime = (long) p.get("datetime");
+				int size = (int) p.get("size");
+				System.out.println(datetime);
+				//System.out.println("Name: " + name);
+				//System.out.println("width: " + p.get("width"));
+				//System.out.println("height: " + p.get("height"));
+				//System.out.println("size: " + p.get("size"));
+
 				if(!idToPicName.containsKey(piI)){
 					//existem imagem no igmur sem nome, temos de lhe atribuir um nome
 					if(name == null)
 						name = String.valueOf(newName++);
 					nameToId.put(name, piI);
 					PictureClass pic = new PictureClass(name, this.authorizationUrl);
+					pic.setDatetime(datetime);
+					pic.setPicSize(size);
 					al.add(pic);
 					idToPicName.put(piI, name);
 				}

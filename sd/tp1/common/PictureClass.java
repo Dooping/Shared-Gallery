@@ -16,7 +16,17 @@ public class PictureClass implements Serializable{
 	public boolean erased;
 	public LamportClock lamportClock;
 	public String server;
+	public long datetime;
+	public int picSize;
 	
+	public int getPicSize() {
+		return picSize;
+	}
+
+	public void setPicSize(int picSize) {
+		this.picSize = picSize;
+	}
+
 	public PictureClass(String name, String server){
 		this.name = name;
 		this.server = server;
@@ -31,6 +41,14 @@ public class PictureClass implements Serializable{
 	
 	public String getServer(){
 		return server;
+	}
+	
+	public void setDatetime(long da){
+		this.datetime = da;
+	}
+	
+	public long getDatetime(){
+		return datetime;
 	}
 
 	public void setLamportClock(LamportClock lamportClock) {

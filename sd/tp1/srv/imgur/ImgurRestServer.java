@@ -40,8 +40,9 @@ public class ImgurRestServer {
 		URI baseUri = UriBuilder.fromUri("https://0.0.0.0/").port(8080).path("GalleryServerImgur").build();
 
 		ResourceConfig config = new ResourceConfig();
-
-		config.register(new ImgurProxy());
+		
+		ImgurProxy proxy = new ImgurProxy();
+		config.register(proxy);
 		
 		SSLContext sslContext = SSLContext.getInstance("TLSv1");
 
@@ -64,7 +65,9 @@ public class ImgurRestServer {
 		System.err.println("GalleryServer proxy started");
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
 		String url = "https://"+serviceURL+ "/GalleryServerImgur";
+		proxy.setUrl(url);
 		System.out.println(url);
+		
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
 		//ServerManager manager = new ServerManager();
