@@ -32,11 +32,11 @@ public class ServerManagerImgur extends ServerManager {
 		} catch (IOException e) {
 			//e.printStackTrace();
 		}
-		this.sendRequests();
-		this.registServer();
-		this.albumReplicationThread();
-		this.albumSynchronizationThread();
-		this.garbageCollector();
+		//this.sendRequests();
+		//this.registServer();
+		//this.albumReplicationThread();
+		//this.albumSynchronizationThread();
+		//this.garbageCollector();
 	}
 	
 	
@@ -52,7 +52,7 @@ public class ServerManagerImgur extends ServerManager {
 				List <PictureClass> l = imgur.getPictures(album);
 				
 				for(PictureClass pic:l){
-					System.out.println("Sending picure: " + pic.name);
+					//System.out.println("Sending picure: " + pic.name);
 					server.uploadPicture(album, pic.name, imgur.getPicture(album, pic.name));
 				}
 						
@@ -191,11 +191,50 @@ public class ServerManagerImgur extends ServerManager {
 							this.deleteDir(new File(basePath,al.name));
 							this.deleteDir(new File(basePath,al.name+".dat"));
 						}
-
 						else{
+							
+							
+							
+//							System.err.println("DEBUGING");
+//							List<File> n = new ArrayList<File>(Arrays.asList(basePath.listFiles()));
+//							ObjectInputStream in;
+//							List<AlbumFolderClass> alb = new ArrayList<>();
+//							for(File f : n){
+//								try {
+//									in = new ObjectInputStream(new FileInputStream(f));
+//									alb.add((AlbumFolderClass)in.readObject());
+//									in.close();
+//								} catch (IOException e) {
+//								} catch (ClassNotFoundException e) {
+//								}
+//							}
+//
+//							for(AlbumFolderClass a: alb){
+//								//System.out.println("Album: " + a.name);
+//								ObjectInputStream inn;
+//								//List<File> nn = new ArrayList<File>(Arrays.asList((new File(basePath, a.name)).listFiles()));
+//								List<PictureClass> pp = new ArrayList<>();
+//								//for(File ff : nn){
+//								try {
+//									inn = new ObjectInputStream(new FileInputStream(new File(basePath, a.name+"/album.dat")));
+//									pp = ((List<PictureClass>)inn.readObject());
+//									inn.close();
+//								} catch (IOException e) {
+//									e.printStackTrace();
+//								} catch (ClassNotFoundException e) {
+//								}
+//
+//								for(PictureClass p: pp)
+//									System.out.println("picture " + p.name);
+//								//System.out.println(ff.getName());
+//								//}
+//							}
+
+							
+							
 							List<PictureClass> pictures;
 							List<PictureClass> newSetPictures = new LinkedList<PictureClass>();
-							System.out.println("Reading for album: " + al.name);
+							//System.out.println("Reading for album: " + (al.name+"/album.dat"));
 							File f = new File(basePath, al.name+"/album.dat");
 							input = new ObjectInputStream(new FileInputStream(f));
 							pictures = (LinkedList<PictureClass>)input.readObject();

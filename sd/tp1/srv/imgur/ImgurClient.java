@@ -43,7 +43,7 @@ import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
 public class ImgurClient implements RequestInterface{
-	public static final int MANAGER_INTERVAL = 100000;
+	public static final int MANAGER_INTERVAL = 30000;
 	private String url;
 	File basePath;
 	private OAuth2AccessToken accessToken;
@@ -410,7 +410,7 @@ public class ImgurClient implements RequestInterface{
 				res = (JSONObject) parser.parse(albumsRes.getBody());
 				JSONObject p = (JSONObject) res.get("data");
 				String id = (String) p.get("id");
-				String namePic = (String) p.get("name");
+				//String namePic = (String) p.get("name");
 				//System.out.println("Name online: " + namePic);
 				//System.out.println("id of new pic: " + id);
 				//System.out.println(picture + " uploaded suc");
@@ -433,7 +433,9 @@ public class ImgurClient implements RequestInterface{
 			try {
 				long t = System.currentTimeMillis();
 				List<AlbumFolderClass> l =  this.getAlbums();
+
 				this.updateAlbuns(l);
+
 				System.err.println("Imgur proxy ready");
 				System.out.println("Time to prepare: " + (System.currentTimeMillis() - t));
 				while(true){
@@ -455,7 +457,7 @@ public class ImgurClient implements RequestInterface{
 	private  void updateAlbuns(List<AlbumFolderClass> list){
 		for(AlbumFolderClass al: list){
 			String album = al.name;
-			System.out.println("found album: " + album);
+			//System.out.println("found album: " + album);
 			this.crealAlbumResDat(album);
 			this.createAlbumDat(album);
 		}
@@ -465,7 +467,7 @@ public class ImgurClient implements RequestInterface{
 		File f = new File(basePath, album);
 		File file = new File(basePath,album+".dat");
 		if (file.exists()){
-			System.out.println("Found album: " + album);
+			//System.out.println("Found album: " + album);
 			ObjectInputStream input;
 			AlbumFolderClass albumDat;
 			try {
@@ -487,9 +489,10 @@ public class ImgurClient implements RequestInterface{
 			
 			//System.out.println("creating new");
 			f.mkdir();
-			createAlbumDat(album);
+			
+			//createAlbumDat(album);
 			File albumDat = new File(basePath,album+"/album.dat");
-			System.out.println("Writing on: " + album+"/album.dat");
+			//System.out.println("Writing on: " + album+"/album.dat");
 			List<PictureClass> l = this.getPictures(album);
 			AlbumFolderClass a = new AlbumFolderClass(album, this.url);
 			ObjectOutput out;
@@ -514,7 +517,7 @@ public class ImgurClient implements RequestInterface{
 		File dir = new File(basePath + "/" + album);
 		if (dir.exists()) {
 			File dat = new File(basePath, album + "/album.dat");
-			System.out.println("acessing: " + (album + "/album.dat"));
+			//System.out.println("acessing: " + (album + "/album.dat"));
 			ObjectInputStream input;
 			try {
 				input = new ObjectInputStream(new FileInputStream(dat));
