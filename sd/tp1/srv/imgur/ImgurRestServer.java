@@ -26,7 +26,6 @@ import sd.tp1.common.Discovery;
 import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.common.ServerManager;
 import sd.tp1.common.ServerManagerImgur;
-import sd.tp1.srvREST.AlbumResource;
 
 import com.sun.net.httpserver.HttpServer;
 

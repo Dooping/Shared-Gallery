@@ -321,6 +321,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 					Thread.sleep(DISCOVERY_INTERVAL);
 				}
 			}catch(Exception e){
+				e.printStackTrace();
 			};
 		}).start();
 	}
@@ -371,12 +372,13 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 									return o1.getServerName().compareTo(o2.getServerName());
 								}
 							}); 
-							gui.updateAlbums();
+							if(gui!=null)
+								gui.updateAlbums();
 						}
 					}
 				}
 			}catch(Exception e){
-				//e.printStackTrace();
+				e.printStackTrace();
 			};
 		}).start();
 	}

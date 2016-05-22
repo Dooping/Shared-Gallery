@@ -154,8 +154,8 @@ public class ImgurClient implements RequestInterface{
 						name = String.valueOf(newName++);
 					nameToId.put(name, piI);
 					PictureClass pic = new PictureClass(name, this.authorizationUrl);
-					pic.setDatetime(datetime);
-					pic.setPicSize(size);
+					pic.datetime =datetime;
+					pic.picSize = size;
 					al.add(pic);
 					idToPicName.put(piI, name);
 				}

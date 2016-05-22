@@ -387,7 +387,7 @@ public class ImgurProxy {
 						//quando são a escrita é mais antigo, muda-se a data de origem para a nova
 						//como os nomes são iguais, depois recria-se a pic
 						if(this.equalsPic(pic, picOld)){
-							picOld.setDatetime(pic.datetime);
+							picOld.datetime = pic.datetime;
 							picOld.recreate(this.url);
 							
 							if(picsList.containsKey(album+name))

@@ -123,7 +123,7 @@ public class ServerManagerImgur extends ServerManager {
 						}
 						//a nossa deixa de estar apagada
 						ownPic.erased = p.erased;
-						ownPic.setLamportClock(p.lamportClock);
+						ownPic.lamportClock = p.lamportClock;
 					}
 			}
 		ObjectOutput out;

@@ -30,7 +30,7 @@ import sd.tp1.common.UtilsClass;
 public class ServerManager {
 	protected static final int DISCOVERY_INTERVAL = 1000;
 	protected static final int REPLICATION_INTERVAL = 10000;
-	protected static final int REPLICATION_DELAY = 10000;
+	protected static final int REPLICATION_DELAY = 21000;
 	protected static final int TIMEOUT_CYCLES = 5;
 	protected static final int NUMBER_OF_REPLICS = 2;
 	protected static final int SYNCHRONIZATION_DELAY = 10000;
@@ -102,7 +102,7 @@ public class ServerManager {
 
 						boolean exits = false;
 						for (ServerObjectClass s: servers){
-							if (s.equals(serviceURI.toString())){
+							if (s.getServerName().equals(serviceURI.toString())){
 								exits = true;
 								s.resetCounter();
 								if(!s.isConnected()){
@@ -316,7 +316,7 @@ public class ServerManager {
 							}
 						}
 						ownPic.erased = p.erased;
-						ownPic.setLamportClock(p.lamportClock);
+						ownPic.lamportClock = p.lamportClock;
 					}
 			}
 
