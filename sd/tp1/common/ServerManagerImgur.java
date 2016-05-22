@@ -8,12 +8,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.MulticastSocket;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import sd.tp1.RequestInterface;
 import sd.tp1.ServerObjectClass;
 import sd.tp1.srv.imgur.ImgurClient;
 
@@ -35,6 +37,28 @@ public class ServerManagerImgur extends ServerManager {
 		this.albumReplicationThread();
 		this.albumSynchronizationThread();
 		this.garbageCollector();
+	}
+	
+	
+	protected void replicateAlbumToServer(ServerObjectClass s, String album){
+		try{
+			RequestInterface server = s.getServer();
+			//System.out.println(s);
+			boolean response = server.createAlbum(album);
+			if (response){
+				//File albumFolder = new File("./gallery/"+album);
+				//List<File> files = new ArrayList<File>(Arrays.asList(albumFolder.listFiles()));
+				
+				List <PictureClass> l = imgur.getPictures(album);
+				
+				for(PictureClass pic:l){
+					System.out.println("Sending picure: " + pic.name);
+					server.uploadPicture(album, pic.name, imgur.getPicture(album, pic.name));
+				}
+						
+			}
+		} catch(Exception e){}
+
 	}
 	
 	/* (non-Javadoc)
@@ -107,6 +131,7 @@ public class ServerManagerImgur extends ServerManager {
 			//a foto ainda nunca esteve neste servidor 
 			if(!ownPictures.contains(p)){
 				byte[] picture = s.getServer().getPicture(album, p.name);
+				System.out.println("Replicate the pic: " + p.name);
 				imgur.uploadPicture(album, p.name, picture);
 				ownPictures.add(new PictureClass(p.name, s.getServerName()));
 			}
@@ -170,6 +195,7 @@ public class ServerManagerImgur extends ServerManager {
 						else{
 							List<PictureClass> pictures;
 							List<PictureClass> newSetPictures = new LinkedList<PictureClass>();
+							System.out.println("Reading for album: " + al.name);
 							File f = new File(basePath, al.name+"/album.dat");
 							input = new ObjectInputStream(new FileInputStream(f));
 							pictures = (LinkedList<PictureClass>)input.readObject();

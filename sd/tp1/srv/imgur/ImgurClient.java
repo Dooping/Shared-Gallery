@@ -4,8 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
 import sun.misc.BASE64Encoder;
 
@@ -39,7 +43,9 @@ import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
 public class ImgurClient implements RequestInterface{
-	
+	public static final int MANAGER_INTERVAL = 100000;
+	private String url;
+	File basePath;
 	private OAuth2AccessToken accessToken;
 	private OAuth20Service service;
 	//estrutura para associar o nome de uma image com um id
@@ -51,13 +57,26 @@ public class ImgurClient implements RequestInterface{
 	int newName;
 	private String authorizationUrl;
 	
-	public ImgurClient(OAuth2AccessToken accessToken, OAuth20Service service) {
+	private Map<String, byte[]> picsList;
+	
+
+	
+	
+	
+	public ImgurClient(OAuth2AccessToken accessToken, OAuth20Service service, String url) {
 		this.accessToken =accessToken;
 		this.service = service;
 		newName = 0;
 		nameToId = new HashMap<String, String>();
 		albumToId = new HashMap<String, String>();
 		idToPicName = new HashMap<String, String>();
+		
+		basePath = new File("./gallery");
+		if (!basePath.exists())
+			basePath.mkdir();
+		this.url = url;
+		picsList = new ConcurrentHashMap<String, byte[]>();
+		this.imgurManager();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -67,7 +86,7 @@ public class ImgurClient implements RequestInterface{
 		
 		try{
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/doping/albums/ids", service);
+					"https://api.imgur.com/3/account/gonalomoncada/albums/ids", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -99,7 +118,7 @@ public class ImgurClient implements RequestInterface{
 			while(it.hasNext()){
 				String s = it.next();
 				OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-						"https://api.imgur.com/3/account/doping/album/" + s, service);
+						"https://api.imgur.com/3/account/gonalomoncada/album/" + s, service);
 				service.signRequest(accessToken, albumsReq);
 				final Response albumsRes = albumsReq.send();
 				if(albumsRes.getCode() == 200){
@@ -126,7 +145,7 @@ public class ImgurClient implements RequestInterface{
 		try{
 			String albumName = albumToId.get(album);
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/doping/album/"+albumName+"/images", service);
+					"https://api.imgur.com/3/account/gonalomoncada/album/"+albumName+"/images", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -142,12 +161,6 @@ public class ImgurClient implements RequestInterface{
 				String name = (String) p.get("name");
 				long datetime = (long) p.get("datetime");
 				long size = (long) p.get("size");
-				//System.out.println(datetime);
-				//System.out.println("Name: " + name);
-				//System.out.println("width: " + p.get("width"));
-				//System.out.println("height: " + p.get("height"));
-				//System.out.println("size: " + p.get("size"));
-
 				if(!idToPicName.containsKey(piI)){
 					//existem imagem no igmur sem nome, temos de lhe atribuir um nome
 					if(name == null)
@@ -171,10 +184,16 @@ public class ImgurClient implements RequestInterface{
 	
 	@Override
 	public byte[] getPicture(String album, String picture) {
+		if(picsList.containsKey(album+picture))
+			return picsList.get(album+picture);
+		return null;
+	}
+	
+	private byte[] requestPic(String album, String picture){
 		try{
 			String picName = nameToId.get(picture);
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/doping/image/" + picName, service);
+					"https://api.imgur.com/3/account/gonalomoncada/image/" + picName, service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -216,13 +235,46 @@ public class ImgurClient implements RequestInterface{
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
+			this.crealAlbumResDat(album);
 			return true;
 		}	
 		return false;
 	}
-
+	
 	@Override
 	public boolean deleteAlbum(String album) {
+		File f = new File(basePath, album+".dat");
+		if(f.exists() && requestAlbumDeletion(album)){
+			ObjectInputStream input;
+			try {
+				input = new ObjectInputStream(new FileInputStream(f));
+				AlbumFolderClass albumDat = (AlbumFolderClass)input.readObject();
+				input.close();
+				albumDat.erase(this.url);
+				ObjectOutput out;
+				out = new ObjectOutputStream(new FileOutputStream(f));
+				out.writeObject(albumDat);
+				out.close();
+				File dat = new File(basePath + "/" + album + "/album.dat");
+				input = new ObjectInputStream(new FileInputStream(dat));
+				List<PictureClass> list = (List<PictureClass>)input.readObject();
+				input.close();
+				for(PictureClass p : list)
+					p.erase(this.url);
+				out = new ObjectOutputStream(new FileOutputStream(dat));
+				out.writeObject(list);
+				out.close();
+			} catch (IOException e) {
+			} catch (ClassNotFoundException e) {
+			}
+			return true;
+		}
+		else 
+			return false;
+	}
+	
+	private boolean requestAlbumDeletion(String album){
+
 		//apagar as fotos primeiro
 		this.deleteAlbumPhotos(album);
 		String albumName = albumToId.get(album);
@@ -237,6 +289,8 @@ public class ImgurClient implements RequestInterface{
 		return false;
 	}
 	
+	
+	
 	/** To delete all photos before deleting an album
 	 * @param album
 	 */
@@ -248,9 +302,35 @@ public class ImgurClient implements RequestInterface{
 		}
 			
 	}
+	
+	
 
 	@Override
 	public boolean deletePicture(String album, String picture) {
+		File f = new File(basePath + "/" + album + "/album.dat");
+		if (f.exists() && picsList.containsKey(album+picture) && requestPhotoDeletion(album, picture)){
+			ObjectInputStream input;
+			try {
+				File dat = new File(basePath + "/" + album + "/album.dat");
+				input = new ObjectInputStream(new FileInputStream(dat));
+				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
+				input.close();
+				PictureClass p = list.get(list.indexOf(new PictureClass(picture, this.url)));
+				p.erase(this.url);
+				ObjectOutput outt;
+				outt = new ObjectOutputStream(new FileOutputStream(dat));
+				outt.writeObject(list);
+				outt.close();
+			} catch (IOException e) {
+			} catch (ClassNotFoundException e) {
+			}
+			picsList.remove(album+picture);
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean requestPhotoDeletion(String album, String picture){
 		String picName = nameToId.get(picture);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
 				"https://api.imgur.com/3/account/doping/image/"+picName, service);
@@ -263,8 +343,54 @@ public class ImgurClient implements RequestInterface{
 		return false;
 	}
 
+	
 	@Override
-	public boolean uploadPicture(String album, String picture, byte[] data) {
+	public boolean uploadPicture(String album, String pictureName, byte[] data) {
+		File dir = new File(basePath + "/" + album);
+		if (dir.exists() && !picsList.containsKey(album+pictureName) && requestPhotoUpdate(album, pictureName, data)) {
+			dir = new File(basePath, album + "/"+ pictureName);
+			File dat = new File(basePath + "/" + album + "/album.dat");
+			ObjectInputStream input;
+			try {
+				input = new ObjectInputStream(new FileInputStream(dat));
+				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
+				input.close();
+				PictureClass pic = new PictureClass(pictureName, this.url);
+				int index = list.indexOf(pic);
+				if(index < 0){
+					list.add(new PictureClass(pictureName, this.url));
+					ObjectOutput outt;
+					outt = new ObjectOutputStream(new FileOutputStream(dat));
+					outt.writeObject(list);
+					outt.close();
+				}
+				else{
+					if (!pic.isErased())
+						return false;
+					pic = list.get(index);
+					pic.recreate(this.url);
+					ObjectOutput outt;
+					outt = new ObjectOutputStream(new FileOutputStream(dat));
+					outt.writeObject(list);
+					outt.close();
+				}
+					
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			//System.out.println("good pic upload!");
+			picsList.put(album+pictureName, data);
+			return true;
+		}
+		else 
+			return false;	
+	}
+	
+	
+	
+	private boolean requestPhotoUpdate(String album, String picture, byte [] data){
 		OAuthRequest albumsReq = new OAuthRequest(Verb.POST,
 				"https://api.imgur.com/3/image", service);
 		BASE64Encoder encoder = new BASE64Encoder();
@@ -299,7 +425,170 @@ public class ImgurClient implements RequestInterface{
 		return false;
 	}
 	
+	/**
+	 * this method makes the request's to imgur and updates the files in the system
+	 */
+	private void imgurManager(){
+		new Thread(() -> {
+			try {
+				long t = System.currentTimeMillis();
+				List<AlbumFolderClass> l =  this.getAlbums();
+				this.updateAlbuns(l);
+				System.err.println("Imgur proxy ready");
+				System.out.println("Time to prepare: " + (System.currentTimeMillis() - t));
+				while(true){
+					//ler os albuns e escrever
+					l =  this.getAlbums();
+					this.updateAlbuns(l);
+					Thread.sleep(MANAGER_INTERVAL);
+				}
 
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}).start();
+	}
+
+	/**
+	 * @param list
+	 */
+	private  void updateAlbuns(List<AlbumFolderClass> list){
+		for(AlbumFolderClass al: list){
+			String album = al.name;
+			System.out.println("found album: " + album);
+			this.crealAlbumResDat(album);
+			this.createAlbumDat(album);
+		}
+	}
+	
+	private void crealAlbumResDat(String album){
+		File f = new File(basePath, album);
+		File file = new File(basePath,album+".dat");
+		if (file.exists()){
+			System.out.println("Found album: " + album);
+			ObjectInputStream input;
+			AlbumFolderClass albumDat;
+			try {
+				input = new ObjectInputStream(new FileInputStream(file));
+				albumDat = (AlbumFolderClass)input.readObject();
+				input.close();
+				if(albumDat.isErased()){
+					albumDat.recreate(this.url);
+					ObjectOutput out;
+					out = new ObjectOutputStream(new FileOutputStream(file));
+					out.writeObject(albumDat);
+					out.close();
+				}
+			} catch (IOException e) {
+			} catch (ClassNotFoundException e) {
+			}
+		}
+		else{
+			
+			//System.out.println("creating new");
+			f.mkdir();
+			createAlbumDat(album);
+			File albumDat = new File(basePath,album+"/album.dat");
+			System.out.println("Writing on: " + album+"/album.dat");
+			List<PictureClass> l = this.getPictures(album);
+			AlbumFolderClass a = new AlbumFolderClass(album, this.url);
+			ObjectOutput out;
+			try {
+				out = new ObjectOutputStream(new FileOutputStream(file));
+				out.writeObject(a);
+				out.close();
+				out = new ObjectOutputStream(new FileOutputStream(albumDat));
+				out.writeObject(l);
+				out.close();
+			} catch (IOException e) {}
+			
+		}
+
+	}
+	
+	/**
+	 * @param album
+	 */
+	private void createAlbumDat(String album){
+		List<PictureClass> l = this.getPictures(album);
+		File dir = new File(basePath + "/" + album);
+		if (dir.exists()) {
+			File dat = new File(basePath, album + "/album.dat");
+			System.out.println("acessing: " + (album + "/album.dat"));
+			ObjectInputStream input;
+			try {
+				input = new ObjectInputStream(new FileInputStream(dat));
+				List<PictureClass> listOld = (LinkedList<PictureClass>)input.readObject();
+				input.close();
+				for(PictureClass pic: l){
+					int index = listOld.indexOf(pic);
+					if(index < 0){
+						//System.out.println("Adding pic: " + pic.getName());
+						listOld.add(pic);
+						ObjectOutput outt;
+						outt = new ObjectOutputStream(new FileOutputStream(dat));
+						outt.writeObject(listOld);
+						outt.close();
+					}
+					else{
+						//vamos comparar as datas de origem
+						PictureClass picOld = listOld.get(index);
+						String name = picOld.name;
+						//System.out.println("found pic : " + name);
+						//quando são a escrita é mais antigo, muda-se a data de origem para a nova
+						//como os nomes são iguais, depois recria-se a pic
+						if(this.equalsPic(pic, picOld)){
+							picOld.datetime = pic.datetime;
+							picOld.recreate(this.url);
+
+							if(picsList.containsKey(album+name))
+								picsList.replace(album+name, this.requestPic(album, name));
+							else
+								picsList.put(album+name, this.requestPic(album, name));
+						}
+						//são iguais ou não é preciso atualizar
+						else 
+							if(picsList.containsKey(album+name))
+								picsList.replace(album+name, this.requestPic(album, name));
+							else
+								picsList.put(album+name, this.requestPic(album, name));
+					}
+				}
+
+				ObjectOutput outt;
+				outt = new ObjectOutputStream(new FileOutputStream(dat));
+				outt.writeObject(listOld);
+				outt.close();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+
+		}	
+	}
+	
+	/**
+	 * @param pic
+	 * @param picOld
+	 * @return true if the newPic is more recent
+	 */
+	private boolean equalsPic(PictureClass newPic, PictureClass oldPic){
+		//só nos interessa saber quando a pic nova é mais recente (podem ser fotos diferentes,
+		//mas com o mesmo nome
+		if(oldPic.datetime < newPic.datetime)
+			return true;
+		else if (oldPic.datetime > newPic.datetime)
+			return false;
+		else if (oldPic.datetime == newPic.datetime)
+			//quando tem a mesma data de origem, mas tamanhos diferentes, assumimos que a pic
+			//é mais recente, isto é, sofreu alterações
+			if(oldPic.datetime != newPic.datetime){
+				return true;
+		}
+		return false;
+	}
 	
 	
 }

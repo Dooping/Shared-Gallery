@@ -199,8 +199,11 @@ public class ServerManager {
 				File albumFolder = new File("./gallery/"+album);
 				List<File> files = new ArrayList<File>(Arrays.asList(albumFolder.listFiles()));
 				for(File pic : files)
-					if(!pic.getName().equals("album.dat"))
+					if(!pic.getName().equals("album.dat")){
+						System.out.println("uploading pic: " + pic.getName());
 						server.uploadPicture(album, pic.getName(), Files.readAllBytes(pic.toPath()));
+					}
+						
 
 			}
 		} catch(Exception e){}
