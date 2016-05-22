@@ -101,6 +101,10 @@ public class ImgurProxy {
 	public void setUrl (String url){
 		this.url = url;
 	}
+	
+	public ImgurClient getImgurClient(){
+		return this.imgur;
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -378,12 +382,12 @@ public class ImgurProxy {
 					else{
 						//vamos comparar as datas de origem
 						PictureClass picOld = listOld.get(index);
-						String name = picOld.getName();
+						String name = picOld.name;
 						//System.out.println("found pic : " + name);
 						//quando são a escrita é mais antigo, muda-se a data de origem para a nova
 						//como os nomes são iguais, depois recria-se a pic
 						if(this.equalsPic(pic, picOld)){
-							picOld.setDatetime(pic.getDatetime());
+							picOld.setDatetime(pic.datetime);
 							picOld.recreate(this.url);
 							
 							if(picsList.containsKey(album+name))
@@ -421,14 +425,14 @@ public class ImgurProxy {
 	private boolean equalsPic(PictureClass newPic, PictureClass oldPic){
 		//só nos interessa saber quando a pic nova é mais recente (podem ser fotos diferentes,
 		//mas com o mesmo nome
-		if(oldPic.getDatetime() < newPic.getDatetime())
+		if(oldPic.datetime < newPic.datetime)
 			return true;
-		else if (oldPic.getDatetime() > newPic.getDatetime())
+		else if (oldPic.datetime > newPic.datetime)
 			return false;
-		else if (oldPic.getDatetime() == newPic.getDatetime())
+		else if (oldPic.datetime == newPic.datetime)
 			//quando tem a mesma data de origem, mas tamanhos diferentes, assumimos que a pic
 			//é mais recente, isto é, sofreu alterações
-			if(oldPic.getPicSize() != newPic.getPicSize()){
+			if(oldPic.datetime != newPic.datetime){
 				return true;
 		}
 		return false;

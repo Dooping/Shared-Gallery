@@ -36,7 +36,7 @@ public class BasicRestServer {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 
-		URI baseUri = UriBuilder.fromUri("https://0.0.0.0/").port(8080).path("GalleryServerREST").build();
+		URI baseUri = UriBuilder.fromUri("https://0.0.0.0/").port(8282).path("GalleryServerREST").build();
 		//URI baseUri = UriBuilder.fromUri("http://0.0.0.0/").port(8080).path("GalleryServerREST").build();
 
 		ResourceConfig config = new ResourceConfig();

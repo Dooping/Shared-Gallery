@@ -18,10 +18,6 @@ public class PictureClass implements Serializable{
 	public String server;
 	public long datetime;
 	public long picSize;
-	
-	public long getPicSize() {
-		return picSize;
-	}
 
 	public void setPicSize(long picSize) {
 		this.picSize = picSize;
@@ -34,10 +30,6 @@ public class PictureClass implements Serializable{
 	}
 	
 	public PictureClass(){}
-
-//	public LamportClock getLamportClock() {
-//		return lamportClock;
-//	}
 	
 	public String getServer(){
 		return server;
@@ -46,17 +38,9 @@ public class PictureClass implements Serializable{
 	public void setDatetime(long da){
 		this.datetime = da;
 	}
-	
-	public long getDatetime(){
-		return datetime;
-	}
 
 	public void setLamportClock(LamportClock lamportClock) {
 		this.lamportClock = lamportClock;
-	}
-
-	public String getName() {
-		return name;
 	}
 	
 	public boolean isErased() {

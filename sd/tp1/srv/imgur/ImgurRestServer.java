@@ -25,6 +25,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import sd.tp1.common.Discovery;
 import sd.tp1.common.MulticastDiscovery;
 import sd.tp1.common.ServerManager;
+import sd.tp1.common.ServerManagerImgur;
 import sd.tp1.srvREST.AlbumResource;
 
 import com.sun.net.httpserver.HttpServer;
@@ -66,11 +67,10 @@ public class ImgurRestServer {
 		String serviceURL = ""+localhostAddress().getCanonicalHostName()+":"+baseUri.getPort();
 		String url = "https://"+serviceURL+ "/GalleryServerImgur";
 		proxy.setUrl(url);
-		System.out.println(url);
 		
 		Discovery discovery = new MulticastDiscovery();
 		discovery.registerService(new URL(url));
-		//ServerManager manager = new ServerManager();
+		ServerManager manager = new ServerManagerImgur(proxy.getImgurClient());
 	}
 	
 	/**

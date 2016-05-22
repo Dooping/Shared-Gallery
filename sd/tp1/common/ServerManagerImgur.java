@@ -2,14 +2,15 @@ package sd.tp1.common;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,33 +22,25 @@ public class ServerManagerImgur extends ServerManager {
 	private ImgurClient imgur;
 	
 	public ServerManagerImgur(ImgurClient i) {
-		super();
 		this.imgur = i;
-	}
-	
-	public void sendRequests(){
-		super.sendRequests();
-	}
-	
-	protected void registServer (){
-		super.registServer();
-	}
-	
-	protected void albumReplicationThread(){
-		super.albumReplicationThread();
-	}
-	
-	protected void replicateAlbumToServer(ServerObjectClass s, String album){
-		super.replicateAlbumToServer(s,album);
-	}
-	
-	protected void albumSynchronizationThread(){
-		super.albumSynchronizationThread();
+		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
+		discovery = new MulticastDiscovery();
+		try {
+			socket = new MulticastSocket();
+		} catch (IOException e) {
+			//e.printStackTrace();
+		}
+		this.sendRequests();
+		this.registServer();
+		this.albumReplicationThread();
+		this.albumSynchronizationThread();
+		this.garbageCollector();
 	}
 	
 	/* (non-Javadoc)
 	 * @see sd.tp1.common.ServerManager#synchronizationAlbum(sd.tp1.ServerObjectClass)
 	 */
+	@Override
 	protected void synchronizationAlbum(ServerObjectClass s){
 		List<AlbumFolderClass> otherAlbums = s.getServer().getAlbums();
 		if(otherAlbums==null)
@@ -96,6 +89,7 @@ public class ServerManagerImgur extends ServerManager {
 	/* (non-Javadoc)
 	 * @see sd.tp1.common.ServerManager#synchronizationPictures(sd.tp1.ServerObjectClass, java.lang.String)
 	 */
+	@Override
 	protected void synchronizationPictures(ServerObjectClass s, String album){
 		File basePath = new File("./gallery");
 		File ownAlbumDat = new File(basePath, album+"/album.dat");
@@ -112,9 +106,9 @@ public class ServerManagerImgur extends ServerManager {
 		for(PictureClass p : otherPictures)
 			//a foto ainda nunca esteve neste servidor 
 			if(!ownPictures.contains(p)){
-				byte[] picture = s.getServer().getPicture(album, p.getName());
-				imgur.uploadPicture(album, p.getName(), picture);
-				ownPictures.add(new PictureClass(p.getName(), s.getServerName()));
+				byte[] picture = s.getServer().getPicture(album, p.name);
+				imgur.uploadPicture(album, p.name, picture);
+				ownPictures.add(new PictureClass(p.name, s.getServerName()));
 			}
 			//a foto já existe, verificar as versões
 			else{
@@ -124,8 +118,8 @@ public class ServerManagerImgur extends ServerManager {
 						if(!p.isErased()){
 							//se é a nossa que está apagada, não existe no server do imgur, pode-se 
 							//enviar a nova sem problema
-							byte[] picture = s.getServer().getPicture(album, p.getName());
-							imgur.uploadPicture(album, p.getName(), picture);
+							byte[] picture = s.getServer().getPicture(album, p.name);
+							imgur.uploadPicture(album, p.name, picture);
 						}
 						//a nossa deixa de estar apagada
 						ownPic.erased = p.erased;
@@ -144,6 +138,7 @@ public class ServerManagerImgur extends ServerManager {
 	
 	//No imgur, já não existe nada no servidor, é só apagar os .dat
 	@SuppressWarnings("unchecked")
+	@Override
 	protected void garbageCollector(){
 		new Thread(() -> {
 			File basePath = new File("./gallery");

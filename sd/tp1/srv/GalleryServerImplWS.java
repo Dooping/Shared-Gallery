@@ -311,7 +311,7 @@ public class GalleryServerImplWS{
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
 				for(PictureClass p: list){
-					if(p.getName().equals(picture))
+					if(p.name.equals(picture))
 						p.erase(this.url);
 				}
 				//System.out.println("deleting: " + picture);
@@ -337,7 +337,7 @@ public class GalleryServerImplWS{
 
 	public static void main(String[] args) throws Exception {
 		String path = args.length > 0 ? args[0] : "./gallery";
-		final int servicePort = 9090;
+		final int servicePort = 8181;
 		
 		KeyManagerFactory keyFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		KeyStore store = KeyStore.getInstance("JKS");

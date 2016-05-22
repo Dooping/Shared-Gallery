@@ -67,7 +67,7 @@ public class ImgurClient implements RequestInterface{
 		
 		try{
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/GonaloMoncada/albums/ids", service);
+					"https://api.imgur.com/3/account/doping/albums/ids", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -99,7 +99,7 @@ public class ImgurClient implements RequestInterface{
 			while(it.hasNext()){
 				String s = it.next();
 				OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-						"https://api.imgur.com/3/account/GonaloMoncada/album/" + s, service);
+						"https://api.imgur.com/3/account/doping/album/" + s, service);
 				service.signRequest(accessToken, albumsReq);
 				final Response albumsRes = albumsReq.send();
 				if(albumsRes.getCode() == 200){
@@ -126,7 +126,7 @@ public class ImgurClient implements RequestInterface{
 		try{
 			String albumName = albumToId.get(album);
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/GonaloMoncada/album/"+albumName+"/images", service);
+					"https://api.imgur.com/3/account/doping/album/"+albumName+"/images", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -174,7 +174,7 @@ public class ImgurClient implements RequestInterface{
 		try{
 			String picName = nameToId.get(picture);
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/GonaloMoncada/image/" + picName, service);
+					"https://api.imgur.com/3/account/doping/image/" + picName, service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -227,7 +227,7 @@ public class ImgurClient implements RequestInterface{
 		this.deleteAlbumPhotos(album);
 		String albumName = albumToId.get(album);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/GonaloMoncada/album/"+albumName, service);
+				"https://api.imgur.com/3/account/doping/album/"+albumName, service);
 		service.signRequest(accessToken, albumsReq);
 		final Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
@@ -244,7 +244,7 @@ public class ImgurClient implements RequestInterface{
 		List<PictureClass> pics =  this.getPictures(album);
 		Iterator <PictureClass> it = pics.iterator();
 		while(it.hasNext()){
-			this.deletePicture(album, it.next().getName());
+			this.deletePicture(album, it.next().name);
 		}
 			
 	}
@@ -253,7 +253,7 @@ public class ImgurClient implements RequestInterface{
 	public boolean deletePicture(String album, String picture) {
 		String picName = nameToId.get(picture);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/GonaloMoncada/image/"+picName, service);
+				"https://api.imgur.com/3/account/doping/image/"+picName, service);
 		service.signRequest(accessToken, albumsReq);
 		final Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){

@@ -129,7 +129,7 @@ public class RESTClientClass implements RequestInterface {
 	    @Override
 	    public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
 	    	Arrays.asList( chain ).forEach( i -> {
-	    		System.err.println( "type: " + i.getType() + "from: " + i.getNotBefore() + " to: " + i.getNotAfter() );
+	    		//System.err.println( "type: " + i.getType() + "from: " + i.getNotBefore() + " to: " + i.getNotAfter() );
 	    	});
 	    }
 

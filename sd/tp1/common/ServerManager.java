@@ -51,9 +51,9 @@ public class ServerManager {
 		}
 		this.sendRequests();
 		this.registServer();
-		//this.albumReplicationThread();
+		this.albumReplicationThread();
 		this.albumSynchronizationThread();
-		//this.garbageCollector();
+		this.garbageCollector();
 	}
 
 	/**
@@ -285,10 +285,10 @@ public class ServerManager {
 		List<PictureClass> otherPictures = s.getServer().getPictures(album);
 		for(PictureClass p : otherPictures)
 			if(!ownPictures.contains(p)){
-				byte[] picture = s.getServer().getPicture(album, p.getName());
+				byte[] picture = s.getServer().getPicture(album, p.name);
 				FileOutputStream out;
 				try {
-					out = new FileOutputStream(new File(basePath, album+"/"+p.getName()));
+					out = new FileOutputStream(new File(basePath, album+"/"+p.name));
 					out.write(picture);
 					out.close();
 				} catch (FileNotFoundException e) {
@@ -296,17 +296,17 @@ public class ServerManager {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				ownPictures.add(new PictureClass(p.getName(), s.getServerName()));
+				ownPictures.add(new PictureClass(p.name, s.getServerName()));
 			}
 			else{
 				PictureClass ownPic = ownPictures.get(ownPictures.indexOf(p));
 				if(p.isErased()!=ownPic.isErased()  || p.lamportClock.lamportNumber!= ownPic.lamportClock.lamportNumber)
 					if(p.lamportClock.compareTo(ownPic.lamportClock) > 0){
 						if(!p.isErased()){
-							byte[] picture = s.getServer().getPicture(album, p.getName());
+							byte[] picture = s.getServer().getPicture(album, p.name);
 							FileOutputStream out;
 							try {
-								out = new FileOutputStream(new File(basePath, album+"/"+p.getName()));
+								out = new FileOutputStream(new File(basePath, album+"/"+p.name));
 								out.write(picture);
 								out.close();
 							} catch (FileNotFoundException e) {
@@ -355,7 +355,6 @@ public class ServerManager {
 						}
 					}
 
-					List <Integer> picToDelete = new LinkedList<Integer>();
 					for(AlbumFolderClass al: albums){
 						if(al.isErased()){
 							this.deleteDir(new File(basePath,al.name));
@@ -371,7 +370,7 @@ public class ServerManager {
 							List<PictureClass> newSetPictures = new LinkedList<PictureClass>();
 							for(PictureClass p: pictures){
 								if(p.isErased()){
-									File pic = new File(basePath, al.name + p.getName());
+									File pic = new File(basePath, al.name + p.name);
 									deleteDir(pic);
 								}
 								else
