@@ -138,6 +138,9 @@ public class ServerManager {
 		}).start();
 	}
 
+	/**
+	 * Thread responsible for checking if any album needs replication
+	 */
 	protected void albumReplicationThread(){
 		new Thread(() -> {
 			try {
@@ -190,6 +193,11 @@ public class ServerManager {
 		}).start();
 	}
 
+	/**
+	 * Uploads an album to the given server
+	 * @param s - server
+	 * @param album - album to upload
+	 */
 	protected void replicateAlbumToServer(ServerObjectClass s, String album){
 		try{
 			RequestInterface server = s.getServer();
@@ -210,6 +218,9 @@ public class ServerManager {
 
 	}
 
+	/**
+	 * Thread checking if own albums are synchronized with every other server's albums
+	 */
 	protected void albumSynchronizationThread(){
 		new Thread(() -> {
 			try {
@@ -228,6 +239,10 @@ public class ServerManager {
 		}).start();
 	}
 
+	/**
+	 * Checks if album information from the given server is different from local information and updates it if necessary
+	 * @param s - server
+	 */
 	protected void synchronizationAlbum(ServerObjectClass s){
 		List<AlbumFolderClass> otherAlbums = s.getServer().getAlbums();
 		if(otherAlbums==null)
@@ -272,6 +287,11 @@ public class ServerManager {
 		}
 	}
 
+	/**
+	 * Checks if information about the album's pictures in the given server is different from local information and updates it if necessary, downloading also the picture
+	 * @param s - server
+	 * @param album - album to synchronize
+	 */
 	@SuppressWarnings("unchecked")
 	protected void synchronizationPictures(ServerObjectClass s, String album){
 		File basePath = new File("./gallery");
