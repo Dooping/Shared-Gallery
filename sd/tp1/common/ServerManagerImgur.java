@@ -25,13 +25,13 @@ public class ServerManagerImgur extends ServerManager {
 	
 	public ServerManagerImgur(ImgurClient i) {
 		this.imgur = i;
-		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
+		/*servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
 		} catch (IOException e) {
 			//e.printStackTrace();
-		}
+		}*/
 		//this.sendRequests();
 		//this.registServer();
 		//this.albumReplicationThread();
@@ -39,7 +39,7 @@ public class ServerManagerImgur extends ServerManager {
 		//this.garbageCollector();
 	}
 	
-	
+	@Override
 	protected void replicateAlbumToServer(ServerObjectClass s, String album){
 		try{
 			RequestInterface server = s.getServer();
