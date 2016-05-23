@@ -275,8 +275,7 @@ public class ImgurClient implements RequestInterface{
 	
 	private boolean requestAlbumDeletion(String album){
 
-		//apagar as fotos primeiro
-		this.deleteAlbumPhotos(album);
+
 		String albumName = albumToId.get(album);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
 				"https://api.imgur.com/3/account/doping/album/"+albumName, service);
@@ -284,6 +283,8 @@ public class ImgurClient implements RequestInterface{
 		final Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
 			albumToId.remove(album);
+			//apagar as fotos primeiro
+			this.deleteAlbumPhotos(album);
 			return true;
 		}
 		return false;
