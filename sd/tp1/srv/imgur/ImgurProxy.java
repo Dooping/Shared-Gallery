@@ -93,9 +93,7 @@ public class ImgurProxy {
 			e.printStackTrace();
 		}
 		picsList = new ConcurrentHashMap<String, byte[]>();
-		
 		imgur = new ImgurClient(accessToken, service, url);
-		//this.imgurManager();
 	}
 	
 	public void setUrl (String url){
@@ -165,7 +163,6 @@ public class ImgurProxy {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createAlbum(String album) {
 		if(imgur.createAlbum(album)){
-			//this.crealAlbumResDat(album);
 			return Response.ok().build();
 		}
 		return Response.status(422).build();
@@ -232,166 +229,7 @@ public class ImgurProxy {
 		}
 		else 
 			return Response.status(Status.NOT_FOUND).build();
-		
-		
-		//return imgur.uploadPicture(album, picture, data) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
 	}
 
-//	/**
-//	 * this method makes the request's to imgur and updates the files in the system
-//	 */
-//	private void imgurManager(){
-//		new Thread(() -> {
-//			try {
-//				long t = System.currentTimeMillis();
-//				List<AlbumFolderClass> l =  imgur.getAlbums();
-//				this.updateAlbuns(l);
-//				System.err.println("Imgur proxy ready");
-//				System.out.println("Time to prepare: " + (System.currentTimeMillis() - t));
-//				while(true){
-//					//ler os albuns e escrever
-//					l =  imgur.getAlbums();
-//					this.updateAlbuns(l);
-//					Thread.sleep(MANAGER_INTERVAL);
-//				}
-//
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}).start();
-//	}
-//
-//	/**
-//	 * @param list
-//	 */
-//	private  void updateAlbuns(List<AlbumFolderClass> list){
-//		for(AlbumFolderClass al: list){
-//			String album = al.name;
-//			this.crealAlbumResDat(album);
-//			this.createAlbumDat(album);
-//		}
-//	}
-//	
-//	private void crealAlbumResDat(String album){
-//		File f = new File(basePath, album);
-//		File file = new File(basePath,album+".dat");
-//		if (file.exists()){
-//			//System.out.println("Found album");
-//			ObjectInputStream input;
-//			AlbumFolderClass albumDat;
-//			try {
-//				input = new ObjectInputStream(new FileInputStream(file));
-//				albumDat = (AlbumFolderClass)input.readObject();
-//				input.close();
-//				if(albumDat.isErased()){
-//					albumDat.recreate(this.url);
-//					ObjectOutput out;
-//					out = new ObjectOutputStream(new FileOutputStream(file));
-//					out.writeObject(albumDat);
-//					out.close();
-//				}
-//			} catch (IOException e) {
-//			} catch (ClassNotFoundException e) {
-//			}
-//		}
-//		else{
-//			//System.out.println("creating new");
-//			f.mkdir();
-//			File albumDat = new File(basePath,album+"/album.dat");
-//			List<PictureClass> l = new LinkedList<>();
-//			AlbumFolderClass a = new AlbumFolderClass(album, this.url);
-//			ObjectOutput out;
-//			try {
-//				out = new ObjectOutputStream(new FileOutputStream(file));
-//				out.writeObject(a);
-//				out.close();
-//				out = new ObjectOutputStream(new FileOutputStream(albumDat));
-//				out.writeObject(l);
-//				out.close();
-//			} catch (IOException e) {}
-//		}
-//
-//	}
-//	
-//	/**
-//	 * @param album
-//	 */
-//	private void createAlbumDat(String album){
-//		List<PictureClass> l = imgur.getPictures(album);
-//		File dir = new File(basePath + "/" + album);
-//		if (dir.exists()) {
-//			File dat = new File(basePath + "/" + album + "/album.dat");
-//			ObjectInputStream input;
-//			try {
-//				input = new ObjectInputStream(new FileInputStream(dat));
-//				List<PictureClass> listOld = (LinkedList<PictureClass>)input.readObject();
-//				input.close();
-//				for(PictureClass pic: l){
-//					int index = listOld.indexOf(pic);
-//					if(index < 0){
-//						//System.out.println("Adding pic: " + pic.getName());
-//						listOld.add(pic);
-//						ObjectOutput outt;
-//						outt = new ObjectOutputStream(new FileOutputStream(dat));
-//						outt.writeObject(listOld);
-//						outt.close();
-//					}
-//					else{
-//						//vamos comparar as datas de origem
-//						PictureClass picOld = listOld.get(index);
-//						String name = picOld.name;
-//						//System.out.println("found pic : " + name);
-//						//quando são a escrita é mais antigo, muda-se a data de origem para a nova
-//						//como os nomes são iguais, depois recria-se a pic
-//						if(this.equalsPic(pic, picOld)){
-//							picOld.datetime = pic.datetime;
-//							picOld.recreate(this.url);
-//							
-//							if(picsList.containsKey(album+name))
-//								picsList.replace(album+name, imgur.getPicture(album, name));
-//							else
-//								picsList.put(album+name, imgur.getPicture(album, name));
-//						}
-//						//são iguais ou não é preciso atualizar
-//						else 
-//							if(picsList.containsKey(album+name))
-//								picsList.replace(album+name, imgur.getPicture(album, name));
-//							else
-//								picsList.put(album+name, imgur.getPicture(album, name));
-//					}
-//				}
-//
-//				ObjectOutput outt;
-//				outt = new ObjectOutputStream(new FileOutputStream(dat));
-//				outt.writeObject(listOld);
-//				outt.close();
-//
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			} catch (ClassNotFoundException e) {
-//				e.printStackTrace();
-//			}
-//		}	
-//	}
-//	
-//	/**
-//	 * @param pic
-//	 * @param picOld
-//	 * @return true if the newPic is more recent
-//	 */
-//	private boolean equalsPic(PictureClass newPic, PictureClass oldPic){
-//		//só nos interessa saber quando a pic nova é mais recente (podem ser fotos diferentes,
-//		//mas com o mesmo nome
-//		if(oldPic.datetime < newPic.datetime)
-//			return true;
-//		else if (oldPic.datetime > newPic.datetime)
-//			return false;
-//		else if (oldPic.datetime == newPic.datetime)
-//			//quando tem a mesma data de origem, mas tamanhos diferentes, assumimos que a pic
-//			//é mais recente, isto é, sofreu alterações
-//			if(oldPic.datetime != newPic.datetime){
-//				return true;
-//		}
-//		return false;
-//	}
+
 }
