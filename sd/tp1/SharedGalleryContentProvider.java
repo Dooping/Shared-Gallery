@@ -61,8 +61,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		}
 		this.sendRequests();
 		this.registServer();
-		this.kafkaSubscriber(messageServerHost);
-		this.kafKaPublisher(messageServerHost);
+		//this.kafkaSubscriber(messageServerHost);
+		//this.kafKaPublisher(messageServerHost);
 
 
 	}
@@ -183,8 +183,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			if(c){
 				//System.out.println("New album");
 				server.addAlbum(new AlbumFolderClass(name, server.getServerName()));
-				ProducerRecord<String, String> data = new ProducerRecord<>("albumCreated" , name);
-				producer.send(data);
+				//ProducerRecord<String, String> data = new ProducerRecord<>("albumCreated" , name);
+				//producer.send(data);
 				return new SharedAlbum(name);
 			}
 			else return null;
@@ -204,8 +204,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			if(s.getServer().deleteAlbum(album.getName())){
 				//System.out.println("Deleting");
 				s.deleteAlbum(album.getName());
-				ProducerRecord<String, String> data = new ProducerRecord<>("albumDeleted" , album.getName());
-				producer.send(data);
+				//ProducerRecord<String, String> data = new ProducerRecord<>("albumDeleted" , album.getName());
+				//producer.send(data);
 			}
 
 		}
@@ -223,8 +223,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		if(s!= null){
 			//System.out.println("Sending new pic");
 			s.getServer().uploadPicture(album.getName(), name, data);
-			ProducerRecord<String, String> kafka = new ProducerRecord<>("pictureCreated" , album.getName());
-			producer.send(kafka);
+			//ProducerRecord<String, String> kafka = new ProducerRecord<>("pictureCreated" , album.getName());
+			//producer.send(kafka);
 			return new SharedPicture(name);
 		}
 		else
@@ -241,8 +241,8 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		ServerObjectClass s = servers.get(random.nextInt(servers.size()));
 		if(s!= null){
 			s.getServer().deletePicture(album.getName(), picture.getName());
-			ProducerRecord<String, String> data = new ProducerRecord<>("pictureDeleted" , album.getName());
-			producer.send(data);
+			//ProducerRecord<String, String> data = new ProducerRecord<>("pictureDeleted" , album.getName());
+			//producer.send(data);
 			return true;
 		}
 		else

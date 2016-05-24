@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,14 @@ import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
+
+
+
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+
 
 public class ImgurClient implements RequestInterface{
 	public static final int MANAGER_INTERVAL = 30000;
@@ -202,10 +211,13 @@ public class ImgurClient implements RequestInterface{
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
 			JSONObject p = (JSONObject) res.get("data");
 			String link = (String) p.get("link");
+			String mime = (String) p.get("type");
+			System.out.println(mime);
 			URL imageURL = new URL(link);
 			BufferedImage originalImage = ImageIO.read(imageURL);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ImageIO.write(originalImage, "jpg", baos );
+
+			ImageIO.write(originalImage, mime, baos );
 			byte[] imageInByte=baos.toByteArray();
 			//System.out.println("here is " + picture);
 			return imageInByte;
@@ -397,7 +409,21 @@ public class ImgurClient implements RequestInterface{
 		BASE64Encoder encoder = new BASE64Encoder();
 		String s = encoder.encode(data);
 		albumsReq.addBodyParameter("image", s);
+		System.out.println("Pic name: " + picture);
+		
+		if (picture == null) return false;
+        // Get position of last '.'.
+        int pos = picture.lastIndexOf(".");
+        // If there wasn't any '.' just return the string as is.
+        if (pos == -1)
+        	picture = picture;
+        else
+        	picture = picture.substring(0, pos);
+        System.out.println("No ext: " + picture);
 
+		//String ext = FilenameUtils.getExtension("/path/to/file/foo.txt");
+		
+		
 		albumsReq.addBodyParameter("name", picture);
 		String albumName = albumToId.get(album);
 		albumsReq.addBodyParameter("album", albumName);
@@ -434,8 +460,12 @@ public class ImgurClient implements RequestInterface{
 			try {
 				long t = System.currentTimeMillis();
 				List<AlbumFolderClass> l =  this.getAlbums();
-
-				this.updateAlbuns(l);
+//				if(!l.isEmpty()){
+					this.updateAlbuns(l);
+//				}
+//				else
+//					deleteDir(new File(basePath,"/"));
+//				
 
 				System.err.println("Imgur proxy ready");
 				System.out.println("Time to prepare: " + (System.currentTimeMillis() - t));
@@ -456,12 +486,43 @@ public class ImgurClient implements RequestInterface{
 	 * @param list
 	 */
 	private  void updateAlbuns(List<AlbumFolderClass> list){
+		File albuns = new File("gallery/");
+		List<File> files = new ArrayList<File>(Arrays.asList(albuns.listFiles()));
+		List <String> allAbuns = new ArrayList<String>();
+
+		
+		String albName;
+//		for(File fls : files){
+//			int pos = fls.getName().lastIndexOf(".");
+//			System.out.println(fls.getName());
+//			if (pos != -1){
+//				albName = fls.getName().substring(0, pos);
+//				System.err.println("Adding: " + albName);
+//				allAbuns.add(albName);
+//			}
+//
+//		}
+		List <String> found = new LinkedList<String>();
+		
 		for(AlbumFolderClass al: list){
 			String album = al.name;
-			//System.out.println("found album: " + album);
 			this.crealAlbumResDat(album);
 			this.createAlbumDat(album);
+			found.add(album);
 		}
+		
+//		for (String s: allAbuns){
+//			int index = found.indexOf(s);
+//			if(index == -1){
+//				//dontExists.add(album);
+//				System.out.println("Album not found on imgur: DELETING");
+//				this.deleteAlbumPhotos(s);
+//				found.remove(index);
+//			}
+//		}
+
+		
+		
 	}
 	
 	private void crealAlbumResDat(String album){
@@ -594,5 +655,18 @@ public class ImgurClient implements RequestInterface{
 		return false;
 	}
 	
+	/**
+	 * @param file
+	 * to delete a directory and all of it's content's
+	 */
+	protected void deleteDir(File file) {
+		File[] contents = file.listFiles();
+		if (contents != null) {
+			for (File f : contents) {
+				deleteDir(f);
+			}
+		}
+		file.delete();
+	}
 	
 }
