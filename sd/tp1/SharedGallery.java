@@ -18,10 +18,10 @@ public class SharedGallery extends Application {
 	
 	
     public static void main(String[] args){
-//    	if ((args.length != 1))
-//			throw new IllegalArgumentException("Syntax: SharedGallery <messageServerHost>");
-//    	messageServerHost = args[0];
-    	messageServerHost = null;
+    	if ((args.length != 1))
+			throw new IllegalArgumentException("Syntax: SharedGallery <messageServerHost>");
+    	messageServerHost = args[0];
+//    	messageServerHost = null;
         launch(args);
     }
     

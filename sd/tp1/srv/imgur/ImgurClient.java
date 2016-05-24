@@ -170,6 +170,11 @@ public class ImgurClient implements RequestInterface{
 				String name = (String) p.get("name");
 				long datetime = (long) p.get("datetime");
 				long size = (long) p.get("size");
+				//String mime = (String) p.get("type");
+				//String [] m = mime.split("/");
+				//name = name+"." + m[1];
+				//System.out.println("Name of getPictures: " + name);
+				
 				if(!idToPicName.containsKey(piI)){
 					//existem imagem no igmur sem nome, temos de lhe atribuir um nome
 					if(name == null)
@@ -200,7 +205,17 @@ public class ImgurClient implements RequestInterface{
 	
 	private byte[] requestPic(String album, String picture){
 		try{
+//			if (picture == null) return null;
+//	        // Get position of last '.'.
+//	        int pos = picture.lastIndexOf(".");
+//	        // If there wasn't any '.' just return the string as is.
+//	        if (pos != -1)
+//	        	picture = picture.substring(0, pos);
+//	        System.out.println("pic request: " + picture);
+	        
 			String picName = nameToId.get(picture);
+			
+			
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
 					"https://api.imgur.com/3/account/gonalomoncada/image/" + picName, service);
 			service.signRequest(accessToken, albumsReq);
@@ -212,6 +227,9 @@ public class ImgurClient implements RequestInterface{
 			JSONObject p = (JSONObject) res.get("data");
 			String link = (String) p.get("link");
 			String mime = (String) p.get("type");
+			System.out.println(mime);
+			String [] m = mime.split("/");
+			mime = m[1];
 			System.out.println(mime);
 			URL imageURL = new URL(link);
 			BufferedImage originalImage = ImageIO.read(imageURL);
@@ -286,11 +304,9 @@ public class ImgurClient implements RequestInterface{
 	}
 	
 	private boolean requestAlbumDeletion(String album){
-
-
 		String albumName = albumToId.get(album);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/doping/album/"+albumName, service);
+				"https://api.imgur.com/3/account/gonalomoncada/album/"+albumName, service);
 		service.signRequest(accessToken, albumsReq);
 		final Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
@@ -321,13 +337,26 @@ public class ImgurClient implements RequestInterface{
 	@Override
 	public boolean deletePicture(String album, String picture) {
 		File f = new File(basePath + "/" + album + "/album.dat");
-		if (f.exists() && picsList.containsKey(album+picture) && requestPhotoDeletion(album, picture)){
+		String imgurName = picture;
+//		if (picture == null) return false;
+//        // Get position of last '.'.
+//        int pos = picture.lastIndexOf(".");
+//        // If there wasn't any '.' just return the string as is.
+//        if (pos != -1)
+//        	imgurName = picture.substring(0, pos);
+//        System.out.println("Deleting: " + picture);
+        
+		if (f.exists() && picsList.containsKey(album+picture) && requestPhotoDeletion(album, imgurName)){
 			ObjectInputStream input;
+			
 			try {
 				File dat = new File(basePath + "/" + album + "/album.dat");
 				input = new ObjectInputStream(new FileInputStream(dat));
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
+				
+
+		        
 				PictureClass p = list.get(list.indexOf(new PictureClass(picture, this.url)));
 				p.erase(this.url);
 				ObjectOutput outt;
@@ -346,7 +375,7 @@ public class ImgurClient implements RequestInterface{
 	private boolean requestPhotoDeletion(String album, String picture){
 		String picName = nameToId.get(picture);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/doping/image/"+picName, service);
+				"https://api.imgur.com/3/account/gonalomoncada/image/"+picName, service);
 		service.signRequest(accessToken, albumsReq);
 		final Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
@@ -360,8 +389,22 @@ public class ImgurClient implements RequestInterface{
 	@Override
 	public boolean uploadPicture(String album, String pictureName, byte[] data) {
 		File dir = new File(basePath + "/" + album);
+		System.out.println("client name: " + pictureName);
+//		String pictureNameImgur = pictureName;
+//		if (pictureName == null) return false;
+//        // Get position of last '.'.
+//        int pos = pictureName.lastIndexOf(".");
+//        // If there wasn't any '.' just return the string as is.
+//        if (pos != -1){
+//        	pictureNameImgur = pictureName.substring(0, pos);
+//        	//ext = pictureName.substring(pos, pos+1);
+//        	//System.out.println(ext);
+//        }
+        	
+        //System.out.println("getting from server: " + pictureNameImgur);
+        
 		if (dir.exists() && !picsList.containsKey(album+pictureName) && requestPhotoUpdate(album, pictureName, data)) {
-			dir = new File(basePath, album + "/"+ pictureName);
+			//dir = new File(basePath, album + "/"+ pictureName);
 			File dat = new File(basePath + "/" + album + "/album.dat");
 			ObjectInputStream input;
 			try {
@@ -410,20 +453,7 @@ public class ImgurClient implements RequestInterface{
 		String s = encoder.encode(data);
 		albumsReq.addBodyParameter("image", s);
 		System.out.println("Pic name: " + picture);
-		
-		if (picture == null) return false;
-        // Get position of last '.'.
-        int pos = picture.lastIndexOf(".");
-        // If there wasn't any '.' just return the string as is.
-        if (pos == -1)
-        	picture = picture;
-        else
-        	picture = picture.substring(0, pos);
-        System.out.println("No ext: " + picture);
 
-		//String ext = FilenameUtils.getExtension("/path/to/file/foo.txt");
-		
-		
 		albumsReq.addBodyParameter("name", picture);
 		String albumName = albumToId.get(album);
 		albumsReq.addBodyParameter("album", albumName);
@@ -460,20 +490,17 @@ public class ImgurClient implements RequestInterface{
 			try {
 				long t = System.currentTimeMillis();
 				List<AlbumFolderClass> l =  this.getAlbums();
-//				if(!l.isEmpty()){
-					this.updateAlbuns(l);
-//				}
-//				else
-//					deleteDir(new File(basePath,"/"));
-//				
+				this.updateAlbuns(l);
+
+				
 
 				System.err.println("Imgur proxy ready");
 				System.out.println("Time to prepare: " + (System.currentTimeMillis() - t));
 				while(true){
+					Thread.sleep(MANAGER_INTERVAL);
 					//ler os albuns e escrever
 					l =  this.getAlbums();
-					this.updateAlbuns(l);
-					Thread.sleep(MANAGER_INTERVAL);
+					this.updateAlbuns(l);	
 				}
 
 			} catch (Exception e) {
@@ -486,24 +513,31 @@ public class ImgurClient implements RequestInterface{
 	 * @param list
 	 */
 	private  void updateAlbuns(List<AlbumFolderClass> list){
-		File albuns = new File("gallery/");
+		if(list == null)
+			return;
+		File albuns = new File("./gallery/");
 		List<File> files = new ArrayList<File>(Arrays.asList(albuns.listFiles()));
 		List <String> allAbuns = new ArrayList<String>();
 
 		
 		String albName;
-//		for(File fls : files){
-//			int pos = fls.getName().lastIndexOf(".");
-//			System.out.println(fls.getName());
-//			if (pos != -1){
-//				albName = fls.getName().substring(0, pos);
-//				System.err.println("Adding: " + albName);
-//				allAbuns.add(albName);
-//			}
-//
-//		}
-		List <String> found = new LinkedList<String>();
 		
+		
+		for(File fls : files){
+			int pos = fls.getName().lastIndexOf(".");
+			//System.out.println(fls.getName());
+			if (pos == -1){
+				//albName = fls.getName().substring(0, pos);
+				albName = fls.getName();
+				System.err.println("Adding: " + albName);
+				allAbuns.add(albName);
+			}
+
+		}
+		
+		List <String> found = new LinkedList<String>();
+
+	
 		for(AlbumFolderClass al: list){
 			String album = al.name;
 			this.crealAlbumResDat(album);
@@ -511,18 +545,20 @@ public class ImgurClient implements RequestInterface{
 			found.add(album);
 		}
 		
-//		for (String s: allAbuns){
-//			int index = found.indexOf(s);
-//			if(index == -1){
-//				//dontExists.add(album);
-//				System.out.println("Album not found on imgur: DELETING");
-//				this.deleteAlbumPhotos(s);
-//				found.remove(index);
-//			}
-//		}
+		for (String s: allAbuns){
+			int index = found.indexOf(s);
+			if(index == -1){
+				//dontExists.add(album);
+				//System.out.println("Album "+ s + " not found on imgur: DELETING");
+				//this.deleteAlbumPhotos(s);
+				//System.out.println("Deleting: " + s);
+				deleteDir(new File(basePath, s));
+				
+				//System.out.println("Deleting " + s+".dat");
+				deleteDir(new File(basePath, s+".dat"));
 
-		
-		
+			}
+		}
 	}
 	
 	private void crealAlbumResDat(String album){
@@ -663,9 +699,11 @@ public class ImgurClient implements RequestInterface{
 		File[] contents = file.listFiles();
 		if (contents != null) {
 			for (File f : contents) {
+				System.out.println("Cleaning " + f.getName());
 				deleteDir(f);
 			}
 		}
+		
 		file.delete();
 	}
 	
