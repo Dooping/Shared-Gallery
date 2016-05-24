@@ -1,4 +1,4 @@
-package sd.tp1.srvREST;
+package sd.tp1.srv.REST;
 
 import java.io.File;
 import java.io.FileInputStream;
