@@ -106,7 +106,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 							server.addListAlbuns(toAdd);
 						}
 					}catch (Exception e ){
-						//return null;
+						e.printStackTrace();
 					}
 				}
 			}
