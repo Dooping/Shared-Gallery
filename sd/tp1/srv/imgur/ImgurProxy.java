@@ -208,7 +208,7 @@ public class ImgurProxy {
 					outt.close();
 				}
 				else{
-					if (!pic.isErased())
+					if (!!list.get(index).isErased())
 						return Response.status(422).build();
 					pic = list.get(index);
 					pic.recreate(this.url);

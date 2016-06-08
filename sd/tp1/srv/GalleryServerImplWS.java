@@ -267,7 +267,7 @@ public class GalleryServerImplWS{
 					outt.close();
 				}
 				else{
-					if (!pic.isErased())
+					if (!!list.get(index).isErased())
 						throw new PictureAlreadyExistsException("picture already exists");
 					pic = list.get(index);
 					pic.recreate(this.url);
