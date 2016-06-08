@@ -97,7 +97,7 @@ public class ImgurClient implements RequestInterface{
 		
 		try{
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/gonalomoncada/albums/ids", service);
+					"https://api.imgur.com/3/account/doping/albums/ids", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -129,7 +129,7 @@ public class ImgurClient implements RequestInterface{
 			while(it.hasNext()){
 				String s = it.next();
 				OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-						"https://api.imgur.com/3/account/gonalomoncada/album/" + s, service);
+						"https://api.imgur.com/3/account/doping/album/" + s, service);
 				service.signRequest(accessToken, albumsReq);
 				final Response albumsRes = albumsReq.send();
 				if(albumsRes.getCode() == 200){
@@ -156,13 +156,14 @@ public class ImgurClient implements RequestInterface{
 		try{
 			String albumName = albumToId.get(album);
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/gonalomoncada/album/"+albumName+"/images", service);
+					"https://api.imgur.com/3/account/doping/album/"+albumName+"/images", service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
 				return null;
 			JSONParser parser = new JSONParser();
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
+			System.out.println(albumsRes.getBody());
 			JSONArray albums = (JSONArray) res.get("data");
 			@SuppressWarnings("rawtypes")
 			Iterator albumsIt = albums.iterator();
@@ -205,7 +206,7 @@ public class ImgurClient implements RequestInterface{
 		try{
 			String picName = nameToId.get(picture);
 			OAuthRequest albumsReq = new OAuthRequest(Verb.GET,
-					"https://api.imgur.com/3/account/gonalomoncada/image/" + picName, service);
+					"https://api.imgur.com/3/account/doping/image/" + picName, service);
 			service.signRequest(accessToken, albumsReq);
 			final Response albumsRes = albumsReq.send();
 			if(albumsRes.getCode() != 200)
@@ -215,10 +216,10 @@ public class ImgurClient implements RequestInterface{
 			JSONObject p = (JSONObject) res.get("data");
 			String link = (String) p.get("link");
 			String mime = (String) p.get("type");
-			System.out.println(mime);
+			//System.out.println(mime);
 			String [] m = mime.split("/");
 			mime = m[1];
-			System.out.println(mime);
+			//System.out.println(mime);
 			URL imageURL = new URL(link);
 			BufferedImage originalImage = ImageIO.read(imageURL);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -303,14 +304,13 @@ public class ImgurClient implements RequestInterface{
 	
 	private boolean requestAlbumDeletion(String album){
 		String albumName = albumToId.get(album);
+		this.deleteAlbumPhotos(album);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/gonalomoncada/album/"+albumName, service);
+				"https://api.imgur.com/3/account/doping/album/"+albumName, service);
 		service.signRequest(accessToken, albumsReq);
 		final Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
 			albumToId.remove(album);
-			//apagar as fotos primeiro
-			this.deleteAlbumPhotos(album);
 			return true;
 		}
 		return false;
@@ -366,7 +366,7 @@ public class ImgurClient implements RequestInterface{
 	private boolean requestPhotoDeletion(String album, String picture){
 		String picName = nameToId.get(picture);
 		OAuthRequest albumsReq = new OAuthRequest(Verb.DELETE,
-				"https://api.imgur.com/3/account/gonalomoncada/image/"+picName, service);
+				"https://api.imgur.com/3/account/doping/image/"+picName, service);
 		service.signRequest(accessToken, albumsReq);
 		final Response albumsRes = albumsReq.send();
 		if(albumsRes.getCode()==200){
@@ -380,7 +380,7 @@ public class ImgurClient implements RequestInterface{
 	@Override
 	public boolean uploadPicture(String album, String pictureName, byte[] data) {
 		File dir = new File(basePath + "/" + album);
-		System.out.println("client name: " + pictureName);
+		//System.out.println("client name: " + pictureName);
         
 		if (dir.exists() && !picsList.containsKey(album+pictureName) && requestPhotoUpdate(album, pictureName, data)) {
 			//dir = new File(basePath, album + "/"+ pictureName);
@@ -431,7 +431,7 @@ public class ImgurClient implements RequestInterface{
 		BASE64Encoder encoder = new BASE64Encoder();
 		String s = encoder.encode(data);
 		albumsReq.addBodyParameter("image", s);
-		System.out.println("Pic name: " + picture);
+		//System.out.println("Pic name: " + picture);
 
 		albumsReq.addBodyParameter("name", picture);
 		String albumName = albumToId.get(album);
@@ -503,7 +503,7 @@ public class ImgurClient implements RequestInterface{
 			//System.out.println(fls.getName());
 			if (pos == -1){
 				albName = fls.getName();
-				System.err.println("Adding: " + albName);
+				//System.err.println("Adding: " + albName);
 				allAbuns.add(albName);
 			}
 
