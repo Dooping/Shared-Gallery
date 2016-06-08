@@ -52,4 +52,11 @@ public class AlbumFolderClass implements Serializable{
 	public boolean isErased(){
 		return erased;
 	}
+
+	@Override
+	public String toString() {
+		return "AlbumFolderClass [name=" + name + ", erased=" + erased + "]";
+	}
+	
+	
 }

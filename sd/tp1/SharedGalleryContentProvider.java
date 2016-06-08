@@ -94,6 +94,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 				if (server != null){
 					try{
 						List<AlbumFolderClass> al = server.getServer().getAlbums();
+						//System.out.println(al);
 						List<AlbumFolderClass> toAdd = new LinkedList<>();
 						if(al != null){
 							for(AlbumFolderClass album : al){
@@ -105,7 +106,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 							server.addListAlbuns(toAdd);
 						}
 					}catch (Exception e ){
-						return null;
+						//return null;
 					}
 				}
 			}
@@ -115,11 +116,12 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 				if(!a.isErased())
 					toReturn.add(new SharedAlbum(a.name));
 			}
+			return toReturn;
 		}
 		else return null;
 
 
-		return toReturn;
+		//return toReturn;
 	}
 
 	/**
