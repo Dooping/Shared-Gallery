@@ -56,6 +56,12 @@ public class LamportClock implements Serializable{
 	       return this.lamportNumber-other.lamportNumber;
 		else
 			return this.serverUrl.compareTo(other.serverUrl);
+	}
+
+	@Override
+	public String toString() {
+		return "LamportClock [serverUrl=" + serverUrl + ", lamportNumber="
+				+ lamportNumber + "]";
 	} 
 
 }

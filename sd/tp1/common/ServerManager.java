@@ -35,7 +35,7 @@ public class ServerManager {
 	protected static final int NUMBER_OF_REPLICS = 2;
 	protected static final int SYNCHRONIZATION_DELAY = 10000;
 	protected static final int SYNCHRONIZATION_CYCLE = 10000;
-	protected static final int GARBAGE_INTERVAL = 20000;
+	protected static final int GARBAGE_INTERVAL = 100000;
 
 	protected MulticastDiscovery discovery;
 	protected MulticastSocket socket;
@@ -393,7 +393,7 @@ public class ServerManager {
 							List<PictureClass> newSetPictures = new LinkedList<PictureClass>();
 							for(PictureClass p: pictures){
 								if(p.isErased()){
-									File pic = new File(basePath, al.name + p.name);
+									File pic = new File(basePath, al.name +"/" + p.name);
 									deleteDir(pic);
 								}
 								else
