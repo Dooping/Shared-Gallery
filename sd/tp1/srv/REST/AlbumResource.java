@@ -233,6 +233,7 @@ public class AlbumResource {
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
 				PictureClass pic = new PictureClass(pictureName, this.url);
+				System.out.println(pic);
 				int index = list.indexOf(pic);
 				if(index < 0){
 					list.add(new PictureClass(pictureName, this.url));
@@ -251,6 +252,8 @@ public class AlbumResource {
 					outt.writeObject(list);
 					outt.close();
 				}
+				if(dir.exists())
+					dir.delete();
 				FileOutputStream out = new FileOutputStream(dir);
 				out.write(picture);
 				out.close();

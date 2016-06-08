@@ -11,6 +11,7 @@ import java.io.Serializable;
  *
  */
 public class PictureClass implements Serializable{
+
 	private static final long serialVersionUID = 0L;
 	public String name;
 	public boolean erased;
@@ -60,5 +61,9 @@ public class PictureClass implements Serializable{
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		return "PictureClass [name=" + name + "]";
+	}
 	
 }

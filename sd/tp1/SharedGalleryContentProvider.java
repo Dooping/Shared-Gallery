@@ -87,7 +87,9 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		Map<String,AlbumFolderClass> albums = new HashMap<>();
 		List<Album> toReturn = new ArrayList<Album>();
 		if (servers != null){
-			for (ServerObjectClass server: servers){
+			Iterator<ServerObjectClass> serverIt = servers.iterator();
+			while (serverIt.hasNext()){
+				ServerObjectClass server = serverIt.next();
 				if (server != null){
 					try{
 						List<AlbumFolderClass> al = server.getServer().getAlbums();
@@ -132,9 +134,13 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 			for(ServerObjectClass s : servers){
 				List<PictureClass> serverPictures = s.getServer().getPictures(album.getName());
 				if(serverPictures != null){
-					for(PictureClass picture : serverPictures)
-						if(!picture.isErased()){
+					for(PictureClass picture : serverPictures){
+						//if(!picture.isErased()){
 							PictureClass p = pictures.get(picture.name);
+							if(p!=null)
+							System.out.println(p.name + " erased:" + p.erased+ " " + p.lamportClock);
+							else
+								System.out.println(picture.name + " erased:" + picture.erased+ " " + picture.lamportClock);
 							if((p != null && picture.lamportClock.compareTo(p.lamportClock)>0) || p == null)
 								pictures.put(picture.name, picture);
 						}

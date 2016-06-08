@@ -276,6 +276,8 @@ public class GalleryServerImplWS{
 					outt.writeObject(list);
 					outt.close();
 				}
+				if(dir.exists())
+					dir.delete();
 				FileOutputStream out = new FileOutputStream(dir);
 				out.write(data);
 				out.close();
