@@ -163,7 +163,7 @@ public class ImgurClient implements RequestInterface{
 				return null;
 			JSONParser parser = new JSONParser();
 			JSONObject res = (JSONObject) parser.parse(albumsRes.getBody());
-			System.out.println(albumsRes.getBody());
+			//System.out.println(albumsRes.getBody());
 			JSONArray albums = (JSONArray) res.get("data");
 			@SuppressWarnings("rawtypes")
 			Iterator albumsIt = albums.iterator();
@@ -559,7 +559,7 @@ public class ImgurClient implements RequestInterface{
 			File albumDat = new File(basePath,album+"/album.dat");
 			//System.out.println("Writing on: " + album+"/album.dat");
 			List<PictureClass> l = this.getPictures(album);
-			System.out.println(this.url);
+			//System.out.println(this.url);
 			AlbumFolderClass a = new AlbumFolderClass(album, this.url);
 			ObjectOutput out;
 			try {
