@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import sd.tp1.RESTClientClass;
 import sd.tp1.RequestInterface;
@@ -42,7 +43,7 @@ public class ServerManager {
 	protected List<ServerObjectClass> servers;
 
 	public ServerManager() {
-		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
+		servers = Collections.synchronizedList(new CopyOnWriteArrayList<ServerObjectClass>());
 		discovery = new MulticastDiscovery();
 		try {
 			socket = new MulticastSocket();
