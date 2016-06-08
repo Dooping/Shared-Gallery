@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -49,7 +50,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 
 
 	SharedGalleryContentProvider(String messageServerHost) {
-		servers = Collections.synchronizedList(new LinkedList<ServerObjectClass>());
+		servers = Collections.synchronizedList(new CopyOnWriteArrayList<ServerObjectClass>());
 		random = new Random(System.currentTimeMillis());
 
 		cache = new PictureCacheClass();
