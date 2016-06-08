@@ -233,7 +233,6 @@ public class AlbumResource {
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
 				PictureClass pic = new PictureClass(pictureName, this.url);
-				System.out.println(pic);
 				int index = list.indexOf(pic);
 				if(index < 0){
 					list.add(new PictureClass(pictureName, this.url));
@@ -243,7 +242,7 @@ public class AlbumResource {
 					outt.close();
 				}
 				else{
-					if (!pic.isErased())
+					if (!list.get(index).isErased())
 						return Response.status(422).build();
 					pic = list.get(index);
 					pic.recreate(this.url);

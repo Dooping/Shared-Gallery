@@ -137,10 +137,6 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 					for(PictureClass picture : serverPictures){
 						//if(!picture.isErased()){
 							PictureClass p = pictures.get(picture.name);
-							if(p!=null)
-							System.out.println(p.name + " erased:" + p.erased+ " " + p.lamportClock);
-							else
-								System.out.println(picture.name + " erased:" + picture.erased+ " " + picture.lamportClock);
 							if((p != null && picture.lamportClock.compareTo(p.lamportClock)>0) || p == null)
 								pictures.put(picture.name, picture);
 						}
