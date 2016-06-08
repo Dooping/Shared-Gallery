@@ -93,11 +93,14 @@ public class ImgurProxy {
 			e.printStackTrace();
 		}
 		picsList = new ConcurrentHashMap<String, byte[]>();
+		//System.out.println(url);
 		imgur = new ImgurClient(accessToken, service, url);
+
 	}
 	
 	public void setUrl (String url){
 		this.url = url;
+		imgur.url = url;
 	}
 	
 	public ImgurClient getImgurClient(){
@@ -172,9 +175,9 @@ public class ImgurProxy {
 	@Path("/{album}")
 	public Response deleteAlbum(@PathParam("album") String album) {
 		 if(imgur.deleteAlbum(album))
+		//imgur.deleteAlbum(album);
 			return Response.ok().build();	
 		return Response.status(Status.NOT_FOUND).build();	
-
 	}
 	
 	@DELETE
@@ -198,6 +201,7 @@ public class ImgurProxy {
 				input = new ObjectInputStream(new FileInputStream(dat));
 				List<PictureClass> list = (LinkedList<PictureClass>)input.readObject();
 				input.close();
+				System.out.println(this.url);
 				PictureClass pic = new PictureClass(pictureName, this.url);
 				int index = list.indexOf(pic);
 				if(index < 0){
@@ -208,7 +212,7 @@ public class ImgurProxy {
 					outt.close();
 				}
 				else{
-					if (!!list.get(index).isErased())
+					if (!list.get(index).isErased())
 						return Response.status(422).build();
 					pic = list.get(index);
 					pic.recreate(this.url);

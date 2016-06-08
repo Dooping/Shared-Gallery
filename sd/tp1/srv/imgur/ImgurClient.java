@@ -53,7 +53,7 @@ import javax.imageio.stream.ImageInputStream;
 
 public class ImgurClient implements RequestInterface{
 	public static final int MANAGER_INTERVAL = 30000;
-	private String url;
+	public String url;
 	File basePath;
 	private OAuth2AccessToken accessToken;
 	private OAuth20Service service;
@@ -72,7 +72,7 @@ public class ImgurClient implements RequestInterface{
 	
 	
 	
-	public ImgurClient(OAuth2AccessToken accessToken, OAuth20Service service, String url) {
+	public ImgurClient(OAuth2AccessToken accessToken, OAuth20Service service, String ur) {
 		this.accessToken =accessToken;
 		this.service = service;
 		newName = 0;
@@ -83,7 +83,9 @@ public class ImgurClient implements RequestInterface{
 		basePath = new File("./gallery");
 		if (!basePath.exists())
 			basePath.mkdir();
-		this.url = url;
+		System.out.println(ur);
+		this.url = ur;
+		//System.out.println(this.url);
 		picsList = new ConcurrentHashMap<String, byte[]>();
 		this.imgurManager();
 	}
@@ -260,12 +262,21 @@ public class ImgurClient implements RequestInterface{
 	@Override
 	public boolean deleteAlbum(String album) {
 		File f = new File(basePath, album+".dat");
-		if(f.exists() && requestAlbumDeletion(album)){
+		if(f.exists() ){
+
+			new Thread(() -> {
+				requestAlbumDeletion(album);
+			}).start();
+			
+			
+			
+			
 			ObjectInputStream input;
 			try {
 				input = new ObjectInputStream(new FileInputStream(f));
 				AlbumFolderClass albumDat = (AlbumFolderClass)input.readObject();
 				input.close();
+				//System.out.println(this.url);
 				albumDat.erase(this.url);
 				ObjectOutput out;
 				out = new ObjectOutputStream(new FileOutputStream(f));
@@ -283,6 +294,7 @@ public class ImgurClient implements RequestInterface{
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
 			}
+			
 			return true;
 		}
 		else 
@@ -547,6 +559,7 @@ public class ImgurClient implements RequestInterface{
 			File albumDat = new File(basePath,album+"/album.dat");
 			//System.out.println("Writing on: " + album+"/album.dat");
 			List<PictureClass> l = this.getPictures(album);
+			System.out.println(this.url);
 			AlbumFolderClass a = new AlbumFolderClass(album, this.url);
 			ObjectOutput out;
 			try {
