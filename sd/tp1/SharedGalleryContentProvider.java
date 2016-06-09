@@ -262,7 +262,7 @@ public class SharedGalleryContentProvider implements GalleryContentProvider{
 		List<ServerObjectClass> list = new LinkedList<>();
 		try{
 			for (ServerObjectClass server: servers){
-				if (server.containsAlbuns(album)){
+				if (server.containsAlbuns(album)&& server.isConnected()){
 					list.add(server);
 				}
 			}
