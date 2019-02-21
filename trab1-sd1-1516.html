@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Trabalho SD 1516</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <meta http-equiv="cache-control" content="no-store">
+  <link href="../../sd1web.css" rel="stylesheet" type="text/css"></head><body class="webpage">
+<div class="header">
+<h1 style="text-align: center;">Distributed Systems <br>
+</h1>
+<h1 style="text-align: center;">Project nº 1 <br>
+</h1>
+
+<h2 style="text-align: center;">Engenharia
+Informática</h2>
+<h3 style="text-align: center;"> Ano lectivo: 2015/2016, 2º Semestre</h3>
+</div>
+
+<h1>Index</h1>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">Deadline</span>: April, 6th, 23h59<br>
+</div>
+<br>
+
+<ul>
+
+  <li><a href="#objectivo">Goal</a></li>
+  <li><a href="#contexto">Components of the system<br>
+    </a></li>
+  <li><strong><a href="#base1">Funcionalidades base e opcionais</a></strong></li>
+  <li><a href="#ambiente">Environment<br></a></li>
+  <li><a href="#report">Written Report<br></a></li>
+  <li><a href="#delivery">Delivery<br>
+</a></li>
+</ul>
+
+<h1><a name="objectivo"></a>Goal</h1>
+
+<p>The goal of the project is to create a system that allows users to
+access a shared gallery of pictures. A gallery consists of multiple
+albums. Each album consists of a set of pictures.<br>
+Users access the gallery through a program with a graphical interface (see environment for details).
+Using the application the user can:<br>
+</p>
+
+<ul>
+
+  <li>List the existing albums</li>
+  <li>Create an album</li>
+  <li>Delete an album</li>
+  <li>Access the pictures in album</li>
+  <li>Add pictures to an album</li>
+  <li>Remove a picture from an album<br>
+  </li>
+</ul>
+
+<p>The albums and pictures will be stored at multiple locations
+(servers). The application will have to hide the distributed nature of
+the contents of the gallery to the user. For example, a given album can
+be have its contents scattered across multiple servers, yet must be
+presented to the user as a single unified collection of pictures.<br>
+&nbsp;<br>
+</p>
+
+<h1><a name="contexto"></a>Components of the system</h1>
+
+<p>The system must contain, at least, two different components<br>
+<br>
+<span style="font-weight: bold;">Content Server</span><br>
+Servers store albums (and pictures) in local storage (file system) and
+export an interface that allows clients to access its contents
+remotely. <br>
+<br>
+<span style="font-weight: bold;">Client</span><br>
+The client is the application that users use to access the shared
+gallery.<br>
+<br>
+A sample application on how to use the graphical interface is provided;
+the students must extend this application to use the information
+obtained from remote servers. (more details at the end of this document)<br>
+</p>
+
+<br>
+
+<h1><a name="base1"></a>Functionalities<br>
+</h1>
+
+<h2>Server discovery [2 points]<span style="font-weight: normal;"></span></h2>
+
+<p><span style="font-weight: normal;">Clients must find servers without
+the need to enter the address of the server in the client.</span><br style="font-weight: normal;">
+<span style="font-weight: normal;">Suggestion: use multicast (as in lab
+2)&nbsp;</span></p>
+
+<h2>Base web services [8 points]</h2>
+
+<p>Must implement a system that supports the functions of the
+application using Web Services SOAP.<br>
+</p>
+
+<h2>Base REST [5 points]<br>
+</h2>
+
+<p><span style="font-weight: normal;">Must implement a system that
+supports the functions of the application using REST.</span><br>
+</p>
+
+<h2>REST+ [7 points] (alternative to REST) - optional<br>
+</h2>
+
+<p><span style="font-weight: normal;">The client must be able to use
+the content provided by the two types of servers, supporting a shared
+gallery that is distributed across a mix of Web Services based on SOAP
+and REST.</span><br>
+</p>
+
+<h2>Update interface on changes in the list of available servers [up to 2 points] - optional<br>
+</h2>
+
+
+<p>The client must implement a mechanism to monitor when a server
+becomes unavailable, and notify the GUI to update the displayed
+information (using the Gui interface).</p>
+
+<h2>Cache data in the client [up to 2 points] - optional<br>
+</h2>
+
+<p>The client method must cache
+information in a way that it reduces the need to contact the servers.</p>
+<p style="text-decoration: underline;"><br>
+</p>
+
+
+<h1><a name="ambiente"></a>Environment<br>
+</h1>
+
+<p><span style="font-weight: bold;">IMPORTANT:</span> The project must be demonstrated in the labs, with servers running in <span style="font-weight: bold;">at least two computers</span>, either using existing hardware or student's hardware.</p>
+<p>We provide Java clases that implement the user interface of the program. <a href="sd1516-tp1.zip">The code is available here</a>. <br>
+</p>
+<p>The code uses JavaFX 8u40. JavaFX is included in Java 8 JRE and JDK  distributions, but it <span style="font-weight: bold; color: red;">requires version 1.8.0_40 or more recent</span>. For <span style="font-weight: bold; color: red;">compiling in Eclipse you must additionally</span>
+set the project's Properties &gt; Java Compiler &gt; Error/Warnings
+&gt; Deprecated and Restricted API &gt; Forbidden reference (access
+rules) to Warning. <br>
+</p>
+<p>The code includes classes for the GUI (package sd.tp1.gui) and an
+application example that uses the GUI to display picture in the file
+system (package sd.tp1.example). <br>
+</p>
+<p>For implementing project 1, you can use the following classes:</p>
+<ul>
+  <li>sd.tp1.SharedGallery : main class for starting the shared
+gallery client (no need to change, unless you want to add parameters to
+your application)</li>
+  <li>sd.tp1.SharedGalleryContentProvider : this class defines the
+methods that must be implemented for providing the application
+functionality. In particular, the following methods are invoked by the
+interface for executing a user operation:</li>
+  <li>
+    <pre>&nbsp;&nbsp;&nbsp; /**</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* Returns the list of albums in the system.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* On error this method should return null.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;*/</pre>
+    <pre>&nbsp;&nbsp;&nbsp; public List&lt;Album&gt; getListOfAlbums()</pre>
+    <pre><br>&nbsp;&nbsp;&nbsp; /**</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* Returns the list of pictures for the given album. </pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* On error this method should return null.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;*/</pre>
+    <pre>&nbsp;&nbsp;&nbsp; public List&lt;Picture&gt; getListOfPictures(Album album)</pre>
+    <pre><br>&nbsp;&nbsp;&nbsp; /**</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* Returns the contents of picture in album.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* On error this method should return null.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;*/</pre>
+    <pre>&nbsp;&nbsp;&nbsp; public byte[] getPictureData(Album album, Picture picture)</pre>
+    <pre><br>&nbsp;&nbsp;&nbsp; /**</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* Create a new album.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* On error this method should return null.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;*/</pre>
+    <pre>&nbsp;&nbsp;&nbsp; public Album createAlbum(String name) </pre>
+    <pre><br>&nbsp;&nbsp;&nbsp; /**</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* Delete an existing album.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;*/</pre>
+    <pre>&nbsp;&nbsp;&nbsp; public void deleteAlbum(Album album)</pre>
+    <pre>&nbsp;&nbsp;&nbsp; </pre>
+    <pre>&nbsp;&nbsp;&nbsp; /**</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* Add a new picture to an album.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* On error this method should return null.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;*/</pre>
+    <pre>&nbsp;&nbsp;&nbsp; public Picture uploadPicture(Album album, String name, byte[] data) </pre>
+    <pre><br>&nbsp;&nbsp;&nbsp; /**</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* Delete a picture from an album.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;* On error this method should return false.</pre>
+    <pre>&nbsp;&nbsp;&nbsp; &nbsp;*/</pre>
+    <pre>&nbsp;&nbsp;&nbsp; public boolean deletePicture(Album album, Picture picture)</pre>
+    <br>
+  </li>
+</ul>
+
+<br>
+
+<h1><a name="report"></a>Written Report:<br></h1>
+
+<p>A written report <b>must</b> be delivered by each group describing their work and implementation. The report should have <b>at most 4 pages</b> <i>(Server APIs should be delivered as an appendix that goes beyond the 4 page limit)</i>, and be delivered in paper at <it>Secretaria</it> in the Informatics Department. The organization of the report is free, and the students should write their report following a structure that makes its contents clear and easy to follow.</p>
+	
+<p>The report <b>must</b> cover the following topics.</p>
+<ul>
+  <li> General description of the work performed by the students, clearly identifying which aspects were completed and fully implemented.</li>
+  <li> Limitations of the delivered code.</li>
+  <li> Interfaces of the servers (both SOAP and REST when applicable).
+  <li> Clear explanation of the mechanisms (i.e, protocols) employed for:
+  <ul>
+	<li>Discovery of servers.</li>
+	<li>Detection of server failure.</li>
+	<li>Handling of faults (both of individual servers or errors during the execution of requests)</li>
+  </ul>
+  <li> Discussion of the implementation decisions taken by the students, when applicable, discussing these decisions in light of possible alternatives.</li>
+</ul>
+
+<p>The report can also cover aspects related with difficulties felt by the students during the execution of the project or other aspects that the students consider relevant.</p>
+<p><br>
+</p>
+<h1><a name="delivery"></a>Delivery Rules:<br></h1>
+<p>The project delivery date is 7 of April of 2016. Each group has 2 slip days to spend between the two projects of the course (meaning that at delivery of projects can happen with a delay without any penalty, as long as the sum of the delay across both projects is not above 2 days).</p>
+<p>The report delivery date is 12 of April of 2016. Slip days <b>cannot</b> be used for the delivery of the report. The report should be delivered physically at <it>Secretaria</it> in the Informatics Department, stapled and with <b>no</b> cover page. The limit of pages is 4, excluding appendix, that <b>must only contain</b> Server APIs.</p>
+
+
+<br>
+<p><br>
+</p>
+<p><br>
+</p>
+
+<br>
+
+<br>
+
+</body></html>

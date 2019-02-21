@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Trabalho SD 1516</title>
+    <meta http-equiv="Content-Type" content="text/html;
+      charset=windows-1252">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="cache-control" content="no-store">
+    <link href="../../sd1web.css" rel="stylesheet" type="text/css">
+  </head>
+  <body class="webpage">
+    <div class="header">
+      <h1 style="text-align: center;">Distributed Systems <br>
+      </h1>
+      <h1 style="text-align: center;">Project nº 2 <br>
+      </h1>
+      <h2 style="text-align: center;">Engenharia Informática</h2>
+      <h3 style="text-align: center;"> Ano lectivo: 2015/2016, 2º
+        Semestre</h3>
+    </div>
+    <h1>Index</h1>
+    <div style="margin-left: 40px;"><span style="font-weight: bold;">Deadline</span>:
+      May, 21st, 23h59<br>
+    </div>
+    <br>
+    <ul>
+      <li><a href="#objectivo">Goal</a></li>
+      <li><strong><a href="#base1">Mandatory and Optional Features<br>
+          </a></strong></li>
+      <li><a href="#ambiente">Environment<br>
+        </a></li>
+      <li><a href="#report">Written Report<br>
+        </a></li>
+      <li><a href="#delivery">Delivery<br>
+        </a></li>
+    </ul>
+    <h1><a name="objectivo"></a>Goal</h1>
+    <p>The goal of the project is to extend the system created in
+      Project 1 to address the following challenges:</p>
+    <ul>
+      <li>Interact with an external service<br>
+      </li>
+      <li>Make communications secure<br>
+      </li>
+      <li>Fault tolerance: replicate data at multiple servers&nbsp; <br>
+      </li>
+    </ul>
+    <h1><a name="base1"></a>Features<br>
+    </h1>
+    <h2>1 - Interaction with an external service (6 values) <span style="font-weight:
+        normal;"></span></h2>
+    <p><span style="font-weight: normal;">Create a server (either in
+        REST or SOAP) that act as a proxy to a remote service (e.g.
+        Imgur, Flickr). This server/proxy will allow clients to access
+        albums and photos stored in the account of a user at a remote
+        service.<br>
+        <p>Note that while in the servers that were implemented on the first project, we consider that a picture with the same name in the same album are the always the same picture (this is still valid in this project for SOAP and REST servers), in Imgur an account can have more than one album with the same name (field title) and more than one picture in the same album with the same name (field title). In this case, you should report to the client different names. For instance, you can report a name for the object (album or photo) that is the concatenation of that object title with its unique identifier used by imgur.
+
+	<p>	NOTE: the proxy should access the general REST or SOAP APIs
+        provided by the services directly, i.e., you should not use any
+        client library provided by these services.<br>
+      </span><span style="font-weight: normal;"></span></p>
+    <h2>2 - Secure communications (3 values)<br>
+    </h2>
+    <p>Communications between the clients and the servers must be
+      secure, using secure channels (SSL/HTTPS). Mandatory for REST
+      servers.<br>
+    </p>
+    <p>Since SSL/HTTPS will only authenticate the server, some provision should be taken to authenticate the clients. For instance, one possible solution is to have a shared password among clients and servers.</p>
+    <h2>3 - Full album replication (5 values) <br>
+    </h2>
+    <p><span style="font-weight: normal;">The contents of an album must
+        be replicated in all servers of the system (excluding those
+        servers that act as a proxy to a remote service).<br>
+        
+	<p>The replication solution employed by students should provide, at least, the semantics of eventual consistency. Which implies that after the system stops receiving user operations and all servers are synchornized, all servers should have the same final state (i.e, the albuns and photos stored in each server are exactly the same).<br>Students should also consider special cases where the behavior of the replication system can lead to a user perceived behavior that goes against its expectations. For instance, if a photo is deleted by a user, and no other user uploads it again, the photo should not remain visible in the system.
+	</p>
+
+	<p>NOTE: besides updating all servers when a new photo is added or
+        a photo is removed, you must also consider the need to
+        synchronize the state of a server that re-joins the system.<br>
+      </span></p>
+    <h2>4 - Full album replication + proxy&nbsp; - optional feature in alternative to 3 (7 values)<br>
+    </h2>
+    <p><span style="font-weight: normal;">This option replaces the
+        previous one by also requiring data to be replicated from and to the
+        external services.<br>
+        NOTE: you must consider that the state of an album in the
+        external service may change due to direct access to the service,
+        and not throught the service. <br>
+        SUGGESTION: periodically check if the server state has changed.
+        <br>
+      </span></p>
+    <h2>5 - Partial album replication - optional feature in alternative to 3 and 4 (7 values)<br>
+    </h2>
+    <p><span style="font-weight: normal;">This option replaces the
+        "Full album replication".</span> and the previously discussed  optional feature (4).
+    <p><span style="font-weight: normal;">The goal of this option is to
+        maintain at least K replicas of a photo in the servers that are
+        running (assuming that K servers are running). To this end, the
+        system may need to create new replicas when some server fails.</span></p>
+    <h2>6 - Partial album replication + proxy&nbsp; - optional feature in alternative to 3, 4, and 5 (9 values)<br>
+    </h2>
+    <p><span style="font-weight: normal;">This option replaces feature 3, and options 5 and 6 by requiring also to replicate data from and to the
+        external services.</span></p>
+
+    <h2>7 - Up-to-date client interface using Event Dissemination
+      System&nbsp; - optional feature (2 values)<br>
+    </h2>
+    <p><span style="font-weight: normal;">Use an event dissemination
+        system to update the client interface, when a album is
+        created/removed and when a photo is added/deleted to an album.</span></p>
+    <br>
+    <h1><a name="ambiente"></a>Environment<br>
+    </h1>
+    <p><span style="font-weight: bold;">IMPORTANT:</span> The project
+      must be demonstrated in the labs, with servers running in <span
+        style="font-weight: bold;">at least two computers</span>, either
+      using existing hardware or student's hardware.</p>
+    <p>The environment is the same of the project 1.<br>
+    <p>15% of the final grade of the project is dedicated to the overall integrity and correctness of the system, the written report clarity and quality, and the demonstration of the project.
+    </p>
+    <br>
+    <h1><a name="report"></a>Written Report:<br>
+    </h1>
+    <p>A written report <b>must</b> be delivered by each group
+      describing their work and implementation. The report should have <b>at
+        most 5 pages (excluding appendix)</b>, and be
+      delivered in paper at <it>Secretaria</it> in the Informatics
+      Department. The organization of the report is free, and the
+      students should write their report following a structure that
+      makes its contents clear and easy to follow.</p>
+    <p>The report <b>must</b> cover the following topics.</p>
+    <ul>
+      <li> General description of the work performed by the students,
+        clearly identifying which aspects were completed and fully
+        implemented and those that were not.</li>
+      <li> Limitations of the delivered code.</li>
+      <li> In relation to the interaction with Imgur, the students should clearly identify which endpoints of the Imgur API were used to implement each of the operations supported by the system (list albums, create album, delete album, list pictures in an album, add picture, and remove picture).</li>
+	  <li> Still in relation to Imgur, the students should indicate clearly if they resort to some form of caching (at the level of the proxy) and indicate what is the data being cached, and how the cache is managed.
+      <li> Clear explanation of the replication mechanism employed by the students. This description <b>must</b> contain:
+        <ul>
+          <li>General textual description (including what entities are responsible for managing the replication of contents and the form of replication implemented).</li>
+          <li>Description of the metadata used to support the replication protocol.</li>
+          <li>The pseudocode of the replication algorithm employed by the students <b>(remember that pseudocode is not java code, hence we expect a clear, clean, and simple description of the algorithm -- penalizations will be applied if the pseudocode presented lacks these properties).</b></li>
+        </ul>
+      </li>
+	  <li> In appendix, the report <b>must</b> include the servers (REST and SOAP) APIs that were <b>added to support replication</b>. This should include the signature of these methods and the necessary annotations to make those methods available. This is <b>the only information that should be presented in the appendix, and there is no need to provide the java code that implements these methods</b>.
+      <li> Discussion of the implementation decisions taken by the
+        students, when applicable, discussing these decisions in light
+        of possible alternatives.</li>
+    </ul>
+    <p>The report can also cover aspects related with difficulties felt
+      by the students during the execution of the project or other
+      aspects that the students consider relevant.</p>
+    <p><br>
+    </p>
+    <h1><a name="delivery"></a>Delivery Rules:<br>
+    </h1>
+    <p>The project delivery date is 21 of May of 2016. <br>
+      As explained, each group has 3 slip days to spend between the two
+      projects of the course (meaning that at delivery of projects can
+      happen with a delay without any penalty, as long as the sum of the
+      delay across both projects is not above 3 days).</p>
+    <p>The report delivery date is 25 of May of 2016. Slip days <b>cannot</b>
+      be used for the delivery of the report. The report should be
+      delivered physically at <it>Secretaria</it> in the Informatics
+      Department, stapled and with <b>no</b> cover page. The limit of
+      pages is 5, excluding appendix, that <b>must only contain</b>
+      Server APIs.</p>
+    <br>
+    <p><br>
+    </p>
+    <br>
+    <br>
+  </body>
+</html>
